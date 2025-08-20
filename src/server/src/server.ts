@@ -37,8 +37,9 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS configuration
+console.log('🔧 CORS allowedOrigins:', config.allowedOrigins);
 app.use(cors({
-  origin: config.allowedOrigins,
+  origin: config.nodeEnv === 'development' ? true : config.allowedOrigins, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],

@@ -5,4 +5,7 @@ export * from './vehicle.schema';
 export * from './appointment.schema';
 export * from './service.schema';
 export * from './mechanic.schema';
+export * from './workstatus.schema';
+export * from './opportunity.schema';
+export * from './statuslog.schema';
 export * from './common.schema';
