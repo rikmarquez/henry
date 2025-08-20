@@ -33,13 +33,22 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "concurrently": "^8.2.2"
+    "bcrypt": "^6.0.0",
+    "concurrently": "^8.2.2",
+    "zod": "^4.0.17"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
-    "prisma": "^5.22.0"
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^24.3.0",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }

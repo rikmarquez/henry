@@ -68,7 +68,7 @@ async function main() {
 
   for (const status of workStatuses) {
     await prisma.workStatus.upsert({
-      where: { name: status.name },
+      where: { id: status.orderIndex },
       update: {},
       create: status,
     });
@@ -96,12 +96,12 @@ async function main() {
     { name: 'Carlos Rodríguez', commissionPercentage: 20.00 },
   ];
 
-  for (const mechanic of mechanics) {
-    await prisma.mechanic.upsert({
-      where: { name: mechanic.name },
-      update: {},
-      create: mechanic,
+  const createdMechanics = [];
+  for (let i = 0; i < mechanics.length; i++) {
+    const mechanic = await prisma.mechanic.create({
+      data: mechanics[i],
     });
+    createdMechanics.push(mechanic);
   }
 
   console.log('✅ Database seeded successfully!');

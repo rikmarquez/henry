@@ -20,7 +20,7 @@
 - **Prisma:** Configurado con esquema completo ✅
 - **Scripts:** Configurados para desarrollo y build ✅
 
-## 📋 Fase Actual: Transición a Fase 1
+## 📋 Fase Actual: Fase 1 - Core (MVP)
 ### ✅ Completado
 - Especificación técnica completa revisada ✅
 - Base de datos PostgreSQL en Railway disponible ✅
@@ -34,23 +34,30 @@
 - Dependencias instaladas y funcionando ✅
 - Archivos de configuración (.env.example, gitignore, etc.) ✅
 - README.md con documentación completa ✅
+- **NUEVA SESIÓN 2025-08-20:**
+- Migración inicial de Prisma ejecutada ✅
+- Seed de datos iniciales poblado ✅
+- Esquemas de validación Zod compartidos creados ✅
+- Sistema de autenticación JWT implementado ✅
+- Middlewares de autenticación creados ✅
+- CRUD básico de usuarios y roles implementado ✅
 
 ### 🔄 En Progreso
 - Ninguna tarea en progreso actualmente
 
 ### ⏳ Pendientes Inmediatos (Para próxima sesión)
-1. Ejecutar primera migración de Prisma
-2. Ejecutar seed de datos iniciales
-3. Crear esquemas de validación Zod compartidos
-4. Implementar sistema de autenticación JWT
-5. Crear middlewares de autenticación
-6. Implementar CRUD básico de usuarios y roles
+1. Probar endpoints de autenticación y usuarios
+2. Crear CRUD de clientes
+3. Crear CRUD de vehículos
+4. Implementar sistema básico de citas
+5. Crear interfaz básica de login en React
+6. Dashboard básico con navegación
 
 ## 📈 Progreso por Fases
 
-### Fase 1 - Core (MVP) - 15% completado
+### Fase 1 - Core (MVP) - 45% completado
 - [x] Setup Railway monolítico + PostgreSQL ✅
-- [ ] Autenticación y sistema de usuarios/roles
+- [x] Autenticación y sistema de usuarios/roles ✅
 - [ ] CRUD básico: clientes, vehículos, mecánicos
 - [ ] Sistema de citas básico
 - [ ] Estados de trabajo (sin transiciones automáticas)
@@ -79,27 +86,70 @@
 - [ ] Documentación completa
 
 ## 🐛 Issues Conocidos
-- Ninguno por el momento
+- ⚠️ **Railway Deployment:** Railway requiere código precompilado (TypeScript → JavaScript)
+  - **Solución:** Crear build con `npm run build` antes del deploy
+  - **Documentado en:** DEPLOYMENT.md
+- Encoding de caracteres especiales en respuestas curl (cosmético)
 
 ## 📝 Notas de Desarrollo
 - La especificación está completa y detallada en ESPECIFICACION.md
 - Se utilizará arquitectura monolítica para simplicidad en Railway
 - La estructura de carpetas seguirá el patrón client/server/shared
 
-## 🎯 Próximos Pasos (Para mañana)
-1. Ejecutar migración inicial de Prisma con Railway
-2. Poblar base de datos con datos de seed
-3. Implementar autenticación JWT en el servidor
-4. Crear primeros endpoints de API (/auth, /users)
-5. Comenzar implementación de CRUD de usuarios y roles
+## 🎓 Lecciones Aprendidas (Railway Deployment)
+### ⚠️ CRÍTICO: Railway requiere código precompilado
+**Problema:** Railway NO ejecuta builds de TypeScript durante el deployment
+**Experiencia:** Deployments anteriores fallaron por esta razón
+**Solución:** 
+```bash
+# Antes de cada deploy:
+cd src/server
+npm run build  # Compila TS → JS
+# Verificar que existe dist/ con código JS
+```
+
+### 📋 Checklist pre-deployment Railway:
+- [ ] `npm run build` ejecutado exitosamente
+- [ ] Carpeta `dist/` existe con código JS compilado  
+- [ ] `package.json` tiene `"start": "node dist/server.js"`
+- [ ] Variables de entorno configuradas en Railway UI
+- [ ] Esquema Prisma presente en el servidor
+
+### 📚 Documentación creada:
+- **DEPLOYMENT.md** - Guía completa de deployment para Railway
+- **README.md** - Actualizado con sección de deployment
+- **STATUS.md** - Lecciones aprendidas documentadas
+
+## 🎯 Próximos Pasos (Para próxima sesión)
+1. Implementar CRUD de clientes con endpoints y validación
+2. Implementar CRUD de vehículos con endpoints y validación
+3. Crear sistema básico de citas (appointments)
+4. Implementar endpoints de mecánicos
+5. Comenzar desarrollo del frontend React
+6. Crear páginas de login y dashboard básico
+7. **OPCIONAL:** Probar deployment en Railway con código compilado
 
 ## 📝 Notas de la Sesión Actual
-- **Estructura completa:** Todo el scaffolding del proyecto está listo
-- **Dependencias:** Todas instaladas sin conflictos mayores
-- **Base de datos:** Esquema Prisma completamente configurado
-- **Scripts:** Listos para desarrollo con `npm run dev`
-- **Próximo paso:** Conectar con la base de datos y empezar desarrollo
+- **Base de datos:** Migración y seed ejecutados exitosamente ✅
+- **Autenticación:** Sistema JWT completo implementado con roles y permisos ✅
+- **Validación:** Esquemas Zod compartidos para toda la aplicación ✅
+- **API:** Endpoints /auth y /users funcionando con middlewares de seguridad ✅
+- **Credenciales de prueba:** admin@henrydiagnostics.com / admin123
+- **Endpoints probados:** Todos funcionando correctamente ✅
+- **Documentación:** DEPLOYMENT.md creado con lecciones aprendidas ✅
+- **Próximo paso:** Crear más endpoints CRUD y comenzar frontend
+
+## 📋 Endpoints API Implementados
+- `POST /api/auth/login` - Inicio de sesión
+- `POST /api/auth/logout` - Cerrar sesión
+- `POST /api/auth/refresh` - Renovar token
+- `GET /api/auth/profile` - Perfil del usuario
+- `POST /api/auth/change-password` - Cambiar contraseña
+- `GET /api/users` - Listar usuarios (Admin/Encargado)
+- `POST /api/users` - Crear usuario (Admin)
+- `GET /api/users/roles` - Listar roles
+- `GET /api/health` - Health check
 
 ---
-*Última actualización: 2025-08-20 - Base técnica completada*
+*Última actualización: 2025-08-20 - Core authentication completado*
 *Próxima sesión: Leer este archivo al inicio y actualizar al final*

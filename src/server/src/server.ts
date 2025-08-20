@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -6,6 +9,8 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/config';
+import routes from './routes';
+import { errorHandler, notFound } from './middleware';
 
 const app = express();
 
@@ -62,14 +67,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes (will be added later)
-app.get('/api', (req, res) => {
-  res.json({
-    message: 'Henry Diagnostics API',
-    version: '1.0.0',
-    status: 'running'
-  });
-});
+// API Routes
+app.use('/api', routes);
 
 // Serve static files from client build in production
 if (config.nodeEnv === 'production') {
@@ -80,34 +79,11 @@ if (config.nodeEnv === 'production') {
   });
 }
 
-// Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  
-  const status = err.status || err.statusCode || 500;
-  const message = config.nodeEnv === 'production' 
-    ? 'Internal server error' 
-    : err.message || 'Something went wrong';
-  
-  res.status(status).json({
-    error: {
-      message,
-      status,
-      ...(config.nodeEnv === 'development' && { stack: err.stack })
-    }
-  });
-});
-
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: {
-      message: 'Route not found',
-      status: 404,
-      path: req.path
-    }
-  });
-});
+app.use(notFound);
+
+// Global error handler
+app.use(errorHandler);
 
 const PORT = config.port;
 

@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  permissions Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  users User[]
+  
+  @@map("roles")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String?  @unique
+  phone        String
+  passwordHash String   @map("password_hash")
+  roleId       Int      @map("role_id")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  role Role @relation(fields: [roleId], references: [id])
+  
+  createdAppointments  Appointment[]
+  createdServices      Service[]
+  createdOpportunities Opportunity[]
+  statusLogs           StatusLog[]
+  
+  @@map("users")
+}
+
+model Client {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  whatsapp  String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  vehicles      Vehicle[]
+  appointments  Appointment[]
+  services      Service[]
+  opportunities Opportunity[]
+  
+  @@map("clients")
+}
+
+model Vehicle {
+  id        Int      @id @default(autoincrement())
+  plate     String   @unique
+  brand     String
+  model     String
+  year      Int?
+  color     String?
+  clientId  Int      @map("client_id")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  appointments  Appointment[]
+  services      Service[]
+  opportunities Opportunity[]
+  
+  @@map("vehicles")
+}
+
+model Mechanic {
+  id                    Int     @id @default(autoincrement())
+  name                  String
+  commissionPercentage  Decimal @default(0.00) @map("commission_percentage") @db.Decimal(5, 2)
+  isActive              Boolean @default(true) @map("is_active")
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  services Service[]
+  
+  @@map("mechanics")
+}
+
+model WorkStatus {
+  id         Int      @id @default(autoincrement())
+  name       String
+  orderIndex Int      @map("order_index")
+  color      String   @default("#6B7280")
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  services         Service[]
+  oldStatusLogs    StatusLog[] @relation("OldStatus")
+  newStatusLogs    StatusLog[] @relation("NewStatus")
+  
+  @@map("work_statuses")
+}
+
+model Appointment {
+  id                 Int       @id @default(autoincrement())
+  clientId           Int       @map("client_id")
+  vehicleId          Int       @map("vehicle_id")
+  opportunityId      Int?      @map("opportunity_id")
+  scheduledDate      DateTime  @map("scheduled_date")
+  status             String    @default("scheduled")
+  notes              String?
+  isFromOpportunity  Boolean   @default(false) @map("is_from_opportunity")
+  createdBy          Int       @map("created_by")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  
+  client      Client       @relation(fields: [clientId], references: [id])
+  vehicle     Vehicle      @relation(fields: [vehicleId], references: [id])
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id])
+  createdByUser User       @relation(fields: [createdBy], references: [id])
+  
+  services Service[]
+  
+  @@map("appointments")
+}
+
+model Service {
+  id                  Int       @id @default(autoincrement())
+  appointmentId       Int?      @map("appointment_id")
+  clientId            Int       @map("client_id")
+  vehicleId           Int       @map("vehicle_id")
+  mechanicId          Int?      @map("mechanic_id")
+  statusId            Int       @default(1) @map("status_id")
+  problemDescription  String?   @map("problem_description")
+  diagnosis           String?
+  quotationDetails    String?   @map("quotation_details")
+  totalAmount         Decimal   @default(0.00) @map("total_amount") @db.Decimal(10, 2)
+  mechanicCommission  Decimal   @default(0.00) @map("mechanic_commission") @db.Decimal(10, 2)
+  startedAt           DateTime? @map("started_at")
+  completedAt         DateTime? @map("completed_at")
+  createdBy           Int       @map("created_by")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  client        Client       @relation(fields: [clientId], references: [id])
+  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id])
+  mechanic      Mechanic?    @relation(fields: [mechanicId], references: [id])
+  status        WorkStatus   @relation(fields: [statusId], references: [id])
+  createdByUser User         @relation(fields: [createdBy], references: [id])
+  
+  opportunities Opportunity[]
+  statusLogs    StatusLog[]
+  
+  @@map("services")
+}
+
+model Opportunity {
+  id           Int      @id @default(autoincrement())
+  clientId     Int      @map("client_id")
+  vehicleId    Int      @map("vehicle_id")
+  serviceId    Int?     @map("service_id")
+  type         String
+  description  String
+  followUpDate DateTime @map("follow_up_date") @db.Date
+  status       String   @default("pending")
+  notes        String?
+  createdBy    Int      @map("created_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  client        Client    @relation(fields: [clientId], references: [id])
+  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id])
+  service       Service?  @relation(fields: [serviceId], references: [id])
+  createdByUser User      @relation(fields: [createdBy], references: [id])
+  
+  appointments Appointment[]
+  
+  @@map("opportunities")
+}
+
+model StatusLog {
+  id           Int      @id @default(autoincrement())
+  serviceId    Int      @map("service_id")
+  oldStatusId  Int?     @map("old_status_id")
+  newStatusId  Int      @map("new_status_id")
+  changedBy    Int      @map("changed_by")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  service       Service     @relation(fields: [serviceId], references: [id])
+  oldStatus     WorkStatus? @relation("OldStatus", fields: [oldStatusId], references: [id])
+  newStatus     WorkStatus  @relation("NewStatus", fields: [newStatusId], references: [id])
+  changedByUser User        @relation(fields: [changedBy], references: [id])
+  
+  @@map("status_logs")
+}
