@@ -1,0 +1,45 @@
+{
+  "name": "henry-diagnostics",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión de Taller Mecánico - Henry Diagnostics",
+  "main": "src/server/dist/server.js",
+  "scripts": {
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd src/client && npm install && npm run build",
+    "build:server": "cd src/server && npm install && npm run build",
+    "start": "cd src/server && npm start",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd src/server && npm run dev",
+    "dev:client": "cd src/client && npm run dev",
+    "postinstall": "cd src/server && npm install && npx prisma generate && npx prisma migrate deploy",
+    "setup": "npm run setup:server && npm run setup:client",
+    "setup:server": "cd src/server && npm install",
+    "setup:client": "cd src/client && npm install",
+    "prisma:generate": "cd src/server && npx prisma generate",
+    "prisma:migrate": "cd src/server && npx prisma migrate dev",
+    "prisma:studio": "cd src/server && npx prisma studio",
+    "prisma:deploy": "cd src/server && npx prisma migrate deploy",
+    "lint": "cd src/server && npm run lint && cd ../client && npm run lint",
+    "test": "cd src/server && npm run test && cd ../client && npm run test"
+  },
+  "keywords": [
+    "taller-mecanico",
+    "gestion",
+    "automotive",
+    "workshop",
+    "diagnostics"
+  ],
+  "author": "Henry Diagnostics",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}
