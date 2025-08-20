@@ -48,8 +48,8 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const authorize = (allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const authorize = (resources: string[], actions: string[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         return res.status(401).json({
@@ -58,10 +58,35 @@ export const authorize = (allowedRoles: string[]) => {
         });
       }
 
-      if (!allowedRoles.includes(req.user.roleName)) {
+      // Get user role permissions from database
+      const { prisma } = await import('../config/database');
+      const userRole = await prisma.role.findUnique({
+        where: { id: req.user.roleId }
+      });
+
+      if (!userRole || !userRole.permissions) {
         return res.status(403).json({
           success: false,
-          message: 'Acceso denegado',
+          message: 'Acceso denegado - Sin permisos configurados',
+        });
+      }
+
+      const permissions = userRole.permissions as any;
+
+      // Check if user has permission for at least one resource-action combination
+      const hasPermission = resources.some(resource => {
+        const resourcePermissions = permissions[resource];
+        if (!resourcePermissions || !Array.isArray(resourcePermissions)) {
+          return false;
+        }
+        
+        return actions.some(action => resourcePermissions.includes(action));
+      });
+
+      if (!hasPermission) {
+        return res.status(403).json({
+          success: false,
+          message: 'Acceso denegado - Permisos insuficientes',
         });
       }
 

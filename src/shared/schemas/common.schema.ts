@@ -3,6 +3,14 @@ import { z } from 'zod';
 // Common validation patterns
 export const idSchema = z.number().int().positive();
 
+export const idParamSchema = z.object({
+  id: z.string().transform(val => parseInt(val))
+});
+
+export const clientIdParamSchema = z.object({
+  clientId: z.string().transform(val => parseInt(val))
+});
+
 export const phoneSchema = z.string()
   .min(10, 'El teléfono debe tener al menos 10 dígitos')
   .regex(/^[+]?[\d\s-()]+$/, 'Formato de teléfono inválido');

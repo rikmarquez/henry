@@ -11,10 +11,10 @@ export const validate = (schema: ZodSchema) => {
         return res.status(400).json({
           success: false,
           message: 'Datos de entrada inválidos',
-          errors: error.errors.map(err => ({
+          errors: error.errors?.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-          })),
+          })) || [],
         });
       }
       
@@ -33,10 +33,10 @@ export const validateQuery = (schema: ZodSchema) => {
         return res.status(400).json({
           success: false,
           message: 'Parámetros de consulta inválidos',
-          errors: error.errors.map(err => ({
+          errors: error.errors?.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-          })),
+          })) || [],
         });
       }
       
@@ -55,10 +55,10 @@ export const validateParams = (schema: ZodSchema) => {
         return res.status(400).json({
           success: false,
           message: 'Parámetros de ruta inválidos',
-          errors: error.errors.map(err => ({
+          errors: error.errors?.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-          })),
+          })) || [],
         });
       }
       
