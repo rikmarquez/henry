@@ -7,6 +7,7 @@ import {
   updateAppointmentSchema,
   appointmentFilterSchema,
 } from '../../../shared/schemas';
+import { z } from 'zod';
 import { idParamSchema } from '../../../shared/schemas/common.schema';
 
 const router = Router();
@@ -192,6 +193,121 @@ router.get(
       });
     } catch (error) {
       console.error('Error fetching appointment:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+      });
+    }
+  }
+);
+
+// Schema for phone appointments (minimal data)
+const phoneAppointmentSchema = z.object({
+  type: z.literal('phone'),
+  clientName: z.string().min(1, 'Nombre del cliente es requerido'),
+  clientPhone: z.string().min(10, 'Teléfono debe tener al menos 10 dígitos'),
+  vehicleDescription: z.string().min(1, 'Descripción del vehículo es requerida'),
+  scheduledDate: z.string().min(1, 'Fecha y hora son requeridas'),
+  notes: z.string().optional(),
+});
+
+// POST /api/appointments/phone - Create phone appointment with minimal data
+router.post(
+  '/phone',
+  authenticate,
+  authorize(['appointments'], ['create']),
+  validate(phoneAppointmentSchema),
+  async (req, res) => {
+    try {
+      const { clientName, clientPhone, vehicleDescription, scheduledDate, notes } = req.body;
+      const userId = (req as any).user.userId;
+
+      // Check if client already exists by phone
+      let client = await prisma.client.findFirst({
+        where: { phone: clientPhone },
+        include: {
+          vehicles: true, // Include vehicles to check if this vehicle already exists
+        },
+      });
+
+      // If client doesn't exist, create new one
+      if (!client) {
+        client = await prisma.client.create({
+          data: {
+            name: clientName,
+            phone: clientPhone,
+            whatsapp: clientPhone, // Unify phone and WhatsApp
+          },
+          include: {
+            vehicles: true,
+          },
+        });
+      } else {
+        // Client exists - update name if it's different (in case they gave a more complete name)
+        if (client.name !== clientName && clientName.length > client.name.length) {
+          client = await prisma.client.update({
+            where: { id: client.id },
+            data: { name: clientName },
+            include: { vehicles: true },
+          });
+        }
+      }
+
+      // Parse vehicle description to extract brand/model if possible
+      const vehicleParts = vehicleDescription.trim().split(' ');
+      const brand = vehicleParts[0] || 'N/A';
+      const model = vehicleParts.slice(1).join(' ') || 'Modelo pendiente';
+
+      // Check if this vehicle already exists for this client
+      // We'll match by brand/model combination in the description
+      let vehicle = client.vehicles.find(v => {
+        const existingDesc = `${v.brand} ${v.model}`.toLowerCase();
+        const newDesc = vehicleDescription.toLowerCase();
+        return existingDesc.includes(newDesc.split(' ')[0]) || newDesc.includes(v.brand.toLowerCase());
+      });
+
+      if (!vehicle) {
+        // Create a new vehicle with temporary plate for phone appointments
+        const tempPlate = `TEMP-${Date.now()}`;
+        
+        vehicle = await prisma.vehicle.create({
+          data: {
+            plate: tempPlate,
+            brand: brand,
+            model: model,
+            clientId: client.id,
+            notes: `Cita telefónica - Descripción original: ${vehicleDescription}. Placa pendiente de capturar al llegar.`,
+          },
+        });
+      }
+
+      // Create the appointment
+      const appointment = await prisma.appointment.create({
+        data: {
+          clientId: client.id,
+          vehicleId: vehicle.id,
+          scheduledDate: new Date(scheduledDate),
+          notes: notes || `Cita telefónica - Vehículo: ${vehicleDescription}`,
+          isFromOpportunity: false,
+          createdBy: userId,
+        },
+        include: {
+          client: {
+            select: { id: true, name: true, phone: true, email: true },
+          },
+          vehicle: {
+            select: { id: true, plate: true, brand: true, model: true },
+          },
+        },
+      });
+
+      res.status(201).json({
+        success: true,
+        data: appointment,
+        message: 'Cita telefónica creada exitosamente',
+      });
+    } catch (error) {
+      console.error('Error creating phone appointment:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',

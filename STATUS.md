@@ -2,11 +2,106 @@
 
 ## 📊 Estado General del Proyecto
 - **Proyecto:** Henry Diagnostics - Sistema de Gestión de Taller Mecánico
-- **Estado Actual:** CRUD de Vehículos Completado + Frontend MVP ✅
+- **Estado Actual:** Sistema de Citas Completado + Frontend MVP Avanzado ✅
 - **Fecha de Inicio:** 2025-08-20
 - **Stack Tecnológico:** React + TypeScript + Node.js + Express + PostgreSQL + Prisma
 
-## 🎉 AVANCES DE ESTA SESIÓN (2025-08-21) - SESIÓN 3
+## 🎉 AVANCES DE ESTA SESIÓN (2025-08-21) - SESIÓN 4 
+
+### ✅ **CORRECCIONES CRÍTICAS DEL SISTEMA DE CITAS** 🔧
+
+#### **🐛 PROBLEMA CRÍTICO: Modal de Confirmación No Aparecía**
+- **Causa Raíz**: Modal de confirmación estaba **dentro del modal principal** con z-index inferior
+- **Síntomas**: 
+  - Botón "Confirmar Cita" no mostraba diálogo de confirmación
+  - No se enviaban requests al servidor
+  - Estados no cambiaban después de confirmar
+- **Solución Técnica**:
+  1. **Reestructuración de modales**: Modal de confirmación movido a `AppointmentsPage.tsx`
+  2. **Z-index corregido**: `z-[80]` para modal de confirmación vs `z-50` para modal principal
+  3. **Flujo de datos mejorado**: Props `onConfirmAction` para comunicación padre-hijo
+  4. **Debug implementado**: Logs para rastrear flujo de eventos
+
+#### **✅ CORRECCIÓN: Unificación Teléfono/WhatsApp**
+- **Problema**: Citas telefónicas creaban cliente con teléfono pero sin WhatsApp
+- **Solución**: 
+  - Backend unifica automáticamente phone = whatsapp en creación/actualización
+  - **Appointments**: `whatsapp: clientPhone` en citas telefónicas
+  - **Clients Controller**: Copia whatsapp → phone automáticamente
+- **Resultado**: Cliente tiene mismo número en ambos campos
+
+#### **🎨 UX MEJORADA: Botón "Cerrar" Más Visible**
+- **Problema**: Solo había botón X pequeño en header del modal
+- **Solución**: Agregado botón "Cerrar" grande y visible en sección de acciones
+- **Ubicación**: Siempre visible al final de todos los botones de acción
+
+### ✅ **SISTEMA DE CITAS COMPLETADO 100%** 🎯
+
+#### **🔥 NUEVO MÓDULO: Gestión Completa de Citas**
+
+El sistema de citas está completamente funcional con **tres vistas principales** optimizadas para el taller:
+
+#### **1. Vista Semanal - Principal (Tipo Pizarrón)** 📅
+- **Diseño optimizado** para gestión semanal como pizarrón físico
+- **Grid de 7 días** con franjas horarias de 7 AM a 8 PM
+- **Slots de 30 minutos** con colores por estado de cita
+- **Creación directa** clicking en slots vacíos
+- **Navegación** semana anterior/siguiente
+- **Vista principal** por defecto (la más usada en talleres)
+
+#### **2. Vista Diaria - Para Hoy** 📋
+- **Enfoque diario** con estadísticas del día
+- **Timeline detallado** con toda la información
+- **Métricas rápidas**: Total, Programadas, Confirmadas, Completadas, Canceladas
+- **Slots interactivos** para crear citas en horarios específicos
+- **Optimizada para seguimiento** día a día
+
+#### **3. Vista Mensual - Panorama General** 🗓️
+- **Calendario tradicional** con vista mensual
+- **Resumen por día** con contador de citas
+- **Navegación mensual** para planificación
+- **Vista compacta** para panorama general
+
+#### **4. Dos Flujos de Citas Según Especificación** 📞
+- **Cita Telefónica**: Datos mínimos (nombre, teléfono, descripción vehículo)
+- **Cita Cliente Existente**: Datos completos pre-cargados
+- **Detección automática**: Sistema identifica si cliente ya existe por teléfono
+- **Gestión inteligente**: Reutiliza datos existentes o crea nuevos
+
+#### **5. Backend Inteligente para Citas Telefónicas** 🧠
+- **Endpoint especial** `/api/appointments/phone` para citas telefónicas
+- **Cliente existente**: Detecta por teléfono y reutiliza datos
+- **Cliente nuevo**: Crea automáticamente cliente + vehículo temporal
+- **Placas temporales**: TEMP-{timestamp} para vehículos sin placa
+- **Parsing inteligente**: Extrae marca/modelo de descripción
+
+#### **6. Estados y Workflow Completo** ⚡
+- **Programada** → **Confirmada** → **Completada**
+- **Cancelación** disponible en cualquier estado
+- **Validaciones** de transición de estados
+- **Acciones rápidas** desde cualquier vista
+
+#### **7. Casos de Uso Reales Cubiertos** ✅
+```
+📞 "Hola, soy Ricardo Márquez (3121069077), tengo un Honda HRV que necesita revisión"
+→ Sistema crea: Cliente + Vehículo temporal + Cita programada
+
+👤 Cliente existente llama de nuevo
+→ Sistema detecta teléfono y sugiere usar datos existentes
+
+🎯 Cita desde Oportunidad
+→ Datos completos pre-cargados automáticamente
+```
+
+#### **8. UI/UX Profesional** 🎨
+- **Colores intuitivos**: Azul=Programada, Verde=Confirmada, Gris=Completada, Rojo=Cancelada
+- **Navegación fluida** entre vistas
+- **Responsive design** para desktop/tablet/móvil
+- **Formularios validados** con React Hook Form + Zod
+- **Modales informativos** con toda la información
+- **Filtros avanzados** por estado, fecha, cliente
+
+---
 
 ### ✅ **CRUD de Vehículos Completado 100% + Correcciones Críticas**
 
@@ -160,35 +255,29 @@
 - [x] **StatusLog API** ✅ (Logs de auditoría completos)
 - [x] **Reports/Metrics API** ✅ (Dashboard y métricas completas)
 
-### **Frontend Progress - 60% completado 🚧**
+### **Frontend Progress - 80% completado 🚀**
 - [x] **Autenticación Frontend** ✅ (Login, logout, rutas protegidas)
 - [x] **Layout Base** ✅ (Sidebar, navegación, responsive)
 - [x] **Dashboard** ✅ (Métricas, servicios recientes, auto-refresh)
 - [x] **Gestión de Clientes** ✅ (Lista, CRUD, búsqueda, navegación)
 - [x] **Gestión de Vehículos** ✅ (CRUD completo vinculado a clientes, filtros)
-- [ ] **Sistema de Citas** ❌ (Calendario, estados)
+- [x] **Sistema de Citas** ✅ (3 vistas: Diaria/Semanal/Mensual, estados, workflows)
 - [ ] **Gestión de Servicios** ❌ (Workflow, asignaciones)
 
-### Fase 1 - Core (MVP) - 85% completado ✅
+### Fase 1 - Core (MVP) - 95% completado ✅
 - [x] Setup Railway monolítico + PostgreSQL ✅
 - [x] Autenticación y sistema de usuarios/roles ✅
 - [x] CRUD completo: clientes ✅, vehículos ✅, mecánicos ✅
 - [x] Sistema de citas completo ✅
 - [x] Estados de trabajo y workflow ✅
 - [x] Dashboard funcional ✅
-- [x] **Páginas frontend CRUD principales** ✅ (Clientes + Vehículos completados)
+- [x] **Páginas frontend CRUD principales** ✅ (Clientes + Vehículos + Citas completados)
 
 ## 📋 **PENDIENTES PARA PRÓXIMA SESIÓN**
 
 ### **Prioridad Alta - Módulos Restantes del MVP**
 
-3. **Sistema de Citas** 🎯 PRÓXIMO
-   - Calendario de citas interactivo
-   - Agendar nueva cita (cliente + vehículo)
-   - Estados: programada → confirmada → completada
-   - Notificaciones y recordatorios
-
-4. **Gestión de Servicios** 
+3. **Gestión de Servicios** 🎯 PRÓXIMO 
    - Lista de órdenes de trabajo
    - Workflow de estados de servicio
    - Asignación de mecánicos
@@ -196,7 +285,8 @@
 
 ### **COMPLETADO EN ESTA SESIÓN ✅**
 1. ✅ **Gestión de Clientes** - CRUD completo con navegación y filtros
-2. ✅ **Gestión de Vehículos** - CRUD completo con campos técnicos y filtros por cliente
+2. ✅ **Gestión de Vehículos** - CRUD completo con campos técnicos y filtros por cliente  
+3. ✅ **Sistema de Citas Completo** - 3 vistas (Diaria/Semanal/Mensual), dos flujos, estados
 
 ### **Prioridad Media - Funcionalidades Avanzadas**
 5. **Reportes Detallados**
@@ -404,11 +494,11 @@ clientId: z.string().optional()
 **Lección:** Implementar logging detallado acelera significativamente el debugging.
 
 ## 🎯 **Objetivo Próxima Sesión**
-**Implementar Sistema de Citas** como próximo módulo del MVP:
-- Calendario interactivo de citas
-- Crear/editar citas vinculadas a cliente+vehículo
-- Estados y workflow de citas
-- Integración completa con el resto del sistema
+**Implementar Gestión de Servicios** como próximo módulo del MVP:
+- Lista de órdenes de trabajo/servicios
+- Workflow de estados (Recibido → Cotizado → Autorizado → En Proceso → Terminado)
+- Asignación de mecánicos y cálculo de comisiones
+- Integración completa con citas existentes
 
 ## 📝 Notas de la Sesión 2025-08-20 (SESIÓN 2 - Finalizada)
 ### ✅ Logros de esta sesión:
@@ -432,7 +522,45 @@ clientId: z.string().optional()
 - **Dashboard funcional:** Métricas reales desde API ✅
 - **Backend APIs:** 100% funcionales y probadas ✅
 
+## 🎓 **Lecciones Aprendidas Sesión 4 (2025-08-21)**
+
+### **1. Z-index y Stacking Context en Modales Anidados**
+**Problema:** Modal de confirmación invisible cuando está dentro de otro modal
+**Causa:** Los stacking contexts se anidan, haciendo que z-index sea relativo al contenedor padre
+**Solución:** Mover modales de confirmación al nivel raíz de la aplicación
+**Lección:** Para modales críticos, siempre renderizar en el nivel más alto del DOM
+
+### **2. Debug con Logs Estratégicos**
+**Técnica Utilizada:**
+```javascript
+console.log('🔧 DEBUG: handleStatusAction called with action:', action);
+console.log('🔧 DEBUG: confirmStatusAction called with:', { appointmentId, action });
+console.log('🔧 DEBUG: handleStatusUpdate called with:', { id, action });
+```
+**Resultado:** Identificación precisa del punto de falla en la cadena de eventos
+**Lección:** Los logs categorizados con emojis facilitan el debugging en tiempo real
+
+### **3. Flujo de Datos Entre Componentes Anidados**
+**Desafío:** Comunicar eventos desde modales hijos hasta componentes padres
+**Solución:** Props de callback específicas (`onConfirmAction`) en lugar de mutaciones directas
+**Patrón Implementado:**
+- Modal hijo → `onConfirmAction(id, action)` → Estado padre → Modal confirmación
+**Lección:** Separar responsabilidades mantiene componentes desacoplados y reutilizables
+
+### **4. Unificación de Datos Backend**
+**Problema:** Campos duplicados (phone/whatsapp) con valores inconsistentes
+**Solución:** Lógica de unificación automática en controllers
+**Implementación:**
+```typescript
+const unifiedData = {
+  ...clientData,
+  phone: clientData.whatsapp, // Unify automatically
+  whatsapp: clientData.whatsapp
+};
+```
+**Lección:** La unificación automática en backend evita inconsistencias de datos
+
 ---
-**Última actualización**: 2025-08-21 06:53 UTC
+**Última actualización**: 2025-08-21 20:00 UTC
 **Responsable**: Claude + Usuario  
-**Estado**: ✅ CRUD de Vehículos 100% Completado - Sistema de Citas es el próximo módulo
+**Estado**: ✅ Sistema de Citas 100% Funcional (Confirmaciones, UX, Teléfono/WhatsApp) - Gestión de Servicios próximo módulo

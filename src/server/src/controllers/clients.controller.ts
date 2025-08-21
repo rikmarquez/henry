@@ -142,8 +142,15 @@ export const clientsController = {
         }
       }
 
+      // Unify phone and WhatsApp - use whatsapp as primary, phone as backup
+      const unifiedData = {
+        ...clientData,
+        phone: clientData.whatsapp, // Copy whatsapp to phone
+        whatsapp: clientData.whatsapp, // Keep whatsapp as is
+      };
+
       const client = await prisma.client.create({
-        data: clientData,
+        data: unifiedData,
         include: {
           _count: {
             select: {
@@ -203,9 +210,15 @@ export const clientsController = {
         }
       }
 
+      // Unify phone and WhatsApp if whatsapp is being updated
+      const unifiedUpdateData = {
+        ...updateData,
+        ...(updateData.whatsapp && { phone: updateData.whatsapp }), // If whatsapp is updated, copy to phone
+      };
+
       const client = await prisma.client.update({
         where: { id: parseInt(id) },
-        data: updateData,
+        data: unifiedUpdateData,
         include: {
           _count: {
             select: {

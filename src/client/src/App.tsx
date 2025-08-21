@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
 import VehiclesPage from './pages/VehiclesPage';
+import AppointmentsPage from './pages/AppointmentsPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -63,6 +64,14 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <VehiclesPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/appointments" element={
+            <ProtectedRoute>
+              <Layout>
+                <AppointmentsPage />
               </Layout>
             </ProtectedRoute>
           } />
