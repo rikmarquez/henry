@@ -58,16 +58,20 @@ model Client {
 }
 
 model Vehicle {
-  id        Int      @id @default(autoincrement())
-  plate     String   @unique
-  brand     String
-  model     String
-  year      Int?
-  color     String?
-  clientId  Int      @map("client_id")
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           Int      @id @default(autoincrement())
+  plate        String   @unique
+  brand        String
+  model        String
+  year         Int?
+  color        String?
+  fuelType     String?  @map("fuel_type")
+  transmission String?
+  engineNumber String?  @map("engine_number")
+  chassisNumber String? @map("chassis_number")
+  clientId     Int      @map("client_id")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
   
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   

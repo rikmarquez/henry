@@ -4,10 +4,14 @@ import { ZodSchema, ZodError } from 'zod';
 export const validate = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log('🔧 VALIDATION INPUT:', JSON.stringify(req.body, null, 2));
       req.body = schema.parse(req.body);
+      console.log('✅ VALIDATION PASSED');
       next();
     } catch (error) {
+      console.log('❌ FULL ERROR:', error);
       if (error instanceof ZodError) {
+        console.log('❌ VALIDATION FAILED:', error.errors);
         return res.status(400).json({
           success: false,
           message: 'Datos de entrada inválidos',

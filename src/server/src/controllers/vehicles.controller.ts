@@ -180,6 +180,10 @@ export const vehiclesController = {
           model: vehicleData.model,
           year: vehicleData.year,
           color: vehicleData.color,
+          fuelType: vehicleData.fuelType,
+          transmission: vehicleData.transmission,
+          engineNumber: vehicleData.engineNumber,
+          chassisNumber: vehicleData.chassisNumber,
           notes: vehicleData.notes,
           clientId: vehicleData.clientId,
         },
@@ -220,6 +224,8 @@ export const vehiclesController = {
     try {
       const { id } = req.params;
       const updateData = req.body;
+      
+      console.log('🔧 UPDATE DATA RECEIVED:', JSON.stringify(updateData, null, 2));
 
       // Verificar si el vehículo existe
       const existingVehicle = await prisma.vehicle.findUnique({

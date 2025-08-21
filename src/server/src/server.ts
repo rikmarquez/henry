@@ -45,10 +45,27 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
-// Body parsing middleware
+// UTF-8 encoding middleware for API routes
+app.use('/api', (req, res, next) => {
+  res.charset = 'utf-8';
+  if (!res.getHeader('Content-Type')) {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  }
+  next();
+});
+
+// Body parsing middleware with UTF-8 encoding
 app.use(compression());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ 
+  limit: '10mb',
+  type: 'application/json',
+  charset: 'utf-8'
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  charset: 'utf-8'
+}));
 app.use(cookieParser());
 
 // Logging middleware

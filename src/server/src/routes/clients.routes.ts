@@ -35,7 +35,7 @@ router.post('/',
 router.put('/:id', 
   authorize(['clients'], ['update']), 
   validateParams(idParamSchema),
-  validate(updateClientSchema.omit({ id: true })), 
+  validate(updateClientSchema), 
   clientsController.updateClient
 );
 

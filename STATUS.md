@@ -2,11 +2,64 @@
 
 ## 📊 Estado General del Proyecto
 - **Proyecto:** Henry Diagnostics - Sistema de Gestión de Taller Mecánico
-- **Estado Actual:** Frontend MVP Completado ✅
+- **Estado Actual:** CRUD de Vehículos Completado + Frontend MVP ✅
 - **Fecha de Inicio:** 2025-08-20
 - **Stack Tecnológico:** React + TypeScript + Node.js + Express + PostgreSQL + Prisma
 
-## 🎉 AVANCES DE ESTA SESIÓN (2025-08-20) - SESIÓN 2
+## 🎉 AVANCES DE ESTA SESIÓN (2025-08-21) - SESIÓN 3
+
+### ✅ **CRUD de Vehículos Completado 100% + Correcciones Críticas**
+
+#### 1. **Problema Crítico: Campos Nuevos en Vehículos No Funcionaban**
+- 🐛 **Problema**: Al actualizar vehículos, los campos `fuelType`, `transmission`, `engineNumber`, `chassisNumber` no se guardaban
+- 🔍 **Causa Raíz**: Schemas de Prisma duplicados y desincronizados
+  - `/prisma/schema.prisma` (root) ✅ tenía campos nuevos
+  - `/src/server/prisma/schema.prisma` ❌ NO tenía campos nuevos (desactualizado)
+- 🔧 **Solución**:
+  1. Sincronización del schema en `/src/server/prisma/schema.prisma`
+  2. Limpieza de cache de Prisma (`node_modules/.prisma` y `node_modules/@prisma`)
+  3. Regeneración completa del cliente Prisma
+- ✅ **Resultado**: Campos funcionando 100% en create/update de vehículos
+
+#### 2. **Problema: Error al Crear Vehículos Nuevos**
+- 🐛 **Problema**: Error 400 "datos de entrada inválidos" al crear vehículos 
+- 🔍 **Causa**: Schema Zod de `createVehicleSchema` no permitía valores `null` en campos opcionales
+- 🔧 **Solución**: Agregado `.nullable()` a campos opcionales:
+  ```typescript
+  // Antes (causaba error)
+  engineNumber: z.string().optional()
+  
+  // Después (funciona)  
+  engineNumber: z.string().nullable().optional()
+  ```
+- ✅ **Resultado**: Creación de vehículos 100% funcional
+
+#### 3. **Problema: Filtro de Vehículos por Cliente**
+- 🐛 **Problema**: Hiperlinks en listado de clientes (número de vehículos) generaban error 400
+- 🔍 **Causa**: Schema de validación esperaba `clientId` como `number`, pero llegaba como `string` desde URL
+- 🔧 **Solución**: Transformación automática string→number en `vehicleFilterSchema`:
+  ```typescript
+  clientId: z.string().optional()
+    .transform(val => val ? parseInt(val) : undefined)
+    .pipe(z.number().int().positive().optional())
+  ```
+- ✅ **Resultado**: Filtros por cliente funcionando perfectamente
+
+### ✅ **Testing y Verificación Completa**
+- **API Testing**: ✅ Todos los endpoints probados y funcionando
+- **Frontend Testing**: ✅ Crear, editar, filtrar vehículos funcionando
+- **Base de Datos**: ✅ Persistencia de todos los campos verificada
+- **Validaciones**: ✅ Esquemas Zod consistentes entre create/update
+
+### 🎯 **Estado Actual del Sistema**
+- **CRUD de Vehículos**: ✅ 100% funcional (crear, leer, actualizar, eliminar, filtrar)
+- **Campos Nuevos**: ✅ fuelType, transmission, engineNumber, chassisNumber funcionando
+- **Navegación**: ✅ Links entre clientes→vehículos funcionando
+- **Validaciones**: ✅ Frontend y backend sincronizados
+
+---
+
+## 🎉 AVANCES ANTERIORES (2025-08-20) - SESIÓN 2
 
 ### ✅ **Frontend Setup + Login + Dashboard - COMPLETADO**
 
@@ -107,49 +160,43 @@
 - [x] **StatusLog API** ✅ (Logs de auditoría completos)
 - [x] **Reports/Metrics API** ✅ (Dashboard y métricas completas)
 
-### **Frontend Progress - 40% completado 🚧**
+### **Frontend Progress - 60% completado 🚧**
 - [x] **Autenticación Frontend** ✅ (Login, logout, rutas protegidas)
 - [x] **Layout Base** ✅ (Sidebar, navegación, responsive)
 - [x] **Dashboard** ✅ (Métricas, servicios recientes, auto-refresh)
-- [ ] **Gestión de Clientes** ❌ (Lista, CRUD, búsqueda)
-- [ ] **Gestión de Vehículos** ❌ (CRUD vinculado a clientes)
+- [x] **Gestión de Clientes** ✅ (Lista, CRUD, búsqueda, navegación)
+- [x] **Gestión de Vehículos** ✅ (CRUD completo vinculado a clientes, filtros)
 - [ ] **Sistema de Citas** ❌ (Calendario, estados)
 - [ ] **Gestión de Servicios** ❌ (Workflow, asignaciones)
 
-### Fase 1 - Core (MVP) - 70% completado ✅
+### Fase 1 - Core (MVP) - 85% completado ✅
 - [x] Setup Railway monolítico + PostgreSQL ✅
 - [x] Autenticación y sistema de usuarios/roles ✅
 - [x] CRUD completo: clientes ✅, vehículos ✅, mecánicos ✅
 - [x] Sistema de citas completo ✅
 - [x] Estados de trabajo y workflow ✅
 - [x] Dashboard funcional ✅
-- [ ] Páginas frontend CRUD principales ❌
+- [x] **Páginas frontend CRUD principales** ✅ (Clientes + Vehículos completados)
 
 ## 📋 **PENDIENTES PARA PRÓXIMA SESIÓN**
 
-### **Prioridad Alta - Páginas CRUD Principales**
-1. **Gestión de Clientes**
-   - Lista con paginación y búsqueda
-   - Formulario crear/editar cliente
-   - Vista detalle del cliente
-   - Gestión de vehículos del cliente
+### **Prioridad Alta - Módulos Restantes del MVP**
 
-2. **Gestión de Vehículos** 
-   - CRUD completo vinculado a clientes
-   - Historial de servicios por vehículo
-   - Información técnica del vehículo
-
-3. **Sistema de Citas**
-   - Calendario de citas
-   - Agendar nueva cita
+3. **Sistema de Citas** 🎯 PRÓXIMO
+   - Calendario de citas interactivo
+   - Agendar nueva cita (cliente + vehículo)
    - Estados: programada → confirmada → completada
    - Notificaciones y recordatorios
 
-4. **Gestión de Servicios**
+4. **Gestión de Servicios** 
    - Lista de órdenes de trabajo
    - Workflow de estados de servicio
    - Asignación de mecánicos
    - Cálculo de costos y comisiones
+
+### **COMPLETADO EN ESTA SESIÓN ✅**
+1. ✅ **Gestión de Clientes** - CRUD completo con navegación y filtros
+2. ✅ **Gestión de Vehículos** - CRUD completo con campos técnicos y filtros por cliente
 
 ### **Prioridad Media - Funcionalidades Avanzadas**
 5. **Reportes Detallados**
@@ -317,12 +364,51 @@ npm run build  # Compila TS → JS
 # Verificar que existe dist/ con código JS
 ```
 
+## 🎓 **Lecciones Aprendidas Sesión 3 (2025-08-21)**
+
+### **1. Schemas de Prisma Duplicados - CRÍTICO**
+**Problema:** Tener múltiples archivos `schema.prisma` puede causar desincronización
+**Ubicaciones encontradas:**
+- `/prisma/schema.prisma` (root)
+- `/src/server/prisma/schema.prisma` (usado por el servidor)
+
+**Lección:** Siempre verificar qué schema usa cada servicio y mantenerlos sincronizados.
+
+### **2. Validaciones Zod: .nullable() vs .optional()**
+**Problema:** Campos que pueden ser `null` necesitan ambos `.nullable()` y `.optional()`
+```typescript
+// ❌ Error - solo acepta string o undefined
+engineNumber: z.string().optional()
+
+// ✅ Correcto - acepta string, null o undefined  
+engineNumber: z.string().nullable().optional()
+```
+**Lección:** En esquemas de validación, siempre considerar todos los tipos posibles (string, null, undefined).
+
+### **3. Transformaciones en Query Parameters**
+**Problema:** Los query parameters siempre llegan como strings desde URLs
+**Solución:** Usar transformaciones automáticas en Zod:
+```typescript
+clientId: z.string().optional()
+  .transform(val => val ? parseInt(val) : undefined)
+  .pipe(z.number().int().positive().optional())
+```
+**Lección:** Automatizar transformaciones de tipos en lugar de manejarlas manualmente.
+
+### **4. Debugging con Logs Detallados**
+**Útil:** Los logs de debug fueron clave para identificar problemas:
+- `🔧 VALIDATION INPUT:` - Ver datos de entrada
+- `❌ VALIDATION FAILED:` - Errores específicos de Zod
+- Query logs de Prisma - Ver SQL generado
+
+**Lección:** Implementar logging detallado acelera significativamente el debugging.
+
 ## 🎯 **Objetivo Próxima Sesión**
-**Implementar páginas CRUD de Clientes y Vehículos** para tener un MVP funcional básico que permita:
-- Registrar clientes nuevos
-- Agregar vehículos a clientes
-- Ver listados y buscar registros
-- Editar información básica
+**Implementar Sistema de Citas** como próximo módulo del MVP:
+- Calendario interactivo de citas
+- Crear/editar citas vinculadas a cliente+vehículo
+- Estados y workflow de citas
+- Integración completa con el resto del sistema
 
 ## 📝 Notas de la Sesión 2025-08-20 (SESIÓN 2 - Finalizada)
 ### ✅ Logros de esta sesión:
@@ -347,6 +433,6 @@ npm run build  # Compila TS → JS
 - **Backend APIs:** 100% funcionales y probadas ✅
 
 ---
-**Última actualización**: 2025-08-20 21:25 UTC
-**Responsable**: Claude + Usuario
-**Estado**: ✅ Frontend MVP Setup Completado - Listo para páginas CRUD
+**Última actualización**: 2025-08-21 06:53 UTC
+**Responsable**: Claude + Usuario  
+**Estado**: ✅ CRUD de Vehículos 100% Completado - Sistema de Citas es el próximo módulo

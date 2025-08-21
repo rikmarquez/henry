@@ -24,8 +24,8 @@ export const dateSchema = z.string().datetime('Fecha inválida')
   .or(z.date());
 
 export const paginationSchema = z.object({
-  page: z.number().int().positive().default(1),
-  limit: z.number().int().positive().max(100).default(10),
+  page: z.string().optional().transform(val => val ? parseInt(val) : 1).pipe(z.number().int().positive()),
+  limit: z.string().optional().transform(val => val ? parseInt(val) : 10).pipe(z.number().int().positive().max(100)),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

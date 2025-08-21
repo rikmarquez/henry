@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import ClientsPage from './pages/ClientsPage';
+import VehiclesPage from './pages/VehiclesPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -45,6 +47,22 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/clients" element={
+            <ProtectedRoute>
+              <Layout>
+                <ClientsPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vehicles" element={
+            <ProtectedRoute>
+              <Layout>
+                <VehiclesPage />
               </Layout>
             </ProtectedRoute>
           } />
