@@ -18,7 +18,7 @@ const prisma = new PrismaClient();
 router.get(
   '/',
   authenticate,
-  authorize(['clients'], ['read']),
+  authorize(['services'], ['read']),
   validateQuery(mechanicFilterSchema),
   async (req, res) => {
     try {
@@ -87,7 +87,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize(['clients'], ['read']),
+  authorize(['services'], ['read']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {
@@ -143,7 +143,7 @@ router.get(
 router.post(
   '/',
   authenticate,
-  authorize(['clients'], ['create']),
+  authorize(['services'], ['create']),
   validate(createMechanicSchema),
   async (req, res) => {
     try {
@@ -177,7 +177,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize(['clients'], ['update']),
+  authorize(['services'], ['update']),
   validateParams(idParamSchema),
   validate(updateMechanicSchema.omit({ id: true })),
   async (req, res) => {
@@ -220,7 +220,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize(['clients'], ['delete']),
+  authorize(['services'], ['delete']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {
@@ -280,7 +280,7 @@ router.delete(
 router.post(
   '/:id/activate',
   authenticate,
-  authorize(['clients'], ['update']),
+  authorize(['services'], ['update']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {
