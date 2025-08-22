@@ -13,6 +13,15 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
+// Debug endpoint to check schema version
+router.get('/debug-schema', (req, res) => {
+  res.json({
+    schema: mechanicFilterSchema._def,
+    timestamp: new Date().toISOString(),
+    version: 'v2-fixed'
+  });
+});
+
 
 // GET /api/mechanics - List mechanics with pagination and filters
 router.get(
