@@ -22,14 +22,15 @@
     }
   },
   "include": [
-    "src",
-    "../shared",
-    "**/*.ts",
-    "**/*.tsx"
+    "src/**/*",
+    "../shared/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "vite.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js"
   ],
   "references": [
     {
