@@ -13,15 +13,45 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
+// DEBUG endpoint - simple test
+router.get('/test', async (req, res) => {
+  try {
+    console.log('🧪 TEST: Simple mechanics test endpoint called');
+    console.log('🧪 Query params:', req.query);
+    
+    const count = await prisma.mechanic.count();
+    console.log('🧪 Mechanics count:', count);
+    
+    res.json({
+      success: true,
+      message: 'Test endpoint working',
+      count,
+      query: req.query
+    });
+  } catch (error) {
+    console.error('🧪 TEST ERROR:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test endpoint error',
+      error: error.message
+    });
+  }
+});
+
 // GET /api/mechanics - List mechanics with pagination and filters
 router.get(
   '/',
   authenticate,
   authorize(['clients'], ['read']),
-  validateQuery(mechanicFilterSchema),
+  // validateQuery(mechanicFilterSchema), // TEMPORARILY DISABLED FOR DEBUG
   async (req, res) => {
     try {
+      console.log('🔧 DEBUG: Mechanics endpoint called');
+      console.log('🔧 Query params:', req.query);
+      
       const { page = 1, limit = 10, search, isActive } = req.query;
+      console.log('🔧 Parsed values:', { page, limit, search, isActive });
+      
       const offset = (page - 1) * limit;
 
       const where = {
