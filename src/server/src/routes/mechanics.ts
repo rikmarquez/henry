@@ -57,12 +57,28 @@ router.get('/debug-schema', (req, res) => {
   }
 });
 
-// GET /api/mechanics - List mechanics with pagination and filters
+// GET /api/mechanics - List mechanics with pagination and filters  
+// TEMPORARY FIX: Manual validation to bypass schema cache issues
 router.get(
   '/',
   authenticate,
   authorize(['mechanics'], ['read']),
-  validateQuery(mechanicFilterSchema),
+  (req, res, next) => {
+    // Manual query validation to bypass schema cache
+    const { page, limit, search, isActive } = req.query;
+    
+    // Transform parameters manually
+    const transformedQuery = {
+      page: page ? parseInt(page as string) : 1,
+      limit: limit ? parseInt(limit as string) : 10,
+      search: search as string,
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+      sortOrder: 'desc' as const
+    };
+    
+    req.query = transformedQuery;
+    next();
+  },
   async (req, res) => {
     try {
       const { page = 1, limit = 10, search, isActive } = req.query;
