@@ -313,6 +313,51 @@ const getActiveBranches = async (req: any, res: any) => {
   }
 };
 
+// Debug endpoint to test branches table - MUST BE FIRST
+router.get('/debug-table', async (req, res) => {
+  try {
+    console.log('🔧 Testing branches table access...');
+    
+    // Test 1: Simple count
+    const count = await prisma.branch.count();
+    console.log('🔧 Branches count:', count);
+    
+    // Test 2: Simple findMany
+    const branches = await prisma.branch.findMany({
+      take: 1,
+      select: { id: true, name: true, code: true }
+    });
+    console.log('🔧 Sample branch:', branches[0]);
+    
+    // Test 3: Check if table exists with raw query
+    const tableExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'branches'
+      );
+    `;
+    console.log('🔧 Table exists:', tableExists);
+    
+    res.json({
+      success: true,
+      debug: {
+        count,
+        sampleBranch: branches[0],
+        tableExists,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Debug branches error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Route definitions
 router.get('/active', getActiveBranches);
 
