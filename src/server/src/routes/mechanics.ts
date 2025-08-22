@@ -43,7 +43,7 @@ router.get(
   '/',
   authenticate,
   authorize(['clients'], ['read']),
-  // validateQuery(mechanicFilterSchema), // TEMPORARILY DISABLED FOR DEBUG
+  validateQuery(mechanicFilterSchema),
   async (req, res) => {
     try {
       console.log('🔧 DEBUG: Mechanics endpoint called');
