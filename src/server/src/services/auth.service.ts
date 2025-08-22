@@ -33,13 +33,25 @@ export class AuthService {
   }
 
   async login(data: LoginInput): Promise<{ user: any; tokens: TokenPair }> {
-    const user = await prisma.user.findUnique({
-      where: { email: data.email },
-      include: { 
-        role: true,
-        branch: true 
-      },
-    });
+    // Try with branch include first, fallback without it for backward compatibility
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: data.email },
+        include: { 
+          role: true,
+          branch: true 
+        },
+      });
+    } catch (error) {
+      // Fallback if branch relation doesn't exist yet
+      user = await prisma.user.findUnique({
+        where: { email: data.email },
+        include: { 
+          role: true
+        },
+      });
+    }
 
     if (!user || !user.isActive) {
       throw new Error('Credenciales inválidas');
@@ -55,7 +67,7 @@ export class AuthService {
       email: user.email!,
       roleId: user.roleId,
       roleName: user.role.name,
-      branchId: user.branchId,
+      branchId: user.branchId || 1, // Default to branch 1 if not set
     });
 
     const { passwordHash, ...userWithoutPassword } = user;
@@ -105,7 +117,7 @@ export class AuthService {
       email: user.email!,
       roleId: user.roleId,
       roleName: user.role.name,
-      branchId: user.branchId,
+      branchId: user.branchId || 1, // Default to branch 1 if not set
     });
 
     const { passwordHash: _, ...userWithoutPassword } = user;
@@ -121,10 +133,19 @@ export class AuthService {
       const payload = jwt.verify(refreshToken, this.jwtRefreshSecret) as JWTPayload;
       
       // Verify user still exists and is active
-      const user = await prisma.user.findUnique({
-        where: { id: payload.userId },
-        include: { role: true, branch: true },
-      });
+      let user;
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: payload.userId },
+          include: { role: true, branch: true },
+        });
+      } catch (error) {
+        // Fallback if branch relation doesn't exist yet
+        user = await prisma.user.findUnique({
+          where: { id: payload.userId },
+          include: { role: true },
+        });
+      }
 
       if (!user || !user.isActive) {
         throw new Error('Usuario inválido');
@@ -192,13 +213,25 @@ export class AuthService {
   }
 
   async getUserProfile(userId: number): Promise<any> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { 
-        role: true,
-        branch: true 
-      },
-    });
+    // Try with branch include first, fallback without it for backward compatibility
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { 
+          role: true,
+          branch: true 
+        },
+      });
+    } catch (error) {
+      // Fallback if branch relation doesn't exist yet
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { 
+          role: true
+        },
+      });
+    }
 
     if (!user || !user.isActive) {
       throw new Error('Usuario no encontrado o inactivo');
