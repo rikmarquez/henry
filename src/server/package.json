@@ -10,7 +10,7 @@
     "lint": "eslint src --ext .ts --fix",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "postinstall": "npx prisma generate && npx prisma migrate deploy",
+    "postinstall": "npx prisma generate && npx prisma db push",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
