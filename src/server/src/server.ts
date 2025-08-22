@@ -103,12 +103,24 @@ if (config.nodeEnv === 'production') {
     console.log('📄 Files in static path:', fs.readdirSync(staticPath));
   }
   
-  app.use(express.static(staticPath));
+  // Configure static file serving with proper MIME types
+  app.use(express.static(staticPath, {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      } else if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (path.endsWith('.html')) {
+        res.setHeader('Content-Type', 'text/html');
+      }
+    }
+  }));
   
   app.get('*', (req, res) => {
     const indexPath = path.join(staticPath, 'index.html');
     console.log('🎯 Serving index.html from:', indexPath);
     console.log('📄 index.html exists:', fs.existsSync(indexPath));
+    res.setHeader('Content-Type', 'text/html');
     res.sendFile(indexPath);
   });
 }
