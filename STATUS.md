@@ -112,5 +112,25 @@ console.log('🔧 useEffect selectedClientId cambió:', selectedClientId);
 3. **Implementar reportes** con gráficos (Chart.js)
 4. **Configuraciones de seguridad** adicionales para producción
 
-**Última actualización:** 2025-08-22 14:30 UTC  
-**MVP Status:** ✅ 100% Completado y Deployado en Producción
+## 🔧 **MÓDULO MECÁNICOS - EN DESARROLLO** ⚠️
+
+### **✅ Completado (95%):**
+- **Backend API completo** - Todas las rutas CRUD implementadas
+- **Frontend MechanicsPage.tsx** - Interfaz completa con modales y filtros
+- **Base de datos actualizada** - Campo phone agregado a mecánicos
+- **Integración servicios** - Cálculo automático de comisiones
+- **Navegación** - Enlace agregado al menú principal
+- **Validaciones** - Zod schemas corregidos
+
+### **❌ Problema Pendiente:**
+- **Error 400 en Railway production** - Solo en endpoint `/api/mechanics`
+- **Causa:** Problema de autorización/permisos en production
+- **Estado:** Local funciona ✅ | Railway sin auth funciona ✅ | Railway con auth falla ❌
+
+### **📋 Archivos Sesión Debug:**
+- **Documentación completa:** `MECHANICS_DEBUG_SESSION.md`
+- **Commits realizados:** 8 commits de debugging y fixes
+- **Próxima sesión:** Resolver error 400 de autorización
+
+**Última actualización:** 2025-08-22 15:03 UTC  
+**MVP Status:** ✅ 95% Completado - Pendiente fix Railway auth
