@@ -17,32 +17,30 @@ router.get('/debug-table', async (req, res) => {
   try {
     console.log('🔧 Testing branches table access...');
     
-    // Test 1: Simple count
-    const count = await prisma.branch.count();
-    console.log('🔧 Branches count:', count);
-    
-    // Test 2: Simple findMany
-    const branches = await prisma.branch.findMany({
-      take: 1,
-      select: { id: true, name: true, code: true }
-    });
-    console.log('🔧 Sample branch:', branches[0]);
-    
-    // Test 3: Check if table exists with raw query
-    const tableExists = await prisma.$queryRaw`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' AND table_name = 'branches'
-      );
+    // Try with raw SQL first
+    const tableCheck = await prisma.$queryRaw`
+      SELECT 
+        COUNT(*) as total_branches,
+        EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' AND table_name = 'branches'
+        ) as table_exists
+      FROM branches;
     `;
-    console.log('🔧 Table exists:', tableExists);
+    
+    console.log('🔧 Raw query result:', tableCheck);
+    
+    // Convert BigInt to string for JSON serialization
+    const serializedResult = tableCheck.map((row: any) => ({
+      ...row,
+      total_branches: row.total_branches.toString()
+    }));
     
     res.json({
       success: true,
       debug: {
-        count,
-        sampleBranch: branches[0],
-        tableExists,
+        rawQuery: serializedResult,
+        prismaAvailable: !!prisma.branch,
         timestamp: new Date().toISOString()
       }
     });
