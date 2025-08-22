@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
+import { useCurrentBranchId } from '../contexts/BranchContext';
 import AppointmentCalendar from '../components/appointments/AppointmentCalendar';
 import WeeklyCalendar from '../components/appointments/WeeklyCalendar';
 import DailyCalendar from '../components/appointments/DailyCalendar';
@@ -53,6 +54,7 @@ interface AppointmentFilters {
 }
 
 const AppointmentsPage = () => {
+  const currentBranchId = useCurrentBranchId();
   const [filters, setFilters] = useState<AppointmentFilters>({
     page: 1,
     limit: 20

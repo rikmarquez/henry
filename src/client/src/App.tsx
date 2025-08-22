@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './stores/authStore';
+import { BranchProvider } from './contexts/BranchContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -13,6 +15,7 @@ import MechanicsPage from './pages/MechanicsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ServicesPage from './pages/ServicesPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
+import BranchesPage from './pages/BranchesPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -41,8 +44,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
+      <BranchProvider>
+        <Router>
+          <Routes>
           {/* Página de login */}
           <Route path="/login" element={<LoginPage />} />
           
@@ -103,6 +107,15 @@ function App() {
             </ProtectedRoute>
           } />
           
+          {/* Ruta solo para administradores */}
+          <Route path="/branches" element={
+            <AdminRoute>
+              <Layout>
+                <BranchesPage />
+              </Layout>
+            </AdminRoute>
+          } />
+          
           {/* Redirigir raíz al dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
@@ -118,8 +131,9 @@ function App() {
               </div>
             </div>
           } />
-        </Routes>
-      </Router>
+          </Routes>
+        </Router>
+      </BranchProvider>
       <Toaster
         position="top-right"
         toastOptions={{

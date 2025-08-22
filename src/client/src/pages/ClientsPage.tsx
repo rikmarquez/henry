@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
+import { useCurrentBranchId } from '../contexts/BranchContext';
 import ClientForm from '../components/ClientForm';
 import { 
   Users, 
@@ -43,6 +44,7 @@ interface ClientsResponse {
 }
 
 export default function ClientsPage() {
+  const currentBranchId = useCurrentBranchId();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../services/api';
+import { useCurrentBranchId } from '../contexts/BranchContext';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -170,6 +171,7 @@ const statusColors: Record<string, string> = {
 
 export default function ServicesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const currentBranchId = useCurrentBranchId();
   const [services, setServices] = useState<Service[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -478,9 +480,10 @@ export default function ServicesPage() {
 
   const handleCreateService = async (data: CreateServiceData) => {
     try {
-      // Include appointment ID if creating from appointment
+      // Include appointment ID if creating from appointment and branch ID
       const serviceData = {
         ...data,
+        branchId: currentBranchId,
         ...(preloadedAppointment && { appointmentId: preloadedAppointment.id })
       };
       

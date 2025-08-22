@@ -20,8 +20,12 @@ exports.emailSchema = zod_1.z.string()
 exports.dateSchema = zod_1.z.string().datetime('Fecha inválida')
     .or(zod_1.z.date());
 exports.paginationSchema = zod_1.z.object({
-    page: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 1).pipe(zod_1.z.number().int().positive()),
-    limit: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 10).pipe(zod_1.z.number().int().positive().max(1000)),
+    page: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 1),
+    limit: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 10),
     sortBy: zod_1.z.string().optional(),
-    sortOrder: zod_1.z.enum(['asc', 'desc']).default('desc'),
+    sortOrder: zod_1.z.string().optional().transform(val => {
+        if (val === 'asc' || val === 'desc')
+            return val;
+        return 'desc';
+    }),
 });

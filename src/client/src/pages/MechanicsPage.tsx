@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
+import { useCurrentBranchId } from '../contexts/BranchContext';
 import { 
   Wrench, 
   Search, 
@@ -40,6 +41,7 @@ interface MechanicsResponse {
 }
 
 export default function MechanicsPage() {
+  const currentBranchId = useCurrentBranchId();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -67,7 +69,8 @@ export default function MechanicsPage() {
 
   const createMechanic = useMutation({
     mutationFn: async (mechanic: { name: string; phone?: string; commissionPercentage?: number }) => {
-      const response = await api.post('/mechanics', mechanic);
+      const mechanicData = { ...mechanic, branchId: currentBranchId };
+      const response = await api.post('/mechanics', mechanicData);
       return response.data;
     },
     onSuccess: () => {

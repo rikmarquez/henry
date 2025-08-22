@@ -10,6 +10,7 @@ declare global {
         email: string;
         roleId: number;
         roleName: string;
+        branchId: number;
       };
     }
   }

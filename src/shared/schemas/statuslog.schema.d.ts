@@ -1,12 +1,9 @@
 import { z } from 'zod';
 export declare const statusLogFilterSchema: z.ZodObject<{
-    page: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
-    limit: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
+    page: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
+    limit: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
     sortBy: z.ZodOptional<z.ZodString>;
-    sortOrder: z.ZodDefault<z.ZodEnum<{
-        asc: "asc";
-        desc: "desc";
-    }>>;
+    sortOrder: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<"asc" | "desc", string | undefined>>;
     serviceId: z.ZodOptional<z.ZodNumber>;
     oldStatusId: z.ZodOptional<z.ZodNumber>;
     newStatusId: z.ZodOptional<z.ZodNumber>;

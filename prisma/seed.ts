@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Create roles
+  // Create roles first 
   const adminRole = await prisma.role.upsert({
     where: { name: 'ADMIN' },
     update: {},
@@ -20,10 +20,27 @@ async function main() {
         services: ['create', 'read', 'update', 'delete'],
         opportunities: ['create', 'read', 'update', 'delete'],
         mechanics: ['create', 'read', 'update', 'delete'],
+        branches: ['create', 'read', 'update', 'delete'],
         reports: ['read']
       },
     },
   });
+
+  // Create default branch 
+  const defaultBranch = await prisma.branch.upsert({
+    where: { code: 'HD001' },
+    update: {},
+    create: {
+      name: 'Henry Diagnostics Central',
+      code: 'HD001',
+      address: 'Dirección Principal',
+      phone: '+52-555-000-0000',
+      email: 'central@henrydiagnostics.com',
+      city: 'Ciudad Principal',
+    },
+  });
+
+  console.log(`🏢 Default branch created: ${defaultBranch.name}`);
 
   const receptionistRole = await prisma.role.upsert({
     where: { name: 'RECEPCIONISTA' },
@@ -86,14 +103,31 @@ async function main() {
       phone: '+1234567890',
       passwordHash: hashedPassword,
       roleId: adminRole.id,
+      branchId: defaultBranch.id,
+    },
+  });
+
+  // Create Rik admin user
+  const rikHashedPassword = await bcrypt.hash('Acceso979971', 12);
+  
+  const rikAdminUser = await prisma.user.upsert({
+    where: { email: 'rik@rikmarquez.com' },
+    update: {},
+    create: {
+      name: 'Rik Marquez',
+      email: 'rik@rikmarquez.com',
+      phone: '+1234567891',
+      passwordHash: rikHashedPassword,
+      roleId: adminRole.id,
+      branchId: defaultBranch.id,
     },
   });
 
   // Create some sample mechanics
   const mechanics = [
-    { name: 'Juan Pérez', commissionPercentage: 15.00 },
-    { name: 'María González', commissionPercentage: 12.50 },
-    { name: 'Carlos Rodríguez', commissionPercentage: 20.00 },
+    { name: 'Juan Pérez', commissionPercentage: 15.00, branchId: defaultBranch.id },
+    { name: 'María González', commissionPercentage: 12.50, branchId: defaultBranch.id },
+    { name: 'Carlos Rodríguez', commissionPercentage: 20.00, branchId: defaultBranch.id },
   ];
 
   const createdMechanics = [];
@@ -106,6 +140,7 @@ async function main() {
 
   console.log('✅ Database seeded successfully!');
   console.log(`👤 Admin user: admin@henrydiagnostics.com / admin123`);
+  console.log(`👤 Rik admin user: rik@rikmarquez.com / Acceso979971`);
   console.log(`🔧 Created ${mechanics.length} mechanics`);
   console.log(`📋 Created ${workStatuses.length} work statuses`);
   console.log(`👥 Created 3 roles: ADMIN, RECEPCIONISTA, ENCARGADO`);

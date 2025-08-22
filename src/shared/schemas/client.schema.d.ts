@@ -14,13 +14,10 @@ export declare const updateClientSchema: z.ZodObject<{
     address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 export declare const clientFilterSchema: z.ZodObject<{
-    page: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
-    limit: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
+    page: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
+    limit: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
     sortBy: z.ZodOptional<z.ZodString>;
-    sortOrder: z.ZodDefault<z.ZodEnum<{
-        asc: "asc";
-        desc: "desc";
-    }>>;
+    sortOrder: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<"asc" | "desc", string | undefined>>;
     search: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export type CreateClientInput = z.infer<typeof createClientSchema>;

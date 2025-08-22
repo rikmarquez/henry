@@ -168,11 +168,13 @@ export class AuthController {
         });
       }
 
-      // You would typically get user from database here
+      // Get fresh user data from database including branch info
+      const user = await authService.getUserProfile(userId);
+
       res.json({
         success: true,
         message: 'Perfil obtenido exitosamente',
-        data: { user: req.user },
+        data: user,
       });
     } catch (error) {
       console.error('Get profile error:', error);

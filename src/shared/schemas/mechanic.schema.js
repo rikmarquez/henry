@@ -12,7 +12,21 @@ exports.createMechanicSchema = zod_1.z.object({
 exports.updateMechanicSchema = exports.createMechanicSchema.partial().extend({
     id: common_schema_1.idSchema,
 });
-exports.mechanicFilterSchema = common_schema_1.paginationSchema.extend({
+exports.mechanicFilterSchema = zod_1.z.object({
+    page: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 1),
+    limit: zod_1.z.string().optional().transform(val => val ? parseInt(val) : 10),
+    sortBy: zod_1.z.string().optional(),
+    sortOrder: zod_1.z.string().optional().transform(val => {
+        if (val === 'asc' || val === 'desc')
+            return val;
+        return 'desc';
+    }),
     search: zod_1.z.string().optional(),
-    isActive: zod_1.z.boolean().optional(),
+    isActive: zod_1.z.string().optional().transform((val) => {
+        if (val === 'true')
+            return true;
+        if (val === 'false')
+            return false;
+        return undefined;
+    }),
 });

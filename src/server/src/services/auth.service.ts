@@ -11,6 +11,7 @@ interface JWTPayload {
   email: string;
   roleId: number;
   roleName: string;
+  branchId: number;
 }
 
 interface TokenPair {
@@ -34,7 +35,10 @@ export class AuthService {
   async login(data: LoginInput): Promise<{ user: any; tokens: TokenPair }> {
     const user = await prisma.user.findUnique({
       where: { email: data.email },
-      include: { role: true },
+      include: { 
+        role: true,
+        branch: true 
+      },
     });
 
     if (!user || !user.isActive) {
@@ -51,6 +55,7 @@ export class AuthService {
       email: user.email!,
       roleId: user.roleId,
       roleName: user.role.name,
+      branchId: user.branchId,
     });
 
     const { passwordHash, ...userWithoutPassword } = user;
@@ -100,6 +105,7 @@ export class AuthService {
       email: user.email!,
       roleId: user.roleId,
       roleName: user.role.name,
+      branchId: user.branchId,
     });
 
     const { passwordHash: _, ...userWithoutPassword } = user;
@@ -117,7 +123,7 @@ export class AuthService {
       // Verify user still exists and is active
       const user = await prisma.user.findUnique({
         where: { id: payload.userId },
-        include: { role: true },
+        include: { role: true, branch: true },
       });
 
       if (!user || !user.isActive) {
@@ -129,6 +135,7 @@ export class AuthService {
         email: user.email!,
         roleId: user.roleId,
         roleName: user.role.name,
+        branchId: user.branchId,
       });
     } catch (error) {
       throw new Error('Token de actualización inválido');
@@ -182,6 +189,23 @@ export class AuthService {
 
   async comparePasswords(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  async getUserProfile(userId: number): Promise<any> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { 
+        role: true,
+        branch: true 
+      },
+    });
+
+    if (!user || !user.isActive) {
+      throw new Error('Usuario no encontrado o inactivo');
+    }
+
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
 

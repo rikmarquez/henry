@@ -6,6 +6,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  branchId: number;
   role: {
     id: number;
     name: string;
@@ -13,6 +14,12 @@ interface User {
       resource: string;
       actions: string[];
     }[];
+  };
+  branch: {
+    id: number;
+    name: string;
+    code: string;
+    city: string;
   };
 }
 

@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { useBranch } from '../contexts/BranchContext';
 import { 
   Home, 
   Users, 
@@ -13,7 +14,8 @@ import {
   Menu,
   X,
   Target,
-  UserCog
+  UserCog,
+  Building2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -21,23 +23,37 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Clientes', href: '/clients', icon: Users },
-  { name: 'Vehículos', href: '/vehicles', icon: Car },
-  { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
-  { name: 'Citas', href: '/appointments', icon: Calendar },
-  { name: 'Servicios', href: '/services', icon: Wrench },
-  { name: 'Oportunidades', href: '/opportunities', icon: Target },
-  { name: 'Reportes', href: '/reports', icon: BarChart3 },
-  { name: 'Configuración', href: '/settings', icon: Settings },
-];
-
 export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const { currentBranch, isAdmin } = useBranch();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Create navigation array dynamically based on permissions
+  const getNavigation = () => {
+    const baseNavigation = [
+      { name: 'Dashboard', href: '/dashboard', icon: Home },
+      { name: 'Clientes', href: '/clients', icon: Users },
+      { name: 'Vehículos', href: '/vehicles', icon: Car },
+      { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
+      { name: 'Citas', href: '/appointments', icon: Calendar },
+      { name: 'Servicios', href: '/services', icon: Wrench },
+      { name: 'Oportunidades', href: '/opportunities', icon: Target },
+      { name: 'Reportes', href: '/reports', icon: BarChart3 },
+    ];
+
+    // Add admin-only routes
+    if (isAdmin) {
+      baseNavigation.push({ name: 'Sucursales', href: '/branches', icon: Building2 });
+    }
+
+    baseNavigation.push({ name: 'Configuración', href: '/settings', icon: Settings });
+    
+    return baseNavigation;
+  };
+
+  const navigation = getNavigation();
 
   const handleLogout = () => {
     logout();
@@ -164,6 +180,12 @@ export default function Layout({ children }: LayoutProps) {
                   <p className="text-xs font-medium text-gray-500 truncate">
                     {user?.role.name}
                   </p>
+                  {currentBranch && (
+                    <p className="text-xs text-blue-600 truncate flex items-center">
+                      <Building2 className="w-3 h-3 mr-1" />
+                      {currentBranch.name}
+                    </p>
+                  )}
                 </div>
               </div>
               <button

@@ -27,13 +27,10 @@ export declare const updateVehicleSchema: z.ZodObject<{
     id: z.ZodNumber;
 }, z.core.$strip>;
 export declare const vehicleFilterSchema: z.ZodObject<{
-    page: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
-    limit: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
+    page: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
+    limit: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
     sortBy: z.ZodOptional<z.ZodString>;
-    sortOrder: z.ZodDefault<z.ZodEnum<{
-        asc: "asc";
-        desc: "desc";
-    }>>;
+    sortOrder: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<"asc" | "desc", string | undefined>>;
     search: z.ZodOptional<z.ZodString>;
     clientId: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number | undefined, string | undefined>>, z.ZodOptional<z.ZodNumber>>;
     brand: z.ZodOptional<z.ZodString>;

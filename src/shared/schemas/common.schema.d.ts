@@ -10,12 +10,9 @@ export declare const phoneSchema: z.ZodString;
 export declare const emailSchema: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
 export declare const dateSchema: z.ZodUnion<[z.ZodString, z.ZodDate]>;
 export declare const paginationSchema: z.ZodObject<{
-    page: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
-    limit: z.ZodPipe<z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>, z.ZodNumber>;
+    page: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
+    limit: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<number, string | undefined>>;
     sortBy: z.ZodOptional<z.ZodString>;
-    sortOrder: z.ZodDefault<z.ZodEnum<{
-        asc: "asc";
-        desc: "desc";
-    }>>;
+    sortOrder: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<"asc" | "desc", string | undefined>>;
 }, z.core.$strip>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
