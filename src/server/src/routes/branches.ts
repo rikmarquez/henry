@@ -137,11 +137,25 @@ const getBranches = async (req: any, res: any) => {
     console.log('🔧 Params:', params);
 
     // Simplified: Get all branches first, then paginate in memory for now
-    const branches = await prisma.$queryRaw`
+    const rawBranches = await prisma.$queryRaw`
       SELECT id, name, code, address, phone, email, city, is_active, created_at, updated_at
       FROM branches
       ORDER BY created_at DESC
     `;
+    
+    // Map database fields to match expected format
+    const branches = Array.isArray(rawBranches) ? rawBranches.map((branch: any) => ({
+      id: branch.id,
+      name: branch.name,
+      code: branch.code,
+      address: branch.address,
+      phone: branch.phone,
+      email: branch.email,
+      city: branch.city,
+      isActive: branch.is_active, // Map is_active to isActive
+      createdAt: branch.created_at,
+      updatedAt: branch.updated_at
+    })) : [];
     console.log('🔧 Found branches:', Array.isArray(branches) ? branches.length : 0);
 
     // Apply pagination in memory
