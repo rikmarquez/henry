@@ -36,13 +36,14 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CORS configuration
+// CORS configuration - Extra permissive for development
 console.log('🔧 CORS allowedOrigins:', config.allowedOrigins);
 app.use(cors({
-  origin: config.nodeEnv === 'development' ? true : config.allowedOrigins, // Allow all origins in development
+  origin: true, // Allow all origins in development
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  optionsSuccessStatus: 200, // For legacy browser support
 }));
 
 // UTF-8 encoding middleware for API routes

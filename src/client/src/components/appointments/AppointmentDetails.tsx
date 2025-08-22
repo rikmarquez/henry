@@ -13,7 +13,8 @@ import {
   XCircle, 
   AlertTriangle,
   Settings,
-  ArrowRight
+  ArrowRight,
+  Wrench
 } from 'lucide-react';
 
 interface Appointment {
@@ -56,6 +57,7 @@ interface AppointmentDetailsProps {
   onStatusUpdate: (id: number, action: 'confirm' | 'complete' | 'cancel') => void;
   isUpdating: boolean;
   onConfirmAction: (appointmentId: number, action: 'confirm' | 'complete' | 'cancel') => void;
+  onCreateService?: (appointment: Appointment) => void;
 }
 
 const AppointmentDetails = ({ 
@@ -64,7 +66,8 @@ const AppointmentDetails = ({
   onClose, 
   onStatusUpdate, 
   isUpdating,
-  onConfirmAction
+  onConfirmAction,
+  onCreateService
 }: AppointmentDetailsProps) => {
 
   if (!isOpen) return null;
@@ -102,6 +105,7 @@ const AppointmentDetails = ({
   const canConfirm = appointment.status === 'scheduled';
   const canComplete = appointment.status === 'confirmed';
   const canCancel = appointment.status === 'scheduled' || appointment.status === 'confirmed';
+  const canCreateService = appointment.status === 'confirmed' && appointment._count.services === 0;
 
   const handleStatusAction = (action: 'confirm' | 'complete' | 'cancel') => {
     onConfirmAction(appointment.id, action);
@@ -323,6 +327,16 @@ const AppointmentDetails = ({
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Completar Cita
+                </button>
+              )}
+
+              {canCreateService && onCreateService && (
+                <button
+                  onClick={() => onCreateService(appointment)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  <Wrench className="h-4 w-4 mr-2" />
+                  Crear Servicio
                 </button>
               )}
 

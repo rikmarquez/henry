@@ -20,7 +20,20 @@
       "Bash(node:*)",
       "Bash(cmd //c:*)",
       "Bash(cat:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cmd /c:*)",
+      "Bash(start http://localhost:5173)",
+      "Bash(magick:*)",
+      "Bash(where convert)",
+      "Bash(copy:*)",
+      "Bash(start http://localhost:5173/services)",
+      "Bash(start http://localhost:5175)",
+      "Bash(start http://localhost:5175/services)",
+      "Bash(npm run build:*)",
+      "Bash(npx vite build:*)",
+      "Bash(start http://localhost:3002/api/health)",
+      "Bash(start http://localhost:5176)",
+      "Bash(start http://localhost:5178)"
     ],
     "deny": [],
     "ask": []

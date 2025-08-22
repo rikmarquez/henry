@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Clock, User, Car, Phone, CalendarDays, Search, Filter, AlertTriangle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 import AppointmentCalendar from '../components/appointments/AppointmentCalendar';

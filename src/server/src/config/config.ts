@@ -25,7 +25,7 @@ const env = {
   bcryptSaltRounds: process.env.BCRYPT_SALT_ROUNDS || 12,
   rateLimitWindowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
   rateLimitMaxRequests: process.env.RATE_LIMIT_MAX_REQUESTS || 100,
-  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5177',
+  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5176,http://localhost:5177,http://localhost:5178',
 };
 
 export const config = configSchema.parse(env);

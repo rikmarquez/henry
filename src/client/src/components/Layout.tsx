@@ -111,9 +111,11 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex flex-col w-64 border-r border-gray-200 bg-white">
           {/* Header del sidebar */}
           <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-gray-200">
-            <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">HD</span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Henry Diagnostics" 
+              className="h-8 w-auto"
+            />
             <span className="ml-2 font-bold text-gray-900">Henry Diagnostics</span>
           </div>
 
@@ -185,9 +187,11 @@ export default function Layout({ children }: LayoutProps) {
                 <Menu className="h-6 w-6" />
               </button>
               <div className="ml-2">
-                <div className="h-6 w-6 bg-blue-600 rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">HD</span>
-                </div>
+                <img 
+                  src="/logo.png" 
+                  alt="Henry Diagnostics" 
+                  className="h-6 w-auto"
+                />
               </div>
             </div>
             <button
