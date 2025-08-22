@@ -13,7 +13,7 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Debug endpoint to check schema version - PUBLIC
+// Debug endpoint to check schema version - PUBLIC (must be FIRST)
 router.get('/debug-schema', (req, res) => {
   try {
     // Test the schema with sample data
@@ -26,18 +26,17 @@ router.get('/debug-schema', (req, res) => {
     res.json({
       schemaTest: testResult,
       timestamp: new Date().toISOString(),
-      version: 'v3-with-test',
+      version: 'v4-moved-first',
       deployCheck: 'Railway should be using latest code'
     });
   } catch (error) {
     res.json({
       error: error.message,
       timestamp: new Date().toISOString(),
-      version: 'v3-error'
+      version: 'v4-error'
     });
   }
 });
-
 
 // GET /api/mechanics - List mechanics with pagination and filters
 router.get(
