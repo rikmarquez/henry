@@ -119,12 +119,13 @@ app.use(notFound);
 // Global error handler
 app.use(errorHandler);
 
-const PORT = config.port;
+const PORT = process.env.PORT || config.port;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Henry Diagnostics Server running on port ${PORT}`);
   console.log(`📊 Environment: ${config.nodeEnv}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌍 Server binding to 0.0.0.0:${PORT}`);
 });
 
 export default app;
