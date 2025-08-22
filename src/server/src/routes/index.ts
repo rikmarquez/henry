@@ -31,10 +31,66 @@ router.use('/branches', branchRoutes);
 // Health check
 router.get('/health', (req, res) => {
   res.json({
-    success: true,
-    message: 'Henry Diagnostics API is running',
+    status: 'healthy',
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
   });
+});
+
+// Debug endpoint for production debugging
+router.get('/debug', async (req, res) => {
+  try {
+    const { prisma } = await import('../services/prisma.service');
+    
+    // Check database connection
+    await prisma.$connect();
+    
+    // Get basic counts
+    const [userCount, branchCount, roleCount] = await Promise.all([
+      prisma.user.count().catch(() => 0),
+      prisma.branch.count().catch(() => 0),
+      prisma.role.count().catch(() => 0),
+    ]);
+
+    // Check admin user
+    let adminExists = false;
+    try {
+      const admin = await prisma.user.findUnique({
+        where: { email: 'admin@henrydiagnostics.com' }
+      });
+      adminExists = !!admin;
+    } catch (error) {
+      adminExists = false;
+    }
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: {
+        connected: true,
+        counts: {
+          users: userCount,
+          branches: branchCount,
+          roles: roleCount,
+        },
+        adminUserExists: adminExists,
+      },
+      env: {
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasDbUrl: !!process.env.DATABASE_URL,
+        nodeEnv: process.env.NODE_ENV,
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 export default router;
