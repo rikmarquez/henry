@@ -13,77 +13,71 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
-// DEBUG endpoint - simple test
-router.get('/test', async (req, res) => {
-  try {
-    console.log('🧪 TEST: Simple mechanics test endpoint called');
-    console.log('🧪 Query params:', req.query);
-    
-    const count = await prisma.mechanic.count();
-    console.log('🧪 Mechanics count:', count);
-    
-    res.json({
-      success: true,
-      message: 'Test endpoint working',
-      count,
-      query: req.query
-    });
-  } catch (error) {
-    console.error('🧪 TEST ERROR:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Test endpoint error',
-      error: error.message
-    });
-  }
-});
 
 // GET /api/mechanics - List mechanics with pagination and filters
 router.get(
   '/',
-  // authenticate,
-  // authorize(['clients'], ['read']),
-  // validateQuery(mechanicFilterSchema),
+  authenticate,
+  authorize(['clients'], ['read']),
+  validateQuery(mechanicFilterSchema),
   async (req, res) => {
     try {
       console.log('🔧 DEBUG: Mechanics endpoint called');
       console.log('🔧 Query params:', req.query);
       
-      // Simple response for testing
-      const mechanics = await prisma.mechanic.findMany({
-        orderBy: { name: 'asc' },
-        take: 10,
-        include: {
-          _count: {
-            select: {
-              services: true,
+      const { page = 1, limit = 10, search, isActive } = req.query;
+      console.log('🔧 Parsed values:', { page, limit, search, isActive });
+      
+      const offset = (page - 1) * limit;
+
+      const where = {
+        ...(search && {
+          name: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        }),
+        ...(isActive !== undefined && { isActive }),
+      };
+
+      const [mechanics, total] = await Promise.all([
+        prisma.mechanic.findMany({
+          where,
+          skip: offset,
+          take: limit,
+          orderBy: { name: 'asc' },
+          include: {
+            _count: {
+              select: {
+                services: true,
+              },
             },
           },
-        },
-      });
+        }),
+        prisma.mechanic.count({ where }),
+      ]);
 
-      console.log('🔧 Found mechanics:', mechanics.length);
+      const totalPages = Math.ceil(total / limit);
 
       res.json({
         success: true,
         data: {
           mechanics,
           pagination: {
-            page: 1,
-            limit: 10,
-            total: mechanics.length,
-            totalPages: 1,
-            hasNext: false,
-            hasPrev: false,
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1,
           },
         },
       });
     } catch (error) {
-      console.error('🔧 Error fetching mechanics:', error);
+      console.error('Error fetching mechanics:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: error.message,
       });
     }
   }
