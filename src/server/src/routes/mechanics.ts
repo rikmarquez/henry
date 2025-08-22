@@ -26,7 +26,7 @@ router.get('/debug-schema', (req, res) => {
     res.json({
       schemaTest: testResult,
       timestamp: new Date().toISOString(),
-      version: 'v4-moved-first',
+      version: 'v5-force-recompile',
       deployCheck: 'Railway should be using latest code'
     });
   } catch (error) {

@@ -28,7 +28,8 @@ export const mechanicFilterSchema = z.object({
   }),
 });
 
-// Types
+// FORCE RAILWAY RECOMPILATION - v2
+// Types  
 export type CreateMechanicInput = z.infer<typeof createMechanicSchema>;
 export type UpdateMechanicInput = z.infer<typeof updateMechanicSchema>;
 export type MechanicFilterInput = z.infer<typeof mechanicFilterSchema>;
