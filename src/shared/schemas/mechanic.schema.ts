@@ -14,7 +14,11 @@ export const updateMechanicSchema = createMechanicSchema.partial().extend({
 
 export const mechanicFilterSchema = paginationSchema.extend({
   search: z.string().optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.string().optional().transform((val) => {
+    if (val === 'true') return true;
+    if (val === 'false') return false;
+    return undefined;
+  }),
 });
 
 // Types
