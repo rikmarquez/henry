@@ -93,11 +93,23 @@ app.use('/api', routes);
 // Serve static files from client build in production
 if (config.nodeEnv === 'production') {
   const staticPath = path.join(__dirname, '../../client/dist');
+  console.log('🗂️  Static path:', staticPath);
+  console.log('🏠 __dirname:', __dirname);
+  
+  // Check if static path exists
+  const fs = require('fs');
+  console.log('📁 Static path exists:', fs.existsSync(staticPath));
+  if (fs.existsSync(staticPath)) {
+    console.log('📄 Files in static path:', fs.readdirSync(staticPath));
+  }
   
   app.use(express.static(staticPath));
   
   app.get('*', (req, res) => {
-    res.sendFile(path.join(staticPath, 'index.html'));
+    const indexPath = path.join(staticPath, 'index.html');
+    console.log('🎯 Serving index.html from:', indexPath);
+    console.log('📄 index.html exists:', fs.existsSync(indexPath));
+    res.sendFile(indexPath);
   });
 }
 
