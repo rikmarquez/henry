@@ -13,13 +13,29 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Debug endpoint to check schema version
+// Debug endpoint to check schema version - PUBLIC
 router.get('/debug-schema', (req, res) => {
-  res.json({
-    schema: mechanicFilterSchema._def,
-    timestamp: new Date().toISOString(),
-    version: 'v2-fixed'
-  });
+  try {
+    // Test the schema with sample data
+    const testResult = mechanicFilterSchema.safeParse({
+      page: "1",
+      limit: "10",
+      isActive: "true"
+    });
+    
+    res.json({
+      schemaTest: testResult,
+      timestamp: new Date().toISOString(),
+      version: 'v3-with-test',
+      deployCheck: 'Railway should be using latest code'
+    });
+  } catch (error) {
+    res.json({
+      error: error.message,
+      timestamp: new Date().toISOString(),
+      version: 'v3-error'
+    });
+  }
 });
 
 
