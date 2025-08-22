@@ -57,8 +57,15 @@ const createBranch = async (req: any, res: any) => {
 // Get branches with pagination
 const getBranches = async (req: any, res: any) => {
   try {
+    console.log('🔧 getBranches called with query:', req.query);
     const { page = 1, limit = 10, search, isActive } = req.query;
-    const skip = (page - 1) * limit;
+    
+    // Validate parameters
+    const parsedPage = parseInt(page as string) || 1;
+    const parsedLimit = Math.min(parseInt(limit as string) || 10, 100); // Max 100 items
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    console.log('🔧 Parsed params:', { parsedPage, parsedLimit, skip, search, isActive });
 
     const where: any = {};
 
@@ -75,46 +82,44 @@ const getBranches = async (req: any, res: any) => {
       where.isActive = isActive;
     }
 
-    const [branches, totalCount] = await Promise.all([
-      prisma.branch.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          _count: {
-            select: {
-              users: true,
-              mechanics: true,
-              services: true,
-              appointments: true,
-            }
-          }
-        }
-      }),
-      prisma.branch.count({ where }),
-    ]);
+    console.log('🔧 Where clause:', JSON.stringify(where, null, 2));
 
-    const totalPages = Math.ceil(totalCount / limit);
+    // First try simple query without counts to diagnose
+    const branches = await prisma.branch.findMany({
+      where,
+      skip,
+      take: parsedLimit,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    console.log('🔧 Found branches:', branches.length);
+
+    // Then get count separately
+    const totalCount = await prisma.branch.count({ where });
+    console.log('🔧 Total count:', totalCount);
+
+    const totalPages = Math.ceil(totalCount / parsedLimit);
 
     res.json({
       success: true,
       data: {
         branches,
         pagination: {
-          currentPage: page,
+          currentPage: parsedPage,
           totalPages,
           totalCount,
-          limit,
+          limit: parsedLimit,
         },
       },
     });
   } catch (error: any) {
-    console.error('Error getting branches:', error);
+    console.error('❌ Error getting branches:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
       error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
