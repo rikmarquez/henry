@@ -18,15 +18,11 @@ const prisma = new PrismaClient();
 router.get(
   '/',
   authenticate,
-  authorize(['services'], ['read']),
+  authorize(['mechanics'], ['read']),
   validateQuery(mechanicFilterSchema),
   async (req, res) => {
     try {
-      console.log('🔧 DEBUG: Mechanics endpoint called');
-      console.log('🔧 Query params:', req.query);
-      
       const { page = 1, limit = 10, search, isActive } = req.query;
-      console.log('🔧 Parsed values:', { page, limit, search, isActive });
       
       const offset = (page - 1) * limit;
 
@@ -87,7 +83,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize(['services'], ['read']),
+  authorize(['mechanics'], ['read']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {
@@ -143,7 +139,7 @@ router.get(
 router.post(
   '/',
   authenticate,
-  authorize(['services'], ['create']),
+  authorize(['mechanics'], ['create']),
   validate(createMechanicSchema),
   async (req, res) => {
     try {
@@ -177,7 +173,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize(['services'], ['update']),
+  authorize(['mechanics'], ['update']),
   validateParams(idParamSchema),
   validate(updateMechanicSchema.omit({ id: true })),
   async (req, res) => {
@@ -220,7 +216,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize(['services'], ['delete']),
+  authorize(['mechanics'], ['delete']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {
@@ -280,7 +276,7 @@ router.delete(
 router.post(
   '/:id/activate',
   authenticate,
-  authorize(['services'], ['update']),
+  authorize(['mechanics'], ['update']),
   validateParams(idParamSchema),
   async (req, res) => {
     try {

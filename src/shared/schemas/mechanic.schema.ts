@@ -12,7 +12,14 @@ export const updateMechanicSchema = createMechanicSchema.partial().extend({
   id: idSchema,
 });
 
-export const mechanicFilterSchema = paginationSchema.extend({
+export const mechanicFilterSchema = z.object({
+  page: z.string().optional().transform(val => val ? parseInt(val) : 1),
+  limit: z.string().optional().transform(val => val ? parseInt(val) : 10),
+  sortBy: z.string().optional(),
+  sortOrder: z.string().optional().transform(val => {
+    if (val === 'asc' || val === 'desc') return val;
+    return 'desc';
+  }),
   search: z.string().optional(),
   isActive: z.string().optional().transform((val) => {
     if (val === 'true') return true;
