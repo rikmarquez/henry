@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/config';
 import routes from './routes';
@@ -91,10 +92,12 @@ app.use('/api', routes);
 
 // Serve static files from client build in production
 if (config.nodeEnv === 'production') {
-  app.use(express.static('../client/dist'));
+  const staticPath = path.join(__dirname, '../../client/dist');
+  
+  app.use(express.static(staticPath));
   
   app.get('*', (req, res) => {
-    res.sendFile('index.html', { root: '../client/dist' });
+    res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
 
