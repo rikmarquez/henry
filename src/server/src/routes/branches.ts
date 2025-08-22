@@ -97,7 +97,7 @@ const createBranch = async (req: any, res: any) => {
   }
 };
 
-// Get branches with pagination
+// Get branches with pagination - TEMPORARY RAW SQL FIX
 const getBranches = async (req: any, res: any) => {
   try {
     console.log('🔧 getBranches called with query:', req.query);
@@ -106,39 +106,49 @@ const getBranches = async (req: any, res: any) => {
     // Validate parameters
     const parsedPage = parseInt(page as string) || 1;
     const parsedLimit = Math.min(parseInt(limit as string) || 10, 100); // Max 100 items
-    const skip = (parsedPage - 1) * parsedLimit;
+    const offset = (parsedPage - 1) * parsedLimit;
 
-    console.log('🔧 Parsed params:', { parsedPage, parsedLimit, skip, search, isActive });
+    console.log('🔧 Parsed params:', { parsedPage, parsedLimit, offset, search, isActive });
 
-    const where: any = {};
+    // Build WHERE conditions for raw SQL
+    let whereConditions = ['1=1']; // Base condition
+    let params: any[] = [];
+    let paramIndex = 1;
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
-        { address: { contains: search, mode: 'insensitive' } },
-      ];
+      whereConditions.push(`(
+        name ILIKE $${paramIndex} OR 
+        code ILIKE $${paramIndex} OR 
+        city ILIKE $${paramIndex} OR 
+        address ILIKE $${paramIndex}
+      )`);
+      params.push(`%${search}%`);
+      paramIndex++;
     }
 
     if (isActive !== undefined) {
-      where.isActive = isActive;
+      whereConditions.push(`is_active = $${paramIndex}`);
+      params.push(isActive);
+      paramIndex++;
     }
 
-    console.log('🔧 Where clause:', JSON.stringify(where, null, 2));
+    const whereClause = whereConditions.join(' AND ');
+    console.log('🔧 WHERE clause:', whereClause);
+    console.log('🔧 Params:', params);
 
-    // First try simple query without counts to diagnose
-    const branches = await prisma.branch.findMany({
-      where,
-      skip,
-      take: parsedLimit,
-      orderBy: { createdAt: 'desc' },
-    });
+    // Simplified: Get all branches first, then paginate in memory for now
+    const branches = await prisma.$queryRaw`
+      SELECT id, name, code, address, phone, email, city, is_active, created_at, updated_at
+      FROM branches
+      ORDER BY created_at DESC
+    `;
+    console.log('🔧 Found branches:', Array.isArray(branches) ? branches.length : 0);
 
-    console.log('🔧 Found branches:', branches.length);
-
-    // Then get count separately
-    const totalCount = await prisma.branch.count({ where });
+    // Apply pagination in memory
+    const startIdx = offset;
+    const endIdx = startIdx + parsedLimit;
+    const paginatedBranches = Array.isArray(branches) ? branches.slice(startIdx, endIdx) : [];
+    const totalCount = Array.isArray(branches) ? branches.length : 0;
     console.log('🔧 Total count:', totalCount);
 
     const totalPages = Math.ceil(totalCount / parsedLimit);
@@ -146,7 +156,7 @@ const getBranches = async (req: any, res: any) => {
     res.json({
       success: true,
       data: {
-        branches,
+        branches: paginatedBranches,
         pagination: {
           currentPage: parsedPage,
           totalPages,
