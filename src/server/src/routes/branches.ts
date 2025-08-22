@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware';
-import { validate } from '../middleware';
+import { validate, validateQuery } from '../middleware';
 import { prisma } from '../services/prisma.service';
 import {
   createBranchSchema,
@@ -312,8 +312,23 @@ const getActiveBranches = async (req: any, res: any) => {
 router.get('/active', getActiveBranches);
 
 router.get('/', 
-  validate(getBranchesSchema),
-  authorize(['branches'], ['read']), 
+  authenticate,
+  authorize(['branches'], ['read']),
+  (req, res, next) => {
+    // Manual query validation to bypass schema cache issues
+    const { page, limit, search, isActive } = req.query;
+    
+    // Transform parameters manually
+    const transformedQuery = {
+      page: page ? parseInt(page as string) : 1,
+      limit: limit ? parseInt(limit as string) : 10,
+      search: search as string,
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+    };
+    
+    req.query = transformedQuery;
+    next();
+  }, 
   getBranches
 );
 

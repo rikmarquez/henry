@@ -60,14 +60,12 @@ const updateBranchSchema = z.object({
 });
 
 const getBranchesSchema = z.object({
-  query: z.object({
-    page: z.string().regex(/^\d+$/).transform(Number).optional(),
-    limit: z.string().regex(/^\d+$/).transform(Number).optional(),
-    search: z.string().max(100).optional(),
-    isActive: z.string()
-      .transform((val) => val === 'true')
-      .optional(),
-  })
+  page: z.string().regex(/^\d+$/).transform(Number).optional(),
+  limit: z.string().regex(/^\d+$/).transform(Number).optional(),
+  search: z.string().max(100).optional(),
+  isActive: z.string()
+    .transform((val) => val === 'true')
+    .optional(),
 });
 
 const getBranchByIdSchema = z.object({
