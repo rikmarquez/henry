@@ -16,6 +16,7 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import ServicesPage from './pages/ServicesPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
 import BranchesPage from './pages/BranchesPage';
+import UsersPage from './pages/UsersPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -107,7 +108,15 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* Ruta solo para administradores */}
+          {/* Rutas solo para administradores */}
+          <Route path="/users" element={
+            <AdminRoute>
+              <Layout>
+                <UsersPage />
+              </Layout>
+            </AdminRoute>
+          } />
+          
           <Route path="/branches" element={
             <AdminRoute>
               <Layout>

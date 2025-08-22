@@ -45,6 +45,7 @@ export default function Layout({ children }: LayoutProps) {
 
     // Add admin-only routes
     if (isAdmin) {
+      baseNavigation.push({ name: 'Usuarios', href: '/users', icon: Users });
       baseNavigation.push({ name: 'Sucursales', href: '/branches', icon: Building2 });
     }
 
