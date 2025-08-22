@@ -16,8 +16,27 @@ const prisma = new PrismaClient();
 // Debug endpoint to check schema version - PUBLIC (must be FIRST)
 router.get('/debug-schema', (req, res) => {
   try {
-    // Test the schema with sample data
-    const testResult = mechanicFilterSchema.safeParse({
+    // Import fresh schema to bypass any cache
+    const { z } = require('zod');
+    
+    // Recreate schema directly here to bypass cache
+    const testSchema = z.object({
+      page: z.string().optional().transform(val => val ? parseInt(val) : 1),
+      limit: z.string().optional().transform(val => val ? parseInt(val) : 10),
+      sortBy: z.string().optional(),
+      sortOrder: z.string().optional().transform(val => {
+        if (val === 'asc' || val === 'desc') return val;
+        return 'desc';
+      }),
+      search: z.string().optional(),
+      isActive: z.string().optional().transform((val) => {
+        if (val === 'true') return true;
+        if (val === 'false') return false;
+        return undefined;
+      }),
+    });
+    
+    const testResult = testSchema.safeParse({
       page: "1",
       limit: "10",
       isActive: "true"
@@ -26,14 +45,14 @@ router.get('/debug-schema', (req, res) => {
     res.json({
       schemaTest: testResult,
       timestamp: new Date().toISOString(),
-      version: 'v5-force-recompile',
-      deployCheck: 'Railway should be using latest code'
+      version: 'v6-direct-schema',
+      deployCheck: 'Direct schema creation to bypass cache'
     });
   } catch (error) {
     res.json({
       error: error.message,
       timestamp: new Date().toISOString(),
-      version: 'v4-error'
+      version: 'v6-error'
     });
   }
 });
