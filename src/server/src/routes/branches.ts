@@ -352,26 +352,27 @@ const deleteBranch = async (req: any, res: any) => {
   }
 };
 
-// Get all active branches for dropdowns
+// Get all active branches for dropdowns - RAW SQL FIX
 const getActiveBranches = async (req: any, res: any) => {
   try {
-    const branches = await prisma.branch.findMany({
-      where: { isActive: true },
-      select: {
-        id: true,
-        name: true,
-        code: true,
-        city: true,
-      },
-      orderBy: { name: 'asc' }
-    });
+    console.log('🔧 Getting active branches...');
+    
+    const rawBranches = await prisma.$queryRaw`
+      SELECT id, name, code, city
+      FROM branches
+      WHERE is_active = true
+      ORDER BY name ASC
+    `;
+
+    const branches = Array.isArray(rawBranches) ? rawBranches : [];
+    console.log('🔧 Found active branches:', branches.length);
 
     res.json({
       success: true,
       data: branches,
     });
   } catch (error: any) {
-    console.error('Error getting active branches:', error);
+    console.error('❌ Error getting active branches:', error);
     res.status(500).json({
       success: false,
       message: 'Error interno del servidor',
