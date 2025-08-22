@@ -11,6 +11,7 @@ import ClientsPage from './pages/ClientsPage';
 import VehiclesPage from './pages/VehiclesPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ServicesPage from './pages/ServicesPage';
+import OpportunitiesPage from './pages/OpportunitiesPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -81,6 +82,14 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <ServicesPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/opportunities" element={
+            <ProtectedRoute>
+              <Layout>
+                <OpportunitiesPage />
               </Layout>
             </ProtectedRoute>
           } />

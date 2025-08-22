@@ -28,8 +28,7 @@
   },
   "include": [
     "src/**/*",
-    "../shared/**/*",
-    "prisma/**/*"
+    "../shared/**/*"
   ],
   "exclude": [
     "node_modules",

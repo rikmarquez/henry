@@ -16,7 +16,7 @@ const configSchema = z.object({
 
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || '3002',
+  port: process.env.PORT || '3005',
   databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:uFXiUmoRNqxdKctJesvlRiLiOXuWTQac@shortline.proxy.rlwy.net:52806/henry',
   jwtSecret: process.env.JWT_SECRET || 'your_super_secret_jwt_key_here_min_32_chars_development',
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'your_refresh_secret_here_min_32_chars_development',
@@ -25,7 +25,7 @@ const env = {
   bcryptSaltRounds: process.env.BCRYPT_SALT_ROUNDS || 12,
   rateLimitWindowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
   rateLimitMaxRequests: process.env.RATE_LIMIT_MAX_REQUESTS || 100,
-  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5176,http://localhost:5177,http://localhost:5178',
+  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180,http://localhost:5181,http://localhost:5200,http://localhost:5201',
 };
 
 export const config = configSchema.parse(env);

@@ -178,7 +178,7 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
 
   // Helper function to ensure arrays are valid
-  const ensureArray = <T>(data: any): T[] => Array.isArray(data) ? data : [];
+  const ensureArray = <T,>(data: any): T[] => Array.isArray(data) ? data : [];
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

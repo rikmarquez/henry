@@ -508,6 +508,122 @@ router.post(
   }
 );
 
+// POST /api/opportunities/:id/convert-to-appointment - Convert opportunity directly to appointment
+router.post(
+  '/:id/convert-to-appointment',
+  authenticate,
+  authorize(['opportunities'], ['update']),
+  validateParams(idParamSchema),
+  validate(z.object({
+    scheduledDate: z.string().min(1, 'Fecha y hora son requeridas'),
+    notes: z.string().optional(),
+  })),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { scheduledDate, notes } = req.body;
+      const userId = (req as any).user.userId;
+
+      const existingOpportunity = await prisma.opportunity.findUnique({
+        where: { id: parseInt(id) },
+        include: {
+          client: true,
+          vehicle: true,
+        },
+      });
+
+      if (!existingOpportunity) {
+        return res.status(404).json({
+          success: false,
+          message: 'Oportunidad no encontrada',
+        });
+      }
+
+      if (existingOpportunity.status === 'converted') {
+        return res.status(400).json({
+          success: false,
+          message: 'La oportunidad ya ha sido convertida',
+        });
+      }
+
+      if (existingOpportunity.status === 'declined') {
+        return res.status(400).json({
+          success: false,
+          message: 'No se puede convertir una oportunidad rechazada',
+        });
+      }
+
+      // Check for conflicting appointments (same vehicle, same day, not cancelled)
+      const conflictingAppointment = await prisma.appointment.findFirst({
+        where: {
+          vehicleId: existingOpportunity.vehicleId,
+          scheduledDate: {
+            gte: new Date(new Date(scheduledDate).setHours(0, 0, 0, 0)),
+            lt: new Date(new Date(scheduledDate).setHours(23, 59, 59, 999)),
+          },
+          status: {
+            not: 'cancelled',
+          },
+        },
+      });
+
+      if (conflictingAppointment) {
+        return res.status(400).json({
+          success: false,
+          message: 'Ya existe una cita para este vehículo en la fecha seleccionada',
+        });
+      }
+
+      // Use transaction to ensure both operations succeed or both fail
+      const result = await prisma.$transaction(async (tx) => {
+        // Update opportunity status to converted
+        const updatedOpportunity = await tx.opportunity.update({
+          where: { id: parseInt(id) },
+          data: { status: 'converted' },
+        });
+
+        // Create appointment with pre-loaded data from opportunity
+        const appointment = await tx.appointment.create({
+          data: {
+            clientId: existingOpportunity.clientId,
+            vehicleId: existingOpportunity.vehicleId,
+            opportunityId: parseInt(id),
+            scheduledDate: new Date(scheduledDate),
+            notes: notes || `Cita generada desde oportunidad: ${existingOpportunity.description}`,
+            isFromOpportunity: true,
+            createdBy: userId,
+          },
+          include: {
+            client: {
+              select: { id: true, name: true, phone: true, email: true },
+            },
+            vehicle: {
+              select: { id: true, plate: true, brand: true, model: true, year: true },
+            },
+            opportunity: {
+              select: { id: true, type: true, description: true },
+            },
+          },
+        });
+
+        return { opportunity: updatedOpportunity, appointment };
+      });
+
+      res.status(201).json({
+        success: true,
+        data: result.appointment,
+        message: 'Oportunidad convertida en cita exitosamente',
+      });
+    } catch (error) {
+      console.error('Error converting opportunity to appointment:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+      });
+    }
+  }
+);
+
 // GET /api/opportunities/by-client/:clientId - Get opportunities by client
 router.get(
   '/by-client/:clientId',

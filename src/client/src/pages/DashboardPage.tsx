@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../services/api';
-import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle } from 'lucide-react';
+import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight } from 'lucide-react';
 
 interface DashboardData {
   overview: {
@@ -30,6 +30,14 @@ interface DashboardData {
     status: { name: string; color: string };
     totalAmount: number;
     createdAt: string;
+  }>;
+  upcomingOpportunities: Array<{
+    id: number;
+    type: string;
+    description: string;
+    followUpDate: string;
+    client: { name: string };
+    vehicle: { plate: string; brand: string; model: string };
   }>;
 }
 
@@ -218,64 +226,147 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Servicios Recientes */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Servicios Recientes</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vehículo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {dashboardData?.recentServices?.map((service) => (
-                  <tr key={service.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {service.client.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {service.vehicle.brand} {service.vehicle.model} ({service.vehicle.plate})
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white"
-                        style={{ backgroundColor: service.status.color }}
-                      >
-                        {service.status.name}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatCurrency(service.totalAmount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(service.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {(!dashboardData?.recentServices || dashboardData.recentServices.length === 0) && (
-              <div className="p-8 text-center text-gray-500">
-                No hay servicios recientes para mostrar
+        {/* Grid para Servicios Recientes y Oportunidades Próximas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Oportunidades Próximas */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-orange-600" />
+                  Seguimientos Próximos
+                </h2>
+                <span className="text-sm text-orange-600 font-medium">
+                  {dashboardData?.upcomingOpportunities?.length || 0} requieren atención
+                </span>
               </div>
-            )}
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {dashboardData?.upcomingOpportunities && dashboardData.upcomingOpportunities.length > 0 ? (
+                <div className="space-y-4 p-6">
+                  {dashboardData.upcomingOpportunities.map((opportunity) => {
+                    const followUpDate = new Date(opportunity.followUpDate);
+                    const today = new Date();
+                    const diffTime = followUpDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const isOverdue = diffDays < 0;
+                    const isDueToday = diffDays === 0;
+                    const isDueSoon = diffDays > 0 && diffDays <= 7;
+                    
+                    return (
+                      <div key={opportunity.id} className={`border rounded-lg p-4 ${
+                        isOverdue ? 'border-red-200 bg-red-50' : 
+                        isDueToday ? 'border-orange-200 bg-orange-50' :
+                        isDueSoon ? 'border-yellow-200 bg-yellow-50' : 
+                        'border-gray-200 bg-gray-50'
+                      }`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Clock className={`h-4 w-4 ${
+                                isOverdue ? 'text-red-600' : 
+                                isDueToday ? 'text-orange-600' :
+                                'text-yellow-600'
+                              }`} />
+                              <span className="font-medium text-gray-900">
+                                {opportunity.client.name}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {opportunity.vehicle.plate} - {opportunity.vehicle.brand} {opportunity.vehicle.model}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-2">
+                              <span className="font-medium">{opportunity.type}:</span> {opportunity.description}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs">
+                              <span className={`font-medium ${
+                                isOverdue ? 'text-red-600' : 
+                                isDueToday ? 'text-orange-600' :
+                                'text-yellow-600'
+                              }`}>
+                                {isOverdue ? `Vencido hace ${Math.abs(diffDays)} días` :
+                                 isDueToday ? 'Vence hoy' :
+                                 `Vence en ${diffDays} días`}
+                              </span>
+                              <span className="text-gray-500">
+                                {followUpDate.toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <button className="ml-3 bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors">
+                            <ArrowRight className="h-3 w-3" />
+                            Contactar
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  <Target className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p>No hay oportunidades próximas</p>
+                  <p className="text-sm mt-1">Todas las oportunidades están al día</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Servicios Recientes */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Wrench className="h-5 w-5 text-blue-600" />
+                Servicios Recientes
+              </h2>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {dashboardData?.recentServices && dashboardData.recentServices.length > 0 ? (
+                <div className="divide-y divide-gray-200">
+                  {dashboardData.recentServices.map((service) => (
+                    <div key={service.id} className="p-4 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-gray-900">
+                              {service.client.name}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {service.vehicle.brand} {service.vehicle.model}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm text-gray-600">
+                              {service.vehicle.plate}
+                            </span>
+                            <span
+                              className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white"
+                              style={{ backgroundColor: service.status.color }}
+                            >
+                              {service.status.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatCurrency(service.totalAmount)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(service.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  <Wrench className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p>No hay servicios recientes</p>
+                  <p className="text-sm mt-1">Los servicios aparecerán aquí</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

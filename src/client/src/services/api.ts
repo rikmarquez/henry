@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configuración base del cliente HTTP
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3002/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3005/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
