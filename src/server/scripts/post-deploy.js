@@ -14,8 +14,18 @@ async function main() {
   console.log('🚀 Running post-deployment setup...');
 
   try {
+    // Test connection first
+    await prisma.$connect();
+    console.log('✅ Database connected');
+
     // Check if branches table exists and has data
-    const branchCount = await prisma.branch.count();
+    let branchCount = 0;
+    try {
+      branchCount = await prisma.branch.count();
+    } catch (error) {
+      console.log('⚠️ Branch table not accessible, skipping branch check');
+      branchCount = 0;
+    }
     
     if (branchCount === 0) {
       console.log('📋 Creating default branch...');
@@ -36,7 +46,13 @@ async function main() {
     }
 
     // Check if roles exist
-    const roleCount = await prisma.role.count();
+    let roleCount = 0;
+    try {
+      roleCount = await prisma.role.count();
+    } catch (error) {
+      console.log('⚠️ Role table not accessible, skipping role check');
+      roleCount = 0;
+    }
     
     if (roleCount === 0) {
       console.log('👥 Creating roles...');
@@ -92,7 +108,13 @@ async function main() {
     }
 
     // Check if work statuses exist
-    const statusCount = await prisma.workStatus.count();
+    let statusCount = 0;
+    try {
+      statusCount = await prisma.workStatus.count();
+    } catch (error) {
+      console.log('⚠️ WorkStatus table not accessible, skipping status check');
+      statusCount = 0;
+    }
     
     if (statusCount === 0) {
       console.log('📋 Creating work statuses...');
@@ -117,9 +139,14 @@ async function main() {
     }
 
     // Check if admin user exists
-    const adminUser = await prisma.user.findUnique({
-      where: { email: 'admin@henrydiagnostics.com' }
-    });
+    let adminUser = null;
+    try {
+      adminUser = await prisma.user.findUnique({
+        where: { email: 'admin@henrydiagnostics.com' }
+      });
+    } catch (error) {
+      console.log('⚠️ User table not accessible, skipping user check');
+    }
 
     if (!adminUser) {
       console.log('👤 Creating admin user...');
