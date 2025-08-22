@@ -5,8 +5,9 @@ const zod_1 = require("zod");
 const common_schema_1 = require("./common.schema");
 exports.createMechanicSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-    commissionPercentage: zod_1.z.number().min(0).max(100).default(0),
-    isActive: zod_1.z.boolean().default(true),
+    phone: zod_1.z.string().optional(),
+    commissionPercentage: zod_1.z.number().min(0).max(100).optional().default(0),
+    isActive: zod_1.z.boolean().optional().default(true),
 });
 exports.updateMechanicSchema = exports.createMechanicSchema.partial().extend({
     id: common_schema_1.idSchema,

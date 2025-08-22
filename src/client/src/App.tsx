@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
 import VehiclesPage from './pages/VehiclesPage';
+import MechanicsPage from './pages/MechanicsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ServicesPage from './pages/ServicesPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
@@ -66,6 +67,14 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <VehiclesPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/mechanics" element={
+            <ProtectedRoute>
+              <Layout>
+                <MechanicsPage />
               </Layout>
             </ProtectedRoute>
           } />

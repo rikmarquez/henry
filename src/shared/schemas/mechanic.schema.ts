@@ -3,8 +3,9 @@ import { idSchema, paginationSchema } from './common.schema';
 
 export const createMechanicSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  commissionPercentage: z.number().min(0).max(100).default(0),
-  isActive: z.boolean().default(true),
+  phone: z.string().optional(),
+  commissionPercentage: z.number().min(0).max(100).optional().default(0),
+  isActive: z.boolean().optional().default(true),
 });
 
 export const updateMechanicSchema = createMechanicSchema.partial().extend({

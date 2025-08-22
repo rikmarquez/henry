@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  Target
+  Target,
+  UserCog
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Clientes', href: '/clients', icon: Users },
   { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
   { name: 'Citas', href: '/appointments', icon: Calendar },
   { name: 'Servicios', href: '/services', icon: Wrench },
   { name: 'Oportunidades', href: '/opportunities', icon: Target },

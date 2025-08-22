@@ -1,13 +1,15 @@
 import { z } from 'zod';
 export declare const createMechanicSchema: z.ZodObject<{
     name: z.ZodString;
-    commissionPercentage: z.ZodDefault<z.ZodNumber>;
-    isActive: z.ZodDefault<z.ZodBoolean>;
+    phone: z.ZodOptional<z.ZodString>;
+    commissionPercentage: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    isActive: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
 export declare const updateMechanicSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
-    commissionPercentage: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
-    isActive: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
+    phone: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    commissionPercentage: z.ZodOptional<z.ZodDefault<z.ZodOptional<z.ZodNumber>>>;
+    isActive: z.ZodOptional<z.ZodDefault<z.ZodOptional<z.ZodBoolean>>>;
     id: z.ZodNumber;
 }, z.core.$strip>;
 export declare const mechanicFilterSchema: z.ZodObject<{

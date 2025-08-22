@@ -141,11 +141,12 @@ router.post(
   validate(createMechanicSchema),
   async (req, res) => {
     try {
-      const { name, commissionPercentage, isActive } = req.body;
+      const { name, phone, commissionPercentage, isActive } = req.body;
 
       const mechanic = await prisma.mechanic.create({
         data: {
           name,
+          phone,
           commissionPercentage,
           isActive,
         },

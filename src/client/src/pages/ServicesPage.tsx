@@ -225,6 +225,23 @@ export default function ServicesPage() {
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
 
+  // Auto-calculate mechanic commission
+  const watchMechanicId = createForm.watch('mechanicId');
+  const watchTotalAmount = createForm.watch('totalAmount');
+
+  useEffect(() => {
+    if (watchMechanicId && watchTotalAmount) {
+      const selectedMechanic = mechanics.find(m => m.id === watchMechanicId);
+      if (selectedMechanic) {
+        const commission = (watchTotalAmount * selectedMechanic.commissionPercentage) / 100;
+        createForm.setValue('mechanicCommission', Number(commission.toFixed(2)));
+      }
+    } else if (!watchMechanicId) {
+      // Clear commission if no mechanic selected
+      createForm.setValue('mechanicCommission', 0);
+    }
+  }, [watchMechanicId, watchTotalAmount, mechanics, createForm]);
+
   // Load data
   useEffect(() => {
     loadServices();
@@ -1119,7 +1136,7 @@ export default function ServicesPage() {
                 {/* Mechanic Commission */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comisión Mecánico
+                    Comisión Mecánico <span className="text-gray-500 text-xs">(calculada automáticamente)</span>
                   </label>
                   <input
                     {...createForm.register('mechanicCommission', { valueAsNumber: true })}
@@ -1127,7 +1144,8 @@ export default function ServicesPage() {
                     step="0.01"
                     min="0"
                     placeholder="0.00"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    readOnly
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -1485,7 +1503,7 @@ export default function ServicesPage() {
                 {/* Mechanic Commission */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comisión Mecánico
+                    Comisión Mecánico <span className="text-gray-500 text-xs">(calculada automáticamente)</span>
                   </label>
                   <input
                     {...createForm.register('mechanicCommission', { 
@@ -1495,7 +1513,8 @@ export default function ServicesPage() {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    readOnly
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
                   />
                 </div>
               </div>
