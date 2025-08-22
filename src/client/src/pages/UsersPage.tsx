@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import toast from 'react-hot-toast';
-import { useCurrentBranchId } from '../hooks/useBranch';
+import { useCurrentBranchId } from '../contexts/BranchContext';
 
 interface Role {
   id: number;
