@@ -80,7 +80,7 @@ export default function MechanicsPage() {
   });
 
   const updateMechanic = useMutation({
-    mutationFn: async ({ id, ...data }: { id: number; name?: string; phone?: string; commissionPercentage?: number }) => {
+    mutationFn: async ({ id, ...data }: { id: number; name?: string; phone?: string; commissionPercentage?: number; isActive?: boolean }) => {
       const response = await api.put(`/mechanics/${id}`, data);
       return response.data;
     },
@@ -129,12 +129,14 @@ export default function MechanicsPage() {
     const commissionPercentage = formData.get('commissionPercentage') 
       ? parseFloat(formData.get('commissionPercentage') as string) 
       : undefined;
+    const isActive = formData.get('isActive') === 'on';
 
     updateMechanic.mutate({ 
       id: selectedMechanic.id, 
       name, 
       phone, 
-      commissionPercentage 
+      commissionPercentage,
+      isActive
     });
   };
 
@@ -478,7 +480,7 @@ export default function MechanicsPage() {
                   className="w-full p-2 border border-gray-300 rounded"
                 />
               </div>
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Porcentaje de Comisión (%)
                 </label>
@@ -491,6 +493,17 @@ export default function MechanicsPage() {
                   defaultValue={selectedMechanic.commissionPercentage.toString()}
                   className="w-full p-2 border border-gray-300 rounded"
                 />
+              </div>
+              <div className="mb-6">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    defaultChecked={selectedMechanic.isActive}
+                    className="mr-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Mecánico activo</span>
+                </label>
               </div>
               <div className="flex justify-end space-x-3">
                 <button
