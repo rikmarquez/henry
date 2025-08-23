@@ -119,6 +119,8 @@ const getStatusIcon = (statusName: string) => {
     case 'Cotizado': return <FileText className="h-4 w-4" />;
     case 'EN PROCESO':
     case 'En Progreso': return <Play className="h-4 w-4" />;
+    case 'PERDIDO':
+    case 'Perdido': return <XCircle className="h-4 w-4" />;
     case 'TERMINADO':
     case 'Completado':
     case 'Entregado': return <CheckCircle className="h-4 w-4" />;
@@ -151,12 +153,13 @@ export default function ServicesKanban({
 }: ServicesKanbanProps) {
   const [draggedService, setDraggedService] = useState<Service | null>(null);
 
-  // Define las 4 columnas simplificadas (usando IDs reales de BD)
+  // Define las 5 columnas del flujo completo (usando IDs reales de BD)
   const simplifiedColumns = [
     { id: 1, name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
-    { id: 2, name: 'COTIZADO', color: 'bg-purple-50', orderIndex: 2 },
-    { id: 4, name: 'EN PROCESO', color: 'bg-orange-50', orderIndex: 3 },
-    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
+    { id: 2, name: 'COTIZADO', color: 'bg-yellow-50', orderIndex: 2 },
+    { id: 4, name: 'EN PROCESO', color: 'bg-purple-50', orderIndex: 3 },
+    { id: 6, name: 'PERDIDO', color: 'bg-gray-50', orderIndex: 4 },
+    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 5 }
   ];
 
   // Mapear servicios directamente por statusId
@@ -165,6 +168,7 @@ export default function ServicesKanban({
       case 1: return 1; // RECIBIDO
       case 2: return 2; // COTIZADO  
       case 4: return 4; // EN PROCESO
+      case 6: return 6; // PERDIDO
       case 5: return 5; // TERMINADO
       default: return 1; // default to RECIBIDO
     }

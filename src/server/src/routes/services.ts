@@ -101,13 +101,13 @@ router.get(
         }
       }
 
-      // Special filtering logic: Always filter TERMINADO services to today only
+      // Special filtering logic: Filter TERMINADO and PERDIDO services to today only
       const currentStatusId = statusId ? parseInt(statusId as string) : null;
       const today = new Date();
       const startOfToday = new Date(today.setHours(0, 0, 0, 0));
       const endOfToday = new Date(today.setHours(23, 59, 59, 999));
       
-      if (currentStatusId === 5) { // TERMINADO status specifically requested
+      if (currentStatusId === 5 || currentStatusId === 6) { // TERMINADO or PERDIDO status specifically requested
         where.AND = [
           ...(where.AND || []),
           {
@@ -118,17 +118,29 @@ router.get(
           },
         ];
       }
-      // For all other requests (including no status filter), apply automatic TERMINADO filtering
+      // For all other requests (including no status filter), apply automatic filtering
       else {
         const originalOR = where.OR || [];
         where.OR = [
           ...originalOR,
-          // Show all non-TERMINADO services
-          { statusId: { not: 5 } },
+          // Show all non-final services (not TERMINADO or PERDIDO)
+          { statusId: { notIn: [5, 6] } },
           // Show only today's TERMINADO services
           {
             AND: [
               { statusId: 5 },
+              {
+                OR: [
+                  { completedAt: { gte: startOfToday, lte: endOfToday } },
+                  { updatedAt: { gte: startOfToday, lte: endOfToday } },
+                ],
+              },
+            ],
+          },
+          // Show only today's PERDIDO services
+          {
+            AND: [
+              { statusId: 6 },
               {
                 OR: [
                   { completedAt: { gte: startOfToday, lte: endOfToday } },
