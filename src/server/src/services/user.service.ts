@@ -132,16 +132,18 @@ export class UserService {
       LIMIT $${whereParams.length + 1} OFFSET $${whereParams.length + 2}
     `;
 
+    // Now branch_id column exists, use proper JOIN query
+    console.log('🔧 Using branch JOIN query with real branch_id column...');
+    
     try {
-      console.log('🔧 Trying query with branch data...');
       rawUsers = await prisma.$queryRawUnsafe(usersWithBranchQuery, ...queryParams) as any[];
+      hasBranchColumn = true;
+      console.log('🔧 Branch JOIN successful!');
     } catch (error) {
-      console.log('🔧 Branch column not found, using fallback query');
+      console.log('🔧 Branch JOIN failed, using fallback:', error);
       hasBranchColumn = false;
       rawUsers = await prisma.$queryRawUnsafe(usersSimpleQuery, ...queryParams) as any[];
     }
-
-    console.log('🔧 Has branch column:', hasBranchColumn);
 
     const users = rawUsers.map(user => ({
       ...user,
