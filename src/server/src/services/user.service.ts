@@ -54,27 +54,67 @@ export class UserService {
 
     // Use raw SQL to avoid Prisma client cache issues
     let whereClause = 'WHERE 1=1';
-    const params: any[] = [];
+    const whereParams: any[] = [];
 
     if (search) {
-      whereClause += ` AND (u.name ILIKE $${params.length + 1} OR u.email ILIKE $${params.length + 1} OR u.phone ILIKE $${params.length + 1})`;
-      params.push(`%${search}%`);
+      whereClause += ` AND (u.name ILIKE $${whereParams.length + 1} OR u.email ILIKE $${whereParams.length + 1} OR u.phone ILIKE $${whereParams.length + 1})`;
+      whereParams.push(`%${search}%`);
     }
 
     if (roleId) {
-      whereClause += ` AND u.role_id = $${params.length + 1}`;
-      params.push(roleId);
+      whereClause += ` AND u.role_id = $${whereParams.length + 1}`;
+      whereParams.push(roleId);
     }
 
     if (typeof isActive === 'boolean') {
-      whereClause += ` AND u.is_active = $${params.length + 1}`;
-      params.push(isActive);
+      whereClause += ` AND u.is_active = $${whereParams.length + 1}`;
+      whereParams.push(isActive);
     }
 
     const orderClause = `ORDER BY u.${sortBy === 'createdAt' ? 'created_at' : sortBy} ${sortOrder}`;
 
-    // Get users with pagination - no branch_id column exists yet
-    const usersQuery = `
+    // First get total count
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM users u
+      ${whereClause}
+    `;
+    
+    const rawCount = await prisma.$queryRawUnsafe(countQuery, ...whereParams) as { total: bigint }[];
+    const total = Number(rawCount[0]?.total || 0);
+
+    // Build query params with pagination
+    const queryParams = [...whereParams, limit, skip];
+
+    // Execute queries with fallback for branch column
+    let rawUsers;
+    let hasBranchColumn = true;
+    
+    // Try with branch data first
+    const usersWithBranchQuery = `
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.phone,
+        u.is_active as "isActive",
+        u.branch_id as "branchId",
+        u.role_id as "roleId",
+        u.created_at as "createdAt",
+        u.updated_at as "updatedAt",
+        r.name as role_name,
+        b.name as branch_name,
+        b.code as branch_code
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      LEFT JOIN branches b ON u.branch_id = b.id
+      ${whereClause}
+      ${orderClause}
+      LIMIT $${whereParams.length + 1} OFFSET $${whereParams.length + 2}
+    `;
+    
+    // Fallback query without branch
+    const usersSimpleQuery = `
       SELECT 
         u.id,
         u.name,
@@ -89,36 +129,33 @@ export class UserService {
       JOIN roles r ON u.role_id = r.id
       ${whereClause}
       ${orderClause}
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      LIMIT $${whereParams.length + 1} OFFSET $${whereParams.length + 2}
     `;
 
-    // Get total count
-    const countQuery = `
-      SELECT COUNT(*) as total
-      FROM users u
-      ${whereClause}
-    `;
+    try {
+      console.log('🔧 Trying query with branch data...');
+      rawUsers = await prisma.$queryRawUnsafe(usersWithBranchQuery, ...queryParams) as any[];
+    } catch (error) {
+      console.log('🔧 Branch column not found, using fallback query');
+      hasBranchColumn = false;
+      rawUsers = await prisma.$queryRawUnsafe(usersSimpleQuery, ...queryParams) as any[];
+    }
 
-    params.push(limit, skip);
-
-    console.log('🔧 SQL Query:', usersQuery);
-    console.log('🔧 SQL Params:', params);
-
-    // Execute queries separately to handle parameters correctly
-    const rawUsers = await prisma.$queryRawUnsafe(usersQuery, ...params) as any[];
-    
-    // For count, use params without limit/offset
-    const countParams = params.slice(0, -2);
-    const rawCount = await prisma.$queryRawUnsafe(countQuery, ...countParams) as { total: bigint }[];
+    console.log('🔧 Has branch column:', hasBranchColumn);
 
     const users = rawUsers.map(user => ({
       ...user,
       role: { id: user.roleId, name: user.role_name },
+      branch: hasBranchColumn && user.branch_name ? { 
+        id: user.branchId, 
+        name: user.branch_name, 
+        code: user.branch_code 
+      } : null,
       // Remove raw fields
-      role_name: undefined
+      role_name: undefined,
+      branch_name: undefined,
+      branch_code: undefined
     }));
-
-    const total = Number(rawCount[0]?.total || 0);
 
     return {
       users,
