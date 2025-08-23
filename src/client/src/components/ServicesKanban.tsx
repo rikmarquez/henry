@@ -151,31 +151,32 @@ export default function ServicesKanban({
 }: ServicesKanbanProps) {
   const [draggedService, setDraggedService] = useState<Service | null>(null);
 
-  // Define las 4 columnas simplificadas
+  // Define las 4 columnas simplificadas (usando IDs reales de BD)
   const simplifiedColumns = [
-    { id: 'RECIBIDO', name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
-    { id: 'COTIZADO', name: 'COTIZADO', color: 'bg-purple-50', orderIndex: 2 },
-    { id: 'EN PROCESO', name: 'EN PROCESO', color: 'bg-orange-50', orderIndex: 3 },
-    { id: 'TERMINADO', name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
+    { id: 1, name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
+    { id: 2, name: 'COTIZADO', color: 'bg-purple-50', orderIndex: 2 },
+    { id: 4, name: 'EN PROCESO', color: 'bg-orange-50', orderIndex: 3 },
+    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
   ];
 
-  // Mapear estados existentes a columnas simplificadas
-  const mapStatusToColumn = (statusName: string) => {
-    const name = statusName.toLowerCase();
-    if (name.includes('recibido')) return 'RECIBIDO';
-    if (name.includes('cotizado') || name.includes('cotización')) return 'COTIZADO';  
-    if (name.includes('progreso') || name.includes('proceso') || name.includes('autorizado') || name.includes('diagnosticando')) return 'EN PROCESO';
-    if (name.includes('completado') || name.includes('entregado') || name.includes('terminado')) return 'TERMINADO';
-    return 'RECIBIDO'; // default
+  // Mapear servicios directamente por statusId
+  const mapServiceToColumn = (statusId: number) => {
+    switch (statusId) {
+      case 1: return 1; // RECIBIDO
+      case 2: return 2; // COTIZADO  
+      case 4: return 4; // EN PROCESO
+      case 5: return 5; // TERMINADO
+      default: return 1; // default to RECIBIDO
+    }
   };
 
   // Agrupar servicios por columnas simplificadas
   const servicesByColumn = simplifiedColumns.reduce((acc, column) => {
     acc[column.id] = services.filter(service => 
-      mapStatusToColumn(service.status.name) === column.id
+      mapServiceToColumn(service.statusId) === column.id
     );
     return acc;
-  }, {} as Record<string, Service[]>);
+  }, {} as Record<number, Service[]>);
 
   const handleDragStart = (e: React.DragEvent, service: Service) => {
     setDraggedService(service);
@@ -187,19 +188,13 @@ export default function ServicesKanban({
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, targetColumn: string) => {
+  const handleDrop = (e: React.DragEvent, targetColumn: number) => {
     e.preventDefault();
     if (draggedService) {
-      const currentColumn = mapStatusToColumn(draggedService.status.name);
+      const currentColumn = mapServiceToColumn(draggedService.statusId);
       if (currentColumn !== targetColumn) {
-        // Encontrar un estado apropiado para la nueva columna
-        const appropriateStatus = workStatuses.find(status => 
-          mapStatusToColumn(status.name) === targetColumn
-        );
-        
-        if (appropriateStatus) {
-          onStatusChange(draggedService.id, appropriateStatus.id);
-        }
+        // Target column is already the status ID we want
+        onStatusChange(draggedService.id, targetColumn);
       }
     }
     setDraggedService(null);

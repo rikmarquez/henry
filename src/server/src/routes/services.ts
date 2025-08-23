@@ -101,6 +101,45 @@ router.get(
         }
       }
 
+      // Special filtering logic: Always filter TERMINADO services to today only
+      const currentStatusId = statusId ? parseInt(statusId as string) : null;
+      const today = new Date();
+      const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+      const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+      
+      if (currentStatusId === 5) { // TERMINADO status specifically requested
+        where.AND = [
+          ...(where.AND || []),
+          {
+            OR: [
+              { completedAt: { gte: startOfToday, lte: endOfToday } },
+              { updatedAt: { gte: startOfToday, lte: endOfToday } },
+            ],
+          },
+        ];
+      }
+      // For all other requests (including no status filter), apply automatic TERMINADO filtering
+      else {
+        const originalOR = where.OR || [];
+        where.OR = [
+          ...originalOR,
+          // Show all non-TERMINADO services
+          { statusId: { not: 5 } },
+          // Show only today's TERMINADO services
+          {
+            AND: [
+              { statusId: 5 },
+              {
+                OR: [
+                  { completedAt: { gte: startOfToday, lte: endOfToday } },
+                  { updatedAt: { gte: startOfToday, lte: endOfToday } },
+                ],
+              },
+            ],
+          },
+        ];
+      }
+
       const [services, total] = await Promise.all([
         prisma.service.findMany({
           where,
