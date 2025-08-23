@@ -321,23 +321,21 @@ export default function MechanicsPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
+                          <button
+                            onClick={() => handleEdit(mechanic)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
                           {mechanic.isActive ? (
-                            <>
-                              <button
-                                onClick={() => handleEdit(mechanic)}
-                                className="text-blue-600 hover:text-blue-900"
-                                title="Editar"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(mechanic)}
-                                className="text-red-600 hover:text-red-900"
-                                title="Desactivar"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </>
+                            <button
+                              onClick={() => handleDelete(mechanic)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Desactivar"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           ) : (
                             <button
                               onClick={() => handleActivate(mechanic)}
