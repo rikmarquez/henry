@@ -2,8 +2,8 @@
 
 ## 📊 Estado General del Proyecto
 - **Proyecto:** Henry Diagnostics - Sistema de Gestión de Taller Mecánico
-- **Estado Actual:** MVP Completado + Estructura Multi-Taller En Desarrollo 🚧
-- **Fecha:** 2025-08-22
+- **Estado Actual:** MVP + Multi-Taller + Reportes Dashboard 100% COMPLETADOS ✅
+- **Fecha:** 2025-08-23
 - **Stack:** React + TypeScript + Node.js + Express + PostgreSQL + Prisma
 - **URLs:** Frontend: http://localhost:5178 | Backend: http://localhost:3002
 
@@ -601,11 +601,125 @@ const mapStatusToColumn = (statusName: string) => {
 - **Responsive**: ✅ Dashboard funciona en móvil y desktop
 - **Deploy Automático**: ✅ Push a Railway completado exitosamente
 
-**Última actualización:** 2025-08-23 17:20 UTC  
+## 🎉 **AVANCES CRÍTICOS SESIÓN 11 (2025-08-23)** 
+
+### 🔧 **MEJORAS Y FIXES EN MÓDULO MECÁNICOS - 100% COMPLETADO** ✅
+
+#### **🔥 Logro Principal: UX Mejorado en Gestión de Mecánicos**
+- **Problema Resuelto**: Formularios de edición incompletos y restricciones de edición innecesarias
+- **Solución**: Campos faltantes añadidos y permisos de edición flexibilizados
+- **Impacto**: Gestión completa de mecánicos con máxima flexibilidad
+
+#### **⚡ Mejoras Implementadas**
+- **Campo isActive en Edición**: Checkbox para activar/desactivar mecánicos directamente desde formulario
+- **Edición de Mecánicos Inactivos**: Removida restricción que impedía editar mecánicos inactivos  
+- **Doble Opción de Reactivación**: Botón rápido O formulario completo con actualización de datos
+- **UX Mejorado**: Flexibilidad total para casos como mecánicos que regresan después de meses
+
+### 💰 **FIX CRÍTICO: SERVICIOS TERMINADOS EN REPORTES - 100% COMPLETADO** ✅
+
+#### **🎯 Problema Crítico Identificado y Resuelto**
+- **Issue**: Servicios marcados como "TERMINADO" no aparecían en estadísticas de ingresos
+- **Root Cause**: Backend solo reconocía estado "Completado" pero seed usa estado "Terminado"
+- **Síntoma**: Dashboard mostraba ingresos totales como $0 a pesar de servicios completados
+
+#### **🛠️ Solución Técnica Aplicada**
+```typescript
+// ANTES (Incorrecto)
+...(newStatus.name === 'Completado' && {
+  completedAt: new Date(),
+}),
+
+// DESPUÉS (Correcto)
+...((newStatus.name === 'Completado' || newStatus.name === 'Terminado') && {
+  completedAt: new Date(),
+}),
+```
+
+#### **📊 Impacto del Fix**
+- ✅ **Servicios "TERMINADO"** → Establecen `completedAt` automáticamente
+- ✅ **Reportes Dashboard** → Incluyen todos los servicios completados  
+- ✅ **Estadísticas Tiempo Real** → Ingresos se actualizan instantáneamente
+- ✅ **Consistencia Total** → Tanto "Completado" como "Terminado" funcionan
+
+### 🐛 **RESOLUCIÓN ERROR GRÁFICOS: BIGINT SERIALIZATION - 100% COMPLETADO** ✅
+
+#### **🔥 Debugging Exhaustivo y Resolución Final**
+- **Problema**: Gráficos de reportes se colgaban con error 500 en `/api/reports/services`
+- **Proceso Debug**: Creados múltiples endpoints de diagnóstico paso a paso
+- **Error Identificado**: `"Do not know how to serialize a BigInt"`
+
+#### **🎯 Root Cause Técnico**
+```typescript
+// PROBLEMA: PostgreSQL devuelve BigInt que JavaScript no puede serializar
+const result = await prisma.$queryRaw`
+  SELECT SUM(total_amount) as revenue, COUNT(*) as services_count
+  FROM services WHERE...
+`;
+// revenue y services_count son BigInt → JSON.stringify() falla
+
+// SOLUCIÓN: Conversión explícita a Number
+const result = rawResult.map(item => ({
+  revenue: Number(item.revenue), // BigInt → Number
+  services_count: Number(item.services_count) // BigInt → Number  
+}));
+```
+
+#### **🛠️ Metodología de Debug Aplicada**
+1. **Endpoints Diagnóstico**: `/debug`, `/test`, `/auth-test`
+2. **Aislamiento de Problemas**: Separar routing, auth, authorization, queries
+3. **Testing Granular**: `/step1`, `/step2`, `/step3` para identificar query específica
+4. **Fix Targeted**: Conversión BigInt solo donde es necesario
+5. **Validación Completa**: Restauración de middlewares + testing end-to-end
+
+#### **📈 Resultado Final**
+- ✅ **Gráficos Funcionales**: "Servicios por estado" y "Productividad por mecánicos"
+- ✅ **Dashboard Completo**: Todas las visualizaciones Chart.js operativas
+- ✅ **Performance Óptimo**: Queries SQL raw con conversión BigInt eficiente
+- ✅ **Sistema Robusto**: Fallback mechanisms para consultas complejas
+
+## 🎓 **APRENDIZAJES CRÍTICOS SESIÓN 11: DEBUGGING SISTEMÁTICO**
+
+### **1. PostgreSQL BigInt en Node.js**
+```typescript
+// Problema común: PostgreSQL SUM() y COUNT() devuelven BigInt
+// JavaScript no puede JSON.stringify(BigInt) por defecto
+// Solución: Conversión explícita Number(bigIntValue)
+```
+**Impacto**: Error muy común en apps con queries agregadas PostgreSQL + Node.js
+
+### **2. Metodología Debug Sistemático**
+```typescript
+// 1. Aislar componentes: routing → auth → authorization → business logic
+// 2. Endpoints granulares: un test por función específica
+// 3. Logging progresivo: antes/después de cada operación crítica
+// 4. Fallback graceful: nunca dejar sistema completamente roto
+```
+**Aprendizaje**: Debug sistemático más eficiente que "shotgun debugging"
+
+### **3. Inconsistencias Naming en Schemas**
+```sql
+-- Problema: Estado se llama "Terminado" en seed pero código busca "Completado"
+-- Solución: Support para ambos nombres hasta standardizar
+WHERE newStatus.name IN ['Completado', 'Terminado']
+```
+**Impacto**: Documentar y mantener consistencia en naming conventions
+
+### **4. UX Permissions Design**
+```typescript
+// Principio: Máxima flexibilidad sin sacrificar seguridad
+// Permitir edición de items "inactivos" para casos de reactivación
+// Doble UI: botón rápido + formulario completo
+```
+
+**Última actualización:** 2025-08-23 19:45 UTC  
 **MVP Status:** ✅ 100% COMPLETADO  
 **Multi-Taller Status:** ✅ 100% COMPLETADO - Sistema empresarial escalable  
 **Gestión Usuarios Status:** ✅ 100% COMPLETADO - Administración completa implementada  
 **Sistema Multi-Branch Status:** ✅ 100% COMPLETADO - Arquitectura multi-tenant completamente funcional
 **Formato Mexicano Status:** ✅ 100% COMPLETADO - Números y fechas con estándar mexicano  
 **Vista Kanban Status:** ✅ 100% COMPLETADO - Tablero visual de flujo de trabajo implementado
-**Dashboard Reportes Status:** ✅ 100% COMPLETADO - Sistema de análisis empresarial con Chart.js
+**Dashboard Reportes Status:** ✅ 100% COMPLETADO - Sistema de análisis empresarial con Chart.js funcional
+**Mecánicos UX Status:** ✅ 100% COMPLETADO - Gestión completa con edición flexible  
+**Servicios Revenue Fix Status:** ✅ 100% COMPLETADO - Ingresos se calculan correctamente
+**Gráficos Reportes Status:** ✅ 100% COMPLETADO - Error BigInt resuelto, visualizaciones operativas

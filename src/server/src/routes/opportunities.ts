@@ -34,8 +34,11 @@ router.get(
         dateTo,
       } = req.query;
       const offset = (page - 1) * limit;
+      const branchId = (req as any).user.branchId;
 
-      const where: any = {};
+      const where: any = {
+        branchId: branchId,
+      };
 
       // Search filter (by client name, vehicle plate, type, description, or notes)
       if (search) {
@@ -181,9 +184,13 @@ router.get(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const branchId = (req as any).user.branchId;
 
       const opportunity = await prisma.opportunity.findUnique({
-        where: { id: parseInt(id) },
+        where: { 
+          id: parseInt(id),
+          branchId: branchId,
+        },
         include: {
           client: {
             select: { 
@@ -257,6 +264,7 @@ router.post(
         notes,
       } = req.body;
       const userId = (req as any).user.userId;
+      const branchId = (req as any).user.branchId;
 
       // Verify client exists
       const client = await prisma.client.findUnique({
@@ -307,6 +315,7 @@ router.post(
           status,
           notes,
           createdBy: userId,
+          branchId,
         },
         include: {
           client: {
@@ -347,9 +356,13 @@ router.put(
     try {
       const { id } = req.params;
       const updateData = req.body;
+      const branchId = (req as any).user.branchId;
 
       const existingOpportunity = await prisma.opportunity.findUnique({
-        where: { id: parseInt(id) },
+        where: { 
+          id: parseInt(id),
+          branchId: branchId,
+        },
       });
 
       if (!existingOpportunity) {
@@ -404,9 +417,13 @@ router.delete(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const branchId = (req as any).user.branchId;
 
       const existingOpportunity = await prisma.opportunity.findUnique({
-        where: { id: parseInt(id) },
+        where: { 
+          id: parseInt(id),
+          branchId: branchId,
+        },
       });
 
       if (!existingOpportunity) {
@@ -450,9 +467,13 @@ router.post(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const branchId = (req as any).user.branchId;
 
       const existingOpportunity = await prisma.opportunity.findUnique({
-        where: { id: parseInt(id) },
+        where: { 
+          id: parseInt(id),
+          branchId: branchId,
+        },
         include: {
           client: true,
           vehicle: true,
@@ -523,9 +544,13 @@ router.post(
       const { id } = req.params;
       const { scheduledDate, notes } = req.body;
       const userId = (req as any).user.userId;
+      const branchId = (req as any).user.branchId;
 
       const existingOpportunity = await prisma.opportunity.findUnique({
-        where: { id: parseInt(id) },
+        where: { 
+          id: parseInt(id),
+          branchId: branchId,
+        },
         include: {
           client: true,
           vehicle: true,
@@ -633,9 +658,13 @@ router.get(
   async (req, res) => {
     try {
       const { clientId } = req.params;
+      const branchId = (req as any).user.branchId;
 
       const opportunities = await prisma.opportunity.findMany({
-        where: { clientId: parseInt(clientId as string) },
+        where: { 
+          clientId: parseInt(clientId as string),
+          branchId: branchId,
+        },
         orderBy: { followUpDate: 'asc' },
         include: {
           vehicle: {
