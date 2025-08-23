@@ -558,8 +558,8 @@ router.put(
             ...(newStatus.name === 'En Progreso' && !existingService.startedAt && {
               startedAt: new Date(),
             }),
-            // Set completedAt if moving to "Completado"
-            ...(newStatus.name === 'Completado' && {
+            // Set completedAt if moving to "Completado" or "Terminado"
+            ...((newStatus.name === 'Completado' || newStatus.name === 'Terminado') && {
               completedAt: new Date(),
             }),
           },
@@ -774,15 +774,17 @@ router.post(
         });
       }
 
-      // Find the "Completado" status
+      // Find the "Completado" or "Terminado" status
       const completedStatus = await prisma.workStatus.findFirst({
-        where: { name: 'Completado' },
+        where: { 
+          name: { in: ['Completado', 'Terminado'] }
+        },
       });
 
       if (!completedStatus) {
         return res.status(500).json({
           success: false,
-          message: 'Estado "Completado" no encontrado en el sistema',
+          message: 'Estado "Completado" o "Terminado" no encontrado en el sistema',
         });
       }
 
