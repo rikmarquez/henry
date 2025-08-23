@@ -171,6 +171,31 @@ router.get(
   }
 );
 
+// GET /api/reports/services-test - Service reports without authorization (temporary)
+router.get(
+  '/services-test',
+  authenticate,
+  async (req, res) => {
+    try {
+      console.log('🔧 Services-test endpoint called - NO AUTHORIZATION');
+      const user = (req as any).user;
+      console.log('🔧 User:', user);
+      
+      res.json({
+        success: true,
+        message: 'Test endpoint working without authorization',
+        user: user
+      });
+    } catch (error) {
+      console.error('❌ Services-test error:', error);
+      res.status(500).json({
+        success: false,
+        error: (error as Error).message
+      });
+    }
+  }
+);
+
 // GET /api/reports/services - Service reports
 router.get(
   '/services',
