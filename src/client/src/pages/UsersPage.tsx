@@ -196,7 +196,7 @@ export default function UsersPage() {
       email: user.email,
       password: '',
       roleId: user.role.id,
-      branchId: user.branch.id,
+      branchId: user.branch?.id || 1, // Default branch if not assigned
     });
     setIsEditModalOpen(true);
   };
@@ -306,8 +306,12 @@ export default function UsersPage() {
                   <div className="flex items-center">
                     <Building2 className="h-4 w-4 mr-2 text-gray-400" />
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{user.branch.name}</div>
-                      <div className="text-xs text-gray-500">{user.branch.code}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.branch?.name || 'Sin sucursal'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {user.branch?.code || 'N/A'}
+                      </div>
                     </div>
                   </div>
                 </td>
