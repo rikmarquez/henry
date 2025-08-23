@@ -315,7 +315,7 @@ export default function VehiclesPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                        {new Date(vehicle.createdAt).toLocaleDateString('es-CO')}
+                        {new Date(vehicle.createdAt).toLocaleDateString('es-MX')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -469,11 +469,9 @@ export default function VehiclesPage() {
               <div><strong>Color:</strong> {selectedVehicle.color || 'No especificado'}</div>
               <div><strong>Combustible:</strong> {selectedVehicle.fuelType || 'No especificado'}</div>
               <div><strong>Transmisión:</strong> {selectedVehicle.transmission || 'No especificado'}</div>
-              <div><strong>Motor:</strong> {selectedVehicle.engineNumber || 'No especificado'}</div>
-              <div className="md:col-span-2"><strong>Chasis:</strong> {selectedVehicle.chassisNumber || 'No especificado'}</div>
               <div className="md:col-span-2"><strong>Propietario:</strong> {selectedVehicle.client.name}</div>
               <div className="md:col-span-2">
-                <strong>Fecha registro:</strong> {new Date(selectedVehicle.createdAt).toLocaleDateString('es-CO')}
+                <strong>Fecha registro:</strong> {new Date(selectedVehicle.createdAt).toLocaleDateString('es-MX')}
               </div>
             </div>
             <button

@@ -12,8 +12,6 @@ const vehicleSchema = z.object({
   model: z.string().min(2, 'El modelo debe tener al menos 2 caracteres'),
   year: z.number().min(1900, 'Año inválido').max(new Date().getFullYear() + 1, 'Año inválido'),
   color: z.string().optional(),
-  engineNumber: z.string().optional(),
-  chassisNumber: z.string().optional(),
   fuelType: z.enum(['Gasolina', 'Diesel', 'Híbrido', 'Eléctrico', 'GLP', 'GNC']).optional(),
   transmission: z.enum(['Manual', 'Automática', 'CVT']).optional(),
   clientId: z.number().min(1, 'Debe seleccionar un cliente'),
@@ -87,8 +85,6 @@ export default function VehicleForm({
       model: '',
       year: new Date().getFullYear(),
       color: '',
-      engineNumber: '',
-      chassisNumber: '',
       fuelType: '',
       transmission: '',
       clientId: 0,
@@ -107,8 +103,6 @@ export default function VehicleForm({
         model: vehicle.model || '',
         year: vehicle.year || new Date().getFullYear(),
         color: vehicle.color || '',
-        engineNumber: vehicle.engineNumber || '',
-        chassisNumber: vehicle.chassisNumber || '',
         fuelType: (vehicle.fuelType as any) || '',
         transmission: (vehicle.transmission as any) || '',
         clientId: vehicle.client?.id || 0,
@@ -120,8 +114,6 @@ export default function VehicleForm({
         model: '',
         year: new Date().getFullYear(),
         color: '',
-        engineNumber: '',
-        chassisNumber: '',
         fuelType: '',
         transmission: '',
         clientId: preselectedClientId,
@@ -134,8 +126,6 @@ export default function VehicleForm({
         model: '',
         year: new Date().getFullYear(),
         color: '',
-        engineNumber: '',
-        chassisNumber: '',
         fuelType: '',
         transmission: '',
         clientId: 0,
@@ -149,8 +139,6 @@ export default function VehicleForm({
       const payload = {
         ...data,
         color: data.color || null,
-        engineNumber: data.engineNumber || null,
-        chassisNumber: data.chassisNumber || null,
         fuelType: data.fuelType || null,
         transmission: data.transmission || null,
       };
@@ -176,8 +164,6 @@ export default function VehicleForm({
       const payload = {
         ...data,
         color: data.color || null,
-        engineNumber: data.engineNumber || null,
-        chassisNumber: data.chassisNumber || null,
         fuelType: data.fuelType || null,
         transmission: data.transmission || null,
       };
@@ -388,36 +374,8 @@ export default function VehicleForm({
               </select>
             </div>
 
-            {/* Número de motor */}
-            <div>
-              <label htmlFor="engineNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                Número de motor
-              </label>
-              <input
-                type="text"
-                id="engineNumber"
-                {...register('engineNumber')}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Motor123456"
-                disabled={isLoading}
-              />
-            </div>
           </div>
 
-          {/* Número de chasis */}
-          <div>
-            <label htmlFor="chassisNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Número de chasis
-            </label>
-            <input
-              type="text"
-              id="chassisNumber"
-              {...register('chassisNumber')}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Chasis123456789"
-              disabled={isLoading}
-            />
-          </div>
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t">

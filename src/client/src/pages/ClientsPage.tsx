@@ -414,7 +414,7 @@ export default function ClientsPage() {
                   </button>
                 )}
               </div>
-              <div><strong>Fecha registro:</strong> {new Date(selectedClient.createdAt).toLocaleDateString('es-CO')}</div>
+              <div><strong>Fecha registro:</strong> {new Date(selectedClient.createdAt).toLocaleDateString('es-MX')}</div>
             </div>
             <button
               onClick={() => setShowDetailsModal(false)}

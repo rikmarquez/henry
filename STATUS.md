@@ -338,7 +338,189 @@ authorize(['users'], ['read'])
 - **Base de Datos**: Permisos ADMIN verificados para recurso 'users'
 - **Producción**: Desplegado automáticamente en Railway ✅
 
-**Última actualización:** 2025-08-22 23:15 UTC  
+## 🎉 **AVANCES CRÍTICOS SESIÓN 8 (2025-08-23)** 
+
+### 🔧 **RESOLUCIÓN COMPLETA DE PROBLEMAS MULTI-SUCURSAL** ✅
+
+#### **🔥 Logros Principales: Sistema Multi-Branch 100% Funcional**
+- **Problema Crítico Resuelto**: Usuarios mostraban "Sin sucursal" en listados pero tenían datos en formularios de edición
+- **Root Cause**: Esquema Prisma incompleto - faltaba modelo Branch y relaciones branchId 
+- **Solución**: Rediseño completo de arquitectura multi-tenant con migraciones de base de datos
+- **Impacto**: Sistema multi-sucursal completamente funcional y consistente
+
+#### **🛠️ Problemas Resueltos Progresivamente**
+```typescript
+// Cronología de fixes aplicados:
+1. **Error 500 API /api/users**: Cache Prisma client - Fixed con raw SQL bypass
+2. **Frontend Crash "Cannot read properties of undefined"**: Fixed con optional chaining (?.)  
+3. **Validación phone field**: Campo opcional añadido a schemas y formularios
+4. **"Sin sucursal" en listados**: Fixed con arquitectura Branch completa
+5. **Esquema Prisma incompleto**: Añadido modelo Branch + relaciones branchId
+```
+
+#### **🏗️ Arquitectura Multi-Branch Implementada**
+- **Modelo Branch**: Completo with name, code, address, city, phone, isActive
+- **Relaciones branchId**: User, Mechanic, Appointment, Service, Opportunity
+- **Valores por defecto**: branch_id DEFAULT 1 para preservar data existente
+- **Constraints**: Foreign keys añadidas con datos preservados
+- **Queries optimizadas**: JOIN reales con branch data en vez de simulaciones
+
+#### **🗄️ Migración de Base de Datos Exitosa**
+```sql
+-- Branch model añadido al schema
+model Branch {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String   @unique
+  address   String?
+  city      String?
+  phone     String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  users         User[]
+  mechanics     Mechanic[]
+  appointments  Appointment[]
+  services      Service[]
+  opportunities Opportunity[]
+  
+  @@map("branches")
+}
+```
+
+#### **⚡ User Service Optimizado**  
+- **Raw SQL con fallback**: Queries JOIN branch_id reales vs simulation
+- **Performance mejorado**: Relaciones nativas Prisma en vez de workarounds
+- **Error handling**: Try/catch con fallback queries para compatibilidad
+- **Data consistency**: Usuarios muestran branch correctamente en listados y modales
+
+#### **🎓 Aprendizajes Críticos: Arquitectura Multi-Tenant**
+```typescript
+// ❌ PROBLEMA: Schema Prisma incompleto
+// Tabla branches existe en DB pero no en schema.prisma
+// Resulta en: queries simuladas, data inconsistente
+
+// ✅ SOLUCIÓN: Schema completo + migraciones preservando data
+// Resultado: TRUE multi-tenant architecture con segregación real
+```
+
+#### **🔧 Metodología de Resolución Aplicada**
+1. **Diagnóstico progresivo**: Error 500 → Frontend crash → Validation → Root cause
+2. **Fixes incrementales**: Cada problema solucionado independientemente  
+3. **Arquitectura correcta**: En vez de workarounds, implementación proper
+4. **Preservación de datos**: Migraciones con DEFAULT values + constraints posteriores
+5. **Testing completo**: Verificación en listados, modals, y nuevas creaciones
+
+### **📊 Estado Final Sistema Multi-Branch**
+- **Schemas**: Prisma schema completo con modelo Branch y relaciones ✅
+- **Base de Datos**: Migraciones ejecutadas preservando data existente ✅  
+- **API Endpoints**: User service optimizado con JOIN queries reales ✅
+- **Frontend UX**: Usuarios muestran branch correctamente en todos los contextos ✅
+- **Producción**: Sistema desplegado automáticamente en Railway ✅
+
+## 🎉 **AVANCES CRÍTICOS SESIÓN 9 (2025-08-23)** 
+
+### 💰 **CORRECCIÓN FORMATO MONETARIO MEXICANO - 100% COMPLETADO** ✅
+
+#### **🔥 Logro Principal: Formato de Números y Fechas Correcto**
+- **Problema Resuelto**: Aplicación usaba formato colombiano (es-CO, COP) en lugar de mexicano
+- **Solución**: Corrección completa a formato mexicano (es-MX, MXN) 
+- **Impacto**: Todos los importes y fechas ahora usan estándar mexicano correcto
+
+#### **💱 Cambios Implementados**
+```typescript
+// ANTES (Incorrecto)
+new Intl.NumberFormat('es-CO', { currency: 'COP' })
+amount.toLocaleString() // Sin locale específico
+
+// DESPUÉS (Correcto)  
+new Intl.NumberFormat('es-MX', { currency: 'MXN' })
+formatCurrency(amount) // Con función específica mexicana
+```
+
+#### **📊 Archivos Corregidos**
+- **DashboardPage.tsx**: Formato moneda y fechas es-CO → es-MX
+- **OpportunitiesPage.tsx**: Agregada función formatCurrency, eliminados toLocaleString sin locale  
+- **ClientsPage.tsx & VehiclesPage.tsx**: Fechas es-CO → es-MX
+- **ServicesPage.tsx**: Ya tenía formato correcto (es-MX)
+
+#### **✅ Formato Mexicano Aplicado**
+- ✅ **Decimales**: Punto (.) como separador decimal  
+- ✅ **Miles**: Coma (,) como separador de miles
+- ✅ **Moneda**: Peso mexicano (MXN) con símbolo $
+- ✅ **Fechas**: Formato mexicano (es-MX) en toda la aplicación
+
+### 🚗 **SIMPLIFICACIÓN FORMULARIO VEHÍCULOS - 100% COMPLETADO** ✅
+
+#### **🎯 Objetivo Alcanzado: Formularios Más Simples**  
+- **Campos Eliminados**: "Número de motor" y "Número de chasis"
+- **Resultado**: Formularios más limpios y enfocados en datos esenciales
+- **Impacto**: UX mejorado para registro rápido de vehículos
+
+#### **🛠️ Componentes Actualizados**
+- **VehicleForm.tsx**: Eliminados campos y validaciones Zod
+- **VehiclesPage.tsx**: Removidos campos del modal de detalles  
+- **Esquemas**: Actualizadas validaciones sin campos eliminados
+- **Formularios**: Alta, edición y vista de detalles simplificados
+
+### 📋 **VISTA KANBAN PARA SERVICIOS - 100% COMPLETADO** ✅
+
+#### **🔥 Logro Principal: Vista de Tablero Kanban Completa**
+- **Problema Resuelto**: Solo existía vista de lista tradicional para servicios
+- **Solución**: Implementada vista Kanban con 4 estados simplificados
+- **Impacto**: Visualización del flujo de trabajo tipo taller mecánico profesional
+
+#### **🎯 Estados Simplificados Implementados**
+```typescript
+const simplifiedColumns = [
+  { id: 'RECIBIDO', name: 'RECIBIDO', color: 'bg-blue-50' },
+  { id: 'COTIZADO', name: 'COTIZADO', color: 'bg-purple-50' },  
+  { id: 'EN PROCESO', name: 'EN PROCESO', color: 'bg-orange-50' },
+  { id: 'TERMINADO', name: 'TERMINADO', color: 'bg-green-50' }
+];
+```
+
+#### **⚡ Funcionalidades Kanban Implementadas**
+- **Toggle Vista**: Botón elegante Lista ↔ Tablero en header
+- **4 Columnas**: RECIBIDO → COTIZADO → EN PROCESO → TERMINADO  
+- **Drag & Drop**: Arrastra servicios entre columnas para cambiar estado
+- **Tarjetas Completas**: Vehículo, cliente, problema, mecánico, monto, fechas
+- **Mapeo Inteligente**: Estados DB existentes se agrupan en 4 categorías
+- **Contadores**: Número de servicios por columna
+- **Estados Vacíos**: Iconos descriptivos cuando no hay servicios
+- **Actualización Automática**: Cambios de estado se guardan en BD instantáneamente
+
+#### **🏗️ Arquitectura Implementada**
+- **ServicesKanban.tsx**: Componente Kanban completo con drag & drop
+- **ServicesPage.tsx**: Toggle de vista y integración Kanban  
+- **Mapeo Estados**: Lógica para agrupar estados existentes en 4 columnas
+- **UX Avanzado**: Colores, animaciones, responsive, scroll horizontal
+
+#### **🎓 Aprendizajes Clave: Vista Kanban**
+```typescript
+// Mapeo inteligente de estados existentes a columnas simplificadas
+const mapStatusToColumn = (statusName: string) => {
+  const name = statusName.toLowerCase();
+  if (name.includes('recibido')) return 'RECIBIDO';
+  if (name.includes('cotizado')) return 'COTIZADO';  
+  if (name.includes('progreso') || name.includes('autorizado')) return 'EN PROCESO';
+  if (name.includes('completado') || name.includes('entregado')) return 'TERMINADO';
+  return 'RECIBIDO'; // default
+};
+```
+
+### **📊 Estado Final Sesión 9**
+- **Formato Mexicano**: ✅ 100% implementado en toda la aplicación
+- **Formulario Vehículos**: ✅ 100% simplificado (eliminados 2 campos)  
+- **Vista Kanban**: ✅ 100% funcional con drag & drop y 4 estados
+- **Compilación**: ✅ Sin errores TypeScript, build exitoso
+- **UX**: ✅ Significativamente mejorado con vistas alternativas
+
+**Última actualización:** 2025-08-23 22:00 UTC  
 **MVP Status:** ✅ 100% COMPLETADO  
 **Multi-Taller Status:** ✅ 100% COMPLETADO - Sistema empresarial escalable  
-**Gestión Usuarios Status:** ✅ 100% COMPLETADO - Administración completa implementada
+**Gestión Usuarios Status:** ✅ 100% COMPLETADO - Administración completa implementada  
+**Sistema Multi-Branch Status:** ✅ 100% COMPLETADO - Arquitectura multi-tenant completamente funcional
+**Formato Mexicano Status:** ✅ 100% COMPLETADO - Números y fechas con estándar mexicano  
+**Vista Kanban Status:** ✅ 100% COMPLETADO - Tablero visual de flujo de trabajo implementado

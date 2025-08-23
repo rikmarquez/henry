@@ -24,7 +24,10 @@ import {
   FileText,
   DollarSign,
   Wrench,
+  List,
+  LayoutGrid,
 } from 'lucide-react';
+import ServicesKanban from '../components/ServicesKanban';
 
 // Types
 interface Service {
@@ -186,6 +189,7 @@ export default function ServicesPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
@@ -614,13 +618,41 @@ export default function ServicesPage() {
           <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
           <p className="text-gray-600">Gestión de órdenes de trabajo y servicios</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Nuevo Servicio</span>
-        </button>
+        <div className="flex items-center space-x-4">
+          {/* View Toggle */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <List className="h-4 w-4" />
+              <span>Lista</span>
+            </button>
+            <button
+              onClick={() => setViewMode('kanban')}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'kanban'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span>Tablero</span>
+            </button>
+          </div>
+          
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Nuevo Servicio</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -741,6 +773,15 @@ export default function ServicesPage() {
             <Wrench className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p>No se encontraron servicios</p>
           </div>
+        ) : viewMode === 'kanban' ? (
+          <ServicesKanban
+            services={ensureArray<Service>(services)}
+            workStatuses={ensureArray<WorkStatus>(workStatuses)}
+            onStatusChange={handleStatusChange}
+            onViewDetails={openDetailsModal}
+            onEdit={openEditModal}
+            isLoading={loading}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

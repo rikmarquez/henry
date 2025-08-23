@@ -124,6 +124,14 @@ type FilterForm = z.infer<typeof filterSchema>;
 // Helper function for safe array handling
 const ensureArray = <T,>(data: any): T[] => Array.isArray(data) ? data : [];
 
+// Helper function for currency formatting (Mexican format)
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+  }).format(amount);
+};
+
 export default function OpportunitiesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -583,7 +591,7 @@ export default function OpportunitiesPage() {
                       {opportunity.service ? (
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">
-                            ${opportunity.service.totalAmount.toLocaleString()}
+                            {formatCurrency(opportunity.service.totalAmount)}
                           </div>
                           <div className="text-gray-500 line-clamp-1">
                             {opportunity.service.problemDescription || 'Sin descripción'}
@@ -764,7 +772,7 @@ export default function OpportunitiesPage() {
                     <option value={0}>Sin servicio origen</option>
                     {services.map((service) => (
                       <option key={service.id} value={service.id}>
-                        {service.client.name} - {service.vehicle.plate} - ${service.totalAmount.toLocaleString()}
+                        {service.client.name} - {service.vehicle.plate} - {formatCurrency(service.totalAmount)}
                       </option>
                     ))}
                   </select>
@@ -1094,7 +1102,7 @@ export default function OpportunitiesPage() {
                       </p>
                     )}
                     <p>
-                      <span className="font-medium">Monto:</span> ${selectedOpportunity.service.totalAmount.toLocaleString()}
+                      <span className="font-medium">Monto:</span> {formatCurrency(selectedOpportunity.service.totalAmount)}
                     </p>
                     <p>
                       <span className="font-medium">Estado del Servicio:</span>

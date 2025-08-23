@@ -74,14 +74,14 @@ export default function DashboardPage() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'COP',
+      currency: 'MXN',
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-CO', {
+    return new Date(dateString).toLocaleDateString('es-MX', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -101,7 +101,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="text-sm text-gray-500">
-              Última actualización: {new Date().toLocaleTimeString('es-CO')}
+              Última actualización: {new Date().toLocaleTimeString('es-MX')}
             </div>
           </div>
         </div>
