@@ -245,14 +245,47 @@ router.get(
   }
 );
 
+// POST /api/opportunities/debug - Debug endpoint without validation
+router.post(
+  '/debug',
+  authenticate,
+  authorize(['opportunities'], ['create']),
+  async (req, res) => {
+    try {
+      console.log('🔧 DEBUG - Body received:', req.body);
+      console.log('🔧 DEBUG - User from JWT:', (req as any).user);
+      
+      return res.json({
+        success: true,
+        message: 'Debug successful',
+        data: {
+          body: req.body,
+          user: (req as any).user,
+        }
+      });
+    } catch (error: any) {
+      console.error('🚨 DEBUG Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Debug failed',
+        error: error.message,
+      });
+    }
+  }
+);
+
 // POST /api/opportunities - Create new opportunity
 router.post(
   '/',
   authenticate,
   authorize(['opportunities'], ['create']),
-  validate(createOpportunitySchema),
+  // Temporarily bypass validation to debug
+  // validate(createOpportunitySchema),
   async (req, res) => {
     try {
+      console.log('🔧 POST /api/opportunities - Body received:', req.body);
+      console.log('🔧 User from JWT:', (req as any).user);
+      
       const {
         clientId,
         vehicleId,
@@ -265,6 +298,10 @@ router.post(
       } = req.body;
       const userId = (req as any).user.userId;
       const branchId = (req as any).user.branchId;
+      
+      console.log('🔧 Parsed data:', { 
+        clientId, vehicleId, serviceId, type, description, followUpDate, status, notes, userId, branchId 
+      });
 
       // Verify client exists
       const client = await prisma.client.findUnique({
@@ -335,11 +372,32 @@ router.post(
         data: opportunity,
         message: 'Oportunidad creada exitosamente',
       });
-    } catch (error) {
-      console.error('Error creating opportunity:', error);
+    } catch (error: any) {
+      console.error('🚨 Error creating opportunity:', error);
+      console.error('🚨 Error details:', error.message);
+      console.error('🚨 Error stack:', error.stack);
+      
+      // Check if it's a Prisma validation error
+      if (error.code === 'P2002') {
+        return res.status(400).json({
+          success: false,
+          message: 'Ya existe un registro con esos datos',
+          error: error.message,
+        });
+      }
+      
+      if (error.code && error.code.startsWith('P')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Error de validación de datos',
+          error: error.message,
+        });
+      }
+      
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
   }
