@@ -67,6 +67,65 @@ router.get(
   }
 );
 
+// GET /api/reports/step1 - Test servicesByStatus query
+router.get('/step1', authenticate, async (req, res) => {
+  try {
+    console.log('🔧 Testing Step 1 - servicesByStatus');
+    const branchId = (req as any).user.branchId;
+    const servicesByStatus = await prisma.service.groupBy({
+      by: ['statusId'],
+      _count: { id: true },
+      where: { branchId },
+    });
+    res.json({ success: true, data: servicesByStatus });
+  } catch (error) {
+    console.error('❌ Step 1 error:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// GET /api/reports/step2 - Test servicesByMechanic query
+router.get('/step2', authenticate, async (req, res) => {
+  try {
+    console.log('🔧 Testing Step 2 - servicesByMechanic');
+    const branchId = (req as any).user.branchId;
+    const servicesByMechanic = await prisma.service.groupBy({
+      by: ['mechanicId'],
+      _count: { id: true },
+      _sum: { totalAmount: true, mechanicCommission: true },
+      where: { branchId, mechanicId: { not: null } },
+    });
+    res.json({ success: true, data: servicesByMechanic });
+  } catch (error) {
+    console.error('❌ Step 2 error:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// GET /api/reports/step3 - Test SQL raw query
+router.get('/step3', authenticate, async (req, res) => {
+  try {
+    console.log('🔧 Testing Step 3 - SQL raw query');
+    const branchId = (req as any).user.branchId;
+    const result = await prisma.$queryRaw`
+      SELECT 
+        DATE_TRUNC('month', created_at) as month,
+        SUM(total_amount) as revenue,
+        COUNT(*) as services_count
+      FROM services 
+      WHERE completed_at IS NOT NULL
+        AND created_at >= NOW() - INTERVAL '6 months'
+        AND branch_id = ${branchId}
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month DESC
+    `;
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('❌ Step 3 error:', error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
 // Common date range validation schema
 const dateRangeSchema = z.object({
   dateFrom: z.string().datetime().optional(),
