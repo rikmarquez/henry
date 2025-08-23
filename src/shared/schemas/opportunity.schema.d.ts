@@ -5,7 +5,7 @@ export declare const createOpportunitySchema: z.ZodObject<{
     serviceId: z.ZodOptional<z.ZodNumber>;
     type: z.ZodString;
     description: z.ZodString;
-    followUpDate: z.ZodUnion<[z.ZodString, z.ZodDate]>;
+    followUpDate: z.ZodString;
     status: z.ZodDefault<z.ZodEnum<{
         pending: "pending";
         contacted: "contacted";
@@ -21,7 +21,7 @@ export declare const updateOpportunitySchema: z.ZodObject<{
     serviceId: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;
     type: z.ZodOptional<z.ZodString>;
     description: z.ZodOptional<z.ZodString>;
-    followUpDate: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodDate]>>;
+    followUpDate: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
         pending: "pending";
         contacted: "contacted";

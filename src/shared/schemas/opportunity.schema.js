@@ -9,7 +9,7 @@ exports.createOpportunitySchema = zod_1.z.object({
     serviceId: common_schema_1.idSchema.optional(),
     type: zod_1.z.string().min(2, 'El tipo debe tener al menos 2 caracteres'),
     description: zod_1.z.string().min(5, 'La descripción debe tener al menos 5 caracteres'),
-    followUpDate: common_schema_1.dateSchema,
+    followUpDate: zod_1.z.string().min(1, 'Fecha de seguimiento requerida'),
     status: zod_1.z.enum(['pending', 'contacted', 'interested', 'declined', 'converted']).default('pending'),
     notes: zod_1.z.string().optional(),
 });

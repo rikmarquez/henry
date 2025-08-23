@@ -7,7 +7,7 @@ export const createOpportunitySchema = z.object({
   serviceId: idSchema.optional(),
   type: z.string().min(2, 'El tipo debe tener al menos 2 caracteres'),
   description: z.string().min(5, 'La descripción debe tener al menos 5 caracteres'),
-  followUpDate: dateSchema,
+  followUpDate: z.string().min(1, 'Fecha de seguimiento requerida'),
   status: z.enum(['pending', 'contacted', 'interested', 'declined', 'converted']).default('pending'),
   notes: z.string().optional(),
 });

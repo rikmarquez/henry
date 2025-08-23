@@ -279,8 +279,7 @@ router.post(
   '/',
   authenticate,
   authorize(['opportunities'], ['create']),
-  // Temporarily bypass validation to debug
-  // validate(createOpportunitySchema),
+  validate(createOpportunitySchema),
   async (req, res) => {
     try {
       console.log('🔧 POST /api/opportunities - Body received:', req.body);
