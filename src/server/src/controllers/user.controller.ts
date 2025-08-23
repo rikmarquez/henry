@@ -35,7 +35,9 @@ export class UserController {
 
   async getUsers(req: Request, res: Response) {
     try {
-      const filters = userFilterSchema.parse(req.query);
+      // Skip schema validation - use manually transformed query from routes
+      const filters = req.query;
+      console.log('🔧 getUsers - filters recibidos:', filters);
       const result = await userService.getUsers(filters);
 
       res.json({

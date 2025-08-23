@@ -50,46 +50,78 @@ export class UserService {
     const { page = 1, limit = 10, search, roleId, isActive, sortBy = 'createdAt', sortOrder = 'desc' } = filters;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    console.log('🔧 userService.getUsers - filtros:', { page, limit, search, roleId, isActive });
+
+    // Use raw SQL to avoid Prisma client cache issues
+    let whereClause = 'WHERE 1=1';
+    const params: any[] = [];
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search } },
-      ];
+      whereClause += ` AND (u.name ILIKE $${params.length + 1} OR u.email ILIKE $${params.length + 1} OR u.phone ILIKE $${params.length + 1})`;
+      params.push(`%${search}%`);
     }
 
     if (roleId) {
-      where.roleId = roleId;
+      whereClause += ` AND u.role_id = $${params.length + 1}`;
+      params.push(roleId);
     }
 
     if (typeof isActive === 'boolean') {
-      where.isActive = isActive;
+      whereClause += ` AND u.is_active = $${params.length + 1}`;
+      params.push(isActive);
     }
 
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        include: {
-          role: true,
-        },
-        orderBy: {
-          [sortBy]: sortOrder,
-        },
-        skip,
-        take: limit,
-      }),
-      prisma.user.count({ where }),
-    ]);
+    const orderClause = `ORDER BY u.${sortBy === 'createdAt' ? 'created_at' : sortBy} ${sortOrder}`;
 
-    const usersWithoutPasswords = users.map(user => {
-      const { passwordHash, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    });
+    // Get users with pagination - no branch_id column exists yet
+    const usersQuery = `
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.phone,
+        u.is_active as "isActive",
+        u.role_id as "roleId",
+        u.created_at as "createdAt",
+        u.updated_at as "updatedAt",
+        r.name as role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      ${whereClause}
+      ${orderClause}
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    `;
+
+    // Get total count
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM users u
+      ${whereClause}
+    `;
+
+    params.push(limit, skip);
+
+    console.log('🔧 SQL Query:', usersQuery);
+    console.log('🔧 SQL Params:', params);
+
+    // Execute queries separately to handle parameters correctly
+    const rawUsers = await prisma.$queryRawUnsafe(usersQuery, ...params) as any[];
+    
+    // For count, use params without limit/offset
+    const countParams = params.slice(0, -2);
+    const rawCount = await prisma.$queryRawUnsafe(countQuery, ...countParams) as { total: bigint }[];
+
+    const users = rawUsers.map(user => ({
+      ...user,
+      role: { id: user.roleId, name: user.role_name },
+      // Remove raw fields
+      role_name: undefined
+    }));
+
+    const total = Number(rawCount[0]?.total || 0);
 
     return {
-      users: usersWithoutPasswords,
+      users,
       total,
       page,
       totalPages: Math.ceil(total / limit),
