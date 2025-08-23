@@ -176,12 +176,20 @@ async function safeSeed() {
 
       for (const mechanic of mechanics) {
         try {
-          await prisma.mechanic.create({ data: mechanic });
+          await prisma.mechanic.upsert({
+            where: { name: mechanic.name },
+            update: {},
+            create: mechanic
+          });
         } catch (error) {
           // Try without branchId
           const { branchId, ...mechanicWithoutBranch } = mechanic;
           try {
-            await prisma.mechanic.create({ data: mechanicWithoutBranch });
+            await prisma.mechanic.upsert({
+              where: { name: mechanicWithoutBranch.name },
+              update: {},
+              create: mechanicWithoutBranch
+            });
           } catch (e) {
             console.log(`⚠️ Could not create mechanic ${mechanic.name}`);
           }
