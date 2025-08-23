@@ -102,12 +102,12 @@ router.get('/step2', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/reports/step3 - Test SQL raw query
+// GET /api/reports/step3 - Test SQL raw query (with BigInt fix)
 router.get('/step3', authenticate, async (req, res) => {
   try {
     console.log('🔧 Testing Step 3 - SQL raw query');
     const branchId = (req as any).user.branchId;
-    const result = await prisma.$queryRaw`
+    const rawResult: any[] = await prisma.$queryRaw`
       SELECT 
         DATE_TRUNC('month', created_at) as month,
         SUM(total_amount) as revenue,
@@ -119,6 +119,14 @@ router.get('/step3', authenticate, async (req, res) => {
       GROUP BY DATE_TRUNC('month', created_at)
       ORDER BY month DESC
     `;
+    
+    // Convert BigInt to regular numbers
+    const result = rawResult.map(item => ({
+      month: item.month,
+      revenue: Number(item.revenue), // Convert BigInt to number
+      services_count: Number(item.services_count) // Convert BigInt to number
+    }));
+    
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('❌ Step 3 error:', error);
@@ -310,12 +318,12 @@ router.get(
   }
 );
 
-// GET /api/reports/services - Service reports (TEMPORARILY REMOVED AUTHORIZATION)
+// GET /api/reports/services - Service reports (FIXED BigInt issue)
 router.get(
   '/services',
   authenticate,
-  // authorize(['reports'], ['read']), // TEMPORARILY COMMENTED OUT
-  // validateQuery(dateRangeSchema), // TEMPORARILY COMMENTED OUT TOO
+  authorize(['reports'], ['read']),
+  validateQuery(dateRangeSchema),
   async (req, res) => {
     try {
       const { dateFrom, dateTo } = req.query;
@@ -408,7 +416,7 @@ router.get(
       console.log('🔧 Testing revenueByMonth query...');
       const revenueByMonth = await (async () => {
         try {
-          return await prisma.$queryRaw`
+          const rawResult: any[] = await prisma.$queryRaw`
             SELECT 
               DATE_TRUNC('month', created_at) as month,
               SUM(total_amount) as revenue,
@@ -420,6 +428,13 @@ router.get(
             GROUP BY DATE_TRUNC('month', created_at)
             ORDER BY month DESC
           `;
+          
+          // Convert BigInt to regular numbers to avoid serialization error
+          return rawResult.map(item => ({
+            month: item.month,
+            revenue: Number(item.revenue),
+            services_count: Number(item.services_count)
+          }));
         } catch (error) {
           console.error('❌ SQL Raw query failed, using fallback:', error);
           // Fallback to regular Prisma query without raw SQL
