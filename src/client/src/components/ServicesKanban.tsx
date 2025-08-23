@@ -7,10 +7,7 @@ import {
   Play, 
   XCircle, 
   AlertCircle,
-  User,
-  Car,
   DollarSign,
-  Calendar,
   Eye,
   Edit2,
   Wrench
@@ -272,22 +269,10 @@ export default function ServicesKanban({
                   </div>
 
                   {/* Vehicle Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Car className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-900">
-                        {service.vehicle.plate}
-                      </span>
-                    </div>
+                  <div className="mt-2">
                     <div className="text-sm text-gray-600">
                       {service.vehicle.brand} {service.vehicle.model} ({service.vehicle.year})
                     </div>
-                  </div>
-
-                  {/* Client Info */}
-                  <div className="flex items-center space-x-2 mt-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">{service.client.name}</span>
                   </div>
 
                   {/* Problem Description */}
@@ -308,16 +293,12 @@ export default function ServicesKanban({
                   )}
 
                   {/* Total Amount */}
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                  <div className="flex items-center mt-3 pt-2 border-t border-gray-100">
                     <div className="flex items-center space-x-1">
                       <DollarSign className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-semibold text-green-600">
                         {formatCurrency(service.totalAmount)}
                       </span>
-                    </div>
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
-                      <Calendar className="h-3 w-3" />
-                      <span>{formatDate(service.createdAt)}</span>
                     </div>
                   </div>
 
