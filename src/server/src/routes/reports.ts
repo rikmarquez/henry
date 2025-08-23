@@ -7,6 +7,41 @@ import { validateQuery } from '../middleware/validation.middleware';
 const router = Router();
 const prisma = new PrismaClient();
 
+// GET /api/reports/debug - Simple diagnostic endpoint
+router.get(
+  '/debug',
+  authenticate,
+  async (req, res) => {
+    try {
+      console.log('🔧 Debug endpoint called');
+      const user = (req as any).user;
+      console.log('🔧 User from token:', user);
+
+      // Test basic Prisma connection
+      const serviceCount = await prisma.service.count();
+      const statusCount = await prisma.workStatus.count();
+      
+      console.log('🔧 Basic counts:', { serviceCount, statusCount });
+
+      res.json({
+        success: true,
+        debug: {
+          user,
+          serviceCount,
+          statusCount,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('❌ Debug endpoint error:', error);
+      res.status(500).json({
+        success: false,
+        error: (error as Error).message
+      });
+    }
+  }
+);
+
 // Common date range validation schema
 const dateRangeSchema = z.object({
   dateFrom: z.string().datetime().optional(),
@@ -172,118 +207,116 @@ router.get(
 
       console.log('🔧 Starting reports queries with filters:', { branchFilter, dateFilter });
 
-      const [
-        servicesByStatus,
-        servicesByMechanic,
-        averageServiceValue,
-        completionStats,
-        revenueByMonth,
-      ] = await Promise.all([
-        // Services grouped by status
-        prisma.service.groupBy({
-          by: ['statusId'],
-          _count: { id: true },
+      // Test queries one by one to identify which one fails
+      console.log('🔧 Testing servicesByStatus query...');
+      const servicesByStatus = await prisma.service.groupBy({
+        by: ['statusId'],
+        _count: { id: true },
+        where: {
+          ...branchFilter,
+          ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+        },
+      });
+      console.log('✅ servicesByStatus completed:', servicesByStatus);
+
+      console.log('🔧 Testing servicesByMechanic query...');
+      const servicesByMechanic = await prisma.service.groupBy({
+        by: ['mechanicId'],
+        _count: { id: true },
+        _sum: { totalAmount: true, mechanicCommission: true },
+        where: {
+          ...branchFilter,
+          mechanicId: { not: null },
+          ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+        },
+      });
+      console.log('✅ servicesByMechanic completed:', servicesByMechanic);
+
+      console.log('🔧 Testing averageServiceValue query...');
+      const averageServiceValue = await prisma.service.aggregate({
+        _avg: { totalAmount: true },
+        _count: { id: true },
+        where: {
+          ...branchFilter,
+          totalAmount: { gt: 0 },
+          ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+        },
+      });
+      console.log('✅ averageServiceValue completed:', averageServiceValue);
+
+      console.log('🔧 Testing completionStats queries...');
+      const completionStats = await Promise.all([
+        prisma.service.count({
+          where: {
+            ...branchFilter,
+            completedAt: { not: null },
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          },
+        }),
+        prisma.service.count({
           where: {
             ...branchFilter,
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           },
         }),
+      ]).then(([completed, total]) => ({
+        completed,
+        total,
+        completionRate: total > 0 ? (completed / total) * 100 : 0,
+      }));
+      console.log('✅ completionStats completed:', completionStats);
 
-        // Services grouped by mechanic
-        prisma.service.groupBy({
-          by: ['mechanicId'],
-          _count: { id: true },
-          _sum: { totalAmount: true, mechanicCommission: true },
-          where: {
-            ...branchFilter,
-            mechanicId: { not: null },
-            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
-          },
-        }),
-
-        // Average service value
-        prisma.service.aggregate({
-          _avg: { totalAmount: true },
-          _count: { id: true },
-          where: {
-            ...branchFilter,
-            totalAmount: { gt: 0 },
-            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
-          },
-        }),
-
-        // Completion statistics
-        Promise.all([
-          prisma.service.count({
+      console.log('🔧 Testing revenueByMonth query...');
+      const revenueByMonth = await (async () => {
+        try {
+          return await prisma.$queryRaw`
+            SELECT 
+              DATE_TRUNC('month', created_at) as month,
+              SUM(total_amount) as revenue,
+              COUNT(*) as services_count
+            FROM services 
+            WHERE completed_at IS NOT NULL
+              AND created_at >= NOW() - INTERVAL '6 months'
+              AND branch_id = ${branchId}
+            GROUP BY DATE_TRUNC('month', created_at)
+            ORDER BY month DESC
+          `;
+        } catch (error) {
+          console.error('❌ SQL Raw query failed, using fallback:', error);
+          // Fallback to regular Prisma query without raw SQL
+          const sixMonthsAgo = new Date();
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+          
+          const services = await prisma.service.findMany({
             where: {
               ...branchFilter,
               completedAt: { not: null },
-              ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+              createdAt: { gte: sixMonthsAgo }
             },
-          }),
-          prisma.service.count({
-            where: {
-              ...branchFilter,
-              ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
-            },
-          }),
-        ]).then(([completed, total]) => ({
-          completed,
-          total,
-          completionRate: total > 0 ? (completed / total) * 100 : 0,
-        })),
-
-        // Revenue by month (last 6 months) - with fallback
-        (async () => {
-          try {
-            return await prisma.$queryRaw`
-              SELECT 
-                DATE_TRUNC('month', created_at) as month,
-                SUM(total_amount) as revenue,
-                COUNT(*) as services_count
-              FROM services 
-              WHERE completed_at IS NOT NULL
-                AND created_at >= NOW() - INTERVAL '6 months'
-                AND branch_id = ${branchId}
-              GROUP BY DATE_TRUNC('month', created_at)
-              ORDER BY month DESC
-            `;
-          } catch (error) {
-            console.error('❌ SQL Raw query failed, using fallback:', error);
-            // Fallback to regular Prisma query without raw SQL
-            const sixMonthsAgo = new Date();
-            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-            
-            const services = await prisma.service.findMany({
-              where: {
-                ...branchFilter,
-                completedAt: { not: null },
-                createdAt: { gte: sixMonthsAgo }
-              },
-              select: {
-                createdAt: true,
-                totalAmount: true
-              }
-            });
-            
-            // Group by month manually
-            const monthlyData: any = {};
-            services.forEach(service => {
-              const month = new Date(service.createdAt.getFullYear(), service.createdAt.getMonth(), 1);
-              const monthKey = month.toISOString();
-              if (!monthlyData[monthKey]) {
-                monthlyData[monthKey] = { month, revenue: 0, services_count: 0 };
-              }
-              monthlyData[monthKey].revenue += service.totalAmount;
-              monthlyData[monthKey].services_count += 1;
-            });
-            
-            return Object.values(monthlyData).sort((a: any, b: any) => 
-              new Date(b.month).getTime() - new Date(a.month).getTime()
-            );
-          }
-        })(),
-      ]);
+            select: {
+              createdAt: true,
+              totalAmount: true
+            }
+          });
+          
+          // Group by month manually
+          const monthlyData: any = {};
+          services.forEach(service => {
+            const month = new Date(service.createdAt.getFullYear(), service.createdAt.getMonth(), 1);
+            const monthKey = month.toISOString();
+            if (!monthlyData[monthKey]) {
+              monthlyData[monthKey] = { month, revenue: 0, services_count: 0 };
+            }
+            monthlyData[monthKey].revenue += service.totalAmount;
+            monthlyData[monthKey].services_count += 1;
+          });
+          
+          return Object.values(monthlyData).sort((a: any, b: any) => 
+            new Date(b.month).getTime() - new Date(a.month).getTime()
+          );
+        }
+      })();
+      console.log('✅ revenueByMonth completed:', revenueByMonth);
 
       console.log('🔧 Queries completed successfully, starting data enhancement');
 
