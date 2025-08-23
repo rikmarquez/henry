@@ -221,12 +221,42 @@ router.get(
   }
 );
 
+// GET /api/reports/services-simple - Ultra simple test
+router.get(
+  '/services-simple',
+  authenticate,
+  async (req, res) => {
+    try {
+      console.log('🔧 Services-simple called');
+      const branchId = (req as any).user.branchId;
+      console.log('🔧 BranchId:', branchId);
+      
+      // Test one simple query
+      const serviceCount = await prisma.service.count({ 
+        where: { branchId } 
+      });
+      console.log('🔧 Service count:', serviceCount);
+      
+      res.json({
+        success: true,
+        data: { serviceCount, branchId }
+      });
+    } catch (error) {
+      console.error('❌ Services-simple error:', error);
+      res.status(500).json({
+        success: false,
+        error: (error as Error).message
+      });
+    }
+  }
+);
+
 // GET /api/reports/services - Service reports (TEMPORARILY REMOVED AUTHORIZATION)
 router.get(
   '/services',
   authenticate,
   // authorize(['reports'], ['read']), // TEMPORARILY COMMENTED OUT
-  validateQuery(dateRangeSchema),
+  // validateQuery(dateRangeSchema), // TEMPORARILY COMMENTED OUT TOO
   async (req, res) => {
     try {
       const { dateFrom, dateTo } = req.query;
