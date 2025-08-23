@@ -51,6 +51,7 @@ interface UsersResponse {
 interface CreateUserData {
   name: string;
   email: string;
+  phone: string;
   password: string;
   roleId: number;
   branchId: number;
@@ -69,6 +70,7 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<CreateUserData>({
     name: '',
     email: '',
+    phone: '',
     password: '',
     roleId: 1,
     branchId: currentBranchId || 1,
@@ -164,6 +166,7 @@ export default function UsersPage() {
     setFormData({
       name: '',
       email: '',
+      phone: '',
       password: '',
       roleId: 1,
       branchId: currentBranchId || 1,
@@ -194,6 +197,7 @@ export default function UsersPage() {
     setFormData({
       name: user.name,
       email: user.email,
+      phone: user.phone || '',
       password: '',
       roleId: user.role.id,
       branchId: user.branch?.id || 1, // Default branch if not assigned
@@ -399,6 +403,17 @@ export default function UsersPage() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Teléfono (opcional)</label>
+                  <input
+                    type="tel"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+1234567890"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Contraseña</label>
                   <div className="mt-1 relative">
                     <input
@@ -501,6 +516,17 @@ export default function UsersPage() {
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Teléfono (opcional)</label>
+                  <input
+                    type="tel"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+1234567890"
                   />
                 </div>
 

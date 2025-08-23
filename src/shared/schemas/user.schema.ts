@@ -4,7 +4,7 @@ import { phoneSchema, emailSchema, idSchema, paginationSchema } from './common.s
 export const createUserSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   email: emailSchema,
-  phone: phoneSchema,
+  phone: phoneSchema.optional(),
   roleId: idSchema,
   isActive: z.boolean().default(true),
 });
