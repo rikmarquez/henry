@@ -778,8 +778,8 @@ export default function ServicesPage() {
             services={ensureArray<Service>(services)}
             workStatuses={ensureArray<WorkStatus>(workStatuses)}
             onStatusChange={handleStatusChange}
-            onViewDetails={openDetailsModal}
-            onEdit={openEditModal}
+            onViewDetails={(service) => handleViewService(service.id)}
+            onEdit={(service) => handleEditService(service.id)}
             isLoading={loading}
           />
         ) : (
