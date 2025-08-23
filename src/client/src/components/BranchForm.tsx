@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, MapPin, Phone, Mail, Code, AlertCircle } from 'lucide-react';
+import { Building2, MapPin, Phone, Code, AlertCircle } from 'lucide-react';
 
 interface Branch {
   id: number;
@@ -7,7 +7,6 @@ interface Branch {
   code: string;
   address: string;
   phone: string;
-  email?: string | null;
   city: string;
   isActive: boolean;
 }
@@ -25,7 +24,6 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading }: Br
     code: '',
     address: '',
     phone: '',
-    email: '',
     city: '',
     isActive: true,
   });
@@ -39,7 +37,6 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading }: Br
         code: branch.code,
         address: branch.address,
         phone: branch.phone,
-        email: branch.email || '',
         city: branch.city,
         isActive: branch.isActive,
       });
@@ -71,9 +68,6 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading }: Br
       newErrors.city = 'La ciudad es requerida';
     }
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'El email no es válido';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -88,7 +82,6 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading }: Br
 
     const submitData = {
       ...formData,
-      email: formData.email || null,
     };
 
     onSubmit(submitData);
@@ -219,28 +212,6 @@ export default function BranchForm({ branch, onSubmit, onCancel, isLoading }: Br
         )}
       </div>
 
-      {/* Email */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          <Mail className="w-4 h-4 inline mr-2" />
-          Email (Opcional)
-        </label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.email ? 'border-red-300' : 'border-gray-300'
-          }`}
-          placeholder="Ej: central@henrydiagnostics.com"
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-600 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
-            {errors.email}
-          </p>
-        )}
-      </div>
 
       {/* Active Status - Only show when editing */}
       {branch && (

@@ -61,7 +61,7 @@ router.use(authenticate);
 // Create branch
 const createBranch = async (req: any, res: any) => {
   try {
-    const { name, code, address, phone, email, city } = req.body;
+    const { name, code, address, phone, city } = req.body;
 
     const branch = await prisma.branch.create({
       data: {
@@ -69,7 +69,6 @@ const createBranch = async (req: any, res: any) => {
         code,
         address,
         phone,
-        email,
         city,
       },
     });
@@ -138,7 +137,7 @@ const getBranches = async (req: any, res: any) => {
 
     // Simplified: Get all branches first, then paginate in memory for now
     const rawBranches = await prisma.$queryRaw`
-      SELECT id, name, code, address, phone, email, city, is_active, created_at, updated_at
+      SELECT id, name, code, address, phone, city, is_active, created_at, updated_at
       FROM branches
       ORDER BY created_at DESC
     `;
@@ -150,7 +149,6 @@ const getBranches = async (req: any, res: any) => {
       code: branch.code,
       address: branch.address,
       phone: branch.phone,
-      email: branch.email,
       city: branch.city,
       isActive: branch.is_active, // Map is_active to isActive
       createdAt: branch.created_at,

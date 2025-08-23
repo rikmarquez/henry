@@ -14,11 +14,8 @@ const createBranchSchema = z.object({
       .max(200, 'Dirección no puede exceder 200 caracteres'),
     phone: z.string()
       .min(10, 'Teléfono debe tener al menos 10 caracteres')
-      .max(20, 'Teléfono no puede exceder 20 caracteres'),
-    email: z.string()
-      .email('Email debe tener un formato válido')
-      .optional()
-      .nullable(),
+      .max(20, 'Teléfono no puede exceder 20 caracteres')
+      .optional(),
     city: z.string()
       .min(2, 'Ciudad debe tener al menos 2 caracteres')
       .max(50, 'Ciudad no puede exceder 50 caracteres'),
@@ -47,10 +44,6 @@ const updateBranchSchema = z.object({
       .min(10, 'Teléfono debe tener al menos 10 caracteres')
       .max(20, 'Teléfono no puede exceder 20 caracteres')
       .optional(),
-    email: z.string()
-      .email('Email debe tener un formato válido')
-      .optional()
-      .nullable(),
     city: z.string()
       .min(2, 'Ciudad debe tener al menos 2 caracteres')
       .max(50, 'Ciudad no puede exceder 50 caracteres')

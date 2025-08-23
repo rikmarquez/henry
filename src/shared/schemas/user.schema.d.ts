@@ -2,14 +2,14 @@ import { z } from 'zod';
 export declare const createUserSchema: z.ZodObject<{
     name: z.ZodString;
     email: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
-    phone: z.ZodString;
+    phone: z.ZodOptional<z.ZodString>;
     roleId: z.ZodNumber;
     isActive: z.ZodDefault<z.ZodBoolean>;
 }, z.core.$strip>;
 export declare const updateUserSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>>;
-    phone: z.ZodOptional<z.ZodString>;
+    phone: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     roleId: z.ZodOptional<z.ZodNumber>;
     isActive: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     id: z.ZodNumber;

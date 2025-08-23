@@ -11,7 +11,6 @@ import {
   Eye, 
   MapPin,
   Phone,
-  Mail,
   Users,
   Wrench,
   Calendar,
@@ -27,7 +26,6 @@ interface Branch {
   code: string;
   address: string;
   phone: string;
-  email?: string | null;
   city: string;
   isActive: boolean;
   createdAt: string;
@@ -300,12 +298,6 @@ export default function BranchesPage() {
                             <Phone className="w-4 h-4 mr-2 text-gray-400" />
                             {branch.phone}
                           </div>
-                          {branch.email && (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                              {branch.email}
-                            </div>
-                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -524,12 +516,6 @@ export default function BranchesPage() {
                       <span className="text-sm text-gray-500">Teléfono:</span>
                       <p className="text-sm font-medium">{selectedBranch.phone}</p>
                     </div>
-                    {selectedBranch.email && (
-                      <div>
-                        <span className="text-sm text-gray-500">Email:</span>
-                        <p className="text-sm font-medium">{selectedBranch.email}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

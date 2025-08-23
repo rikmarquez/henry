@@ -6,7 +6,7 @@ const common_schema_1 = require("./common.schema");
 exports.createUserSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
     email: common_schema_1.emailSchema,
-    phone: common_schema_1.phoneSchema,
+    phone: common_schema_1.phoneSchema.optional(),
     roleId: common_schema_1.idSchema,
     isActive: zod_1.z.boolean().default(true),
 });

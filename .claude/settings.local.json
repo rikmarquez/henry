@@ -34,7 +34,13 @@
       "Bash(start http://localhost:3002/api/health)",
       "Bash(start http://localhost:5176)",
       "Bash(start http://localhost:5178)",
-      "Bash(set PORT=3003)"
+      "Bash(set PORT=3003)",
+      "Bash(gh api:*)",
+      "Bash(del test_schema.js)",
+      "Bash(del check-db.js clean-db.js seed-fresh.js test-branches.js)",
+      "Bash(del check-db.js clean-db.js create-branches.js)",
+      "Bash(psql:*)",
+      "Bash(start http://localhost:5174)"
     ],
     "deny": [],
     "ask": []
