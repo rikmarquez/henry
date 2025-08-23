@@ -153,32 +153,32 @@ export default function ServicesKanban({
 }: ServicesKanbanProps) {
   const [draggedService, setDraggedService] = useState<Service | null>(null);
 
-  // Define las 5 columnas del flujo completo (usando IDs reales de BD)
+  // Define las 4 columnas del flujo activo de trabajo (sin PERDIDO)
   const simplifiedColumns = [
     { id: 1, name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
     { id: 2, name: 'COTIZADO', color: 'bg-yellow-50', orderIndex: 2 },
     { id: 4, name: 'EN PROCESO', color: 'bg-purple-50', orderIndex: 3 },
-    { id: 6, name: 'PERDIDO', color: 'bg-gray-50', orderIndex: 4 },
-    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 5 }
+    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
   ];
 
-  // Mapear servicios directamente por statusId
+  // Mapear servicios directamente por statusId (excluyendo PERDIDO del Kanban)
   const mapServiceToColumn = (statusId: number) => {
     switch (statusId) {
       case 1: return 1; // RECIBIDO
       case 2: return 2; // COTIZADO  
       case 4: return 4; // EN PROCESO
-      case 6: return 6; // PERDIDO
       case 5: return 5; // TERMINADO
+      case 6: return null; // PERDIDO - no mostrar en Kanban
       default: return 1; // default to RECIBIDO
     }
   };
 
-  // Agrupar servicios por columnas simplificadas
+  // Agrupar servicios por columnas simplificadas (excluyendo PERDIDOS)
   const servicesByColumn = simplifiedColumns.reduce((acc, column) => {
-    acc[column.id] = services.filter(service => 
-      mapServiceToColumn(service.statusId) === column.id
-    );
+    acc[column.id] = services.filter(service => {
+      const mappedColumn = mapServiceToColumn(service.statusId);
+      return mappedColumn === column.id;
+    });
     return acc;
   }, {} as Record<number, Service[]>);
 
