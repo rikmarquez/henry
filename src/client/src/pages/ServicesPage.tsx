@@ -538,8 +538,23 @@ export default function ServicesPage() {
     try {
       const response = await api.get(`/services/${serviceId}`);
       if (response.data.success) {
-        setSelectedService(response.data.data);
-        setSelectedClientId(response.data.data.clientId);
+        const service = response.data.data;
+        setSelectedService(service);
+        setSelectedClientId(service.clientId);
+        
+        // Populate form with current service data
+        createForm.reset({
+          clientId: service.clientId,
+          vehicleId: service.vehicleId,
+          mechanicId: service.mechanicId || 0,
+          statusId: service.statusId, // ← CRITICAL: Preserve current status
+          problemDescription: service.problemDescription || '',
+          diagnosis: service.diagnosis || '',
+          quotationDetails: service.quotationDetails || '',
+          totalAmount: service.totalAmount,
+          mechanicCommission: service.mechanicCommission,
+        });
+        
         setShowEditModal(true);
       }
     } catch (error: any) {
