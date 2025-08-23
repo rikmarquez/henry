@@ -382,26 +382,13 @@ const getActiveBranches = async (req: any, res: any) => {
 };
 
 // Route definitions
-router.get('/active', getActiveBranches);
+router.get('/active', 
+  authorize(['branches'], ['read']),
+  getActiveBranches
+);
 
 router.get('/', 
-  authenticate,
   authorize(['branches'], ['read']),
-  (req, res, next) => {
-    // Manual query validation to bypass schema cache issues
-    const { page, limit, search, isActive } = req.query;
-    
-    // Transform parameters manually
-    const transformedQuery = {
-      page: page ? parseInt(page as string) : 1,
-      limit: limit ? parseInt(limit as string) : 10,
-      search: search as string,
-      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
-    };
-    
-    req.query = transformedQuery;
-    next();
-  }, 
   getBranches
 );
 
