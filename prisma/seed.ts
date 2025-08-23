@@ -123,7 +123,8 @@ async function main() {
     },
   });
 
-  // Create some sample mechanics
+  // Create some sample mechanics (prevent duplicates with upsert)
+  console.log('🔧 Creating mechanics...');
   const mechanics = [
     { name: 'Juan Pérez', commissionPercentage: 15.00, branchId: defaultBranch.id },
     { name: 'María González', commissionPercentage: 12.50, branchId: defaultBranch.id },
@@ -131,11 +132,24 @@ async function main() {
   ];
 
   const createdMechanics = [];
-  for (let i = 0; i < mechanics.length; i++) {
-    const mechanic = await prisma.mechanic.create({
-      data: mechanics[i],
+  for (const mechanicData of mechanics) {
+    const existingMechanic = await prisma.mechanic.findFirst({
+      where: { 
+        name: mechanicData.name,
+        branchId: mechanicData.branchId 
+      }
     });
-    createdMechanics.push(mechanic);
+
+    if (!existingMechanic) {
+      const mechanic = await prisma.mechanic.create({
+        data: mechanicData,
+      });
+      createdMechanics.push(mechanic);
+      console.log(`   ✅ Created mechanic: ${mechanic.name}`);
+    } else {
+      console.log(`   ⚠️ Mechanic already exists: ${mechanicData.name}`);
+      createdMechanics.push(existingMechanic);
+    }
   }
 
   console.log('✅ Database seeded successfully!');
