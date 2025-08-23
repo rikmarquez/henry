@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import VehicleForm from '../components/VehicleForm';
+import ServiceHistoryTable from '../components/ServiceHistoryTable';
 import { 
   Car, 
   Search, 
@@ -459,27 +460,64 @@ export default function VehiclesPage() {
 
       {showDetailsModal && selectedVehicle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">Detalles del Vehículo</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><strong>Marca:</strong> {selectedVehicle.brand}</div>
-              <div><strong>Modelo:</strong> {selectedVehicle.model}</div>
-              <div><strong>Placa:</strong> {selectedVehicle.plate}</div>
-              <div><strong>Año:</strong> {selectedVehicle.year}</div>
-              <div><strong>Color:</strong> {selectedVehicle.color || 'No especificado'}</div>
-              <div><strong>Combustible:</strong> {selectedVehicle.fuelType || 'No especificado'}</div>
-              <div><strong>Transmisión:</strong> {selectedVehicle.transmission || 'No especificado'}</div>
-              <div className="md:col-span-2"><strong>Propietario:</strong> {selectedVehicle.client.name}</div>
-              <div className="md:col-span-2">
-                <strong>Fecha registro:</strong> {new Date(selectedVehicle.createdAt).toLocaleDateString('es-MX')}
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Car className="w-6 h-6 mr-2" />
+              Detalles del Vehículo
+            </h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Vehicle Information */}
+              <div>
+                <h3 className="text-lg font-medium mb-4 text-gray-800">Información del Vehículo</h3>
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><strong>Marca:</strong> {selectedVehicle.brand}</div>
+                    <div><strong>Modelo:</strong> {selectedVehicle.model}</div>
+                    <div><strong>Placa:</strong> {selectedVehicle.plate}</div>
+                    <div><strong>Año:</strong> {selectedVehicle.year}</div>
+                    <div><strong>Color:</strong> {selectedVehicle.color || 'No especificado'}</div>
+                    <div><strong>Combustible:</strong> {selectedVehicle.fuelType || 'No especificado'}</div>
+                    <div><strong>Transmisión:</strong> {selectedVehicle.transmission || 'No especificado'}</div>
+                  </div>
+                  <div className="border-t pt-3 mt-3">
+                    <div className="flex items-center space-x-2">
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span><strong>Propietario:</strong> {selectedVehicle.client.name}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Calendar className="w-4 h-4 text-gray-500" />
+                      <span><strong>Fecha registro:</strong> {new Date(selectedVehicle.createdAt).toLocaleDateString('es-MX')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service History */}
+              <div>
+                <h3 className="text-lg font-medium mb-4 text-gray-800">Historial de Servicios</h3>
+                <ServiceHistoryTable 
+                  type="vehicle" 
+                  id={selectedVehicle.id}
+                  compact={true}
+                  limit={5}
+                  showViewAllButton={true}
+                  onViewAll={() => {
+                    // TODO: Navigate to full history page
+                    console.log('Navigate to full history for vehicle', selectedVehicle.id);
+                  }}
+                />
               </div>
             </div>
-            <button
-              onClick={() => setShowDetailsModal(false)}
-              className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Cerrar
-            </button>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

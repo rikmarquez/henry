@@ -815,4 +815,192 @@ router.post(
   }
 );
 
+// GET /api/services/history/client/:id - Service history for a specific client
+router.get(
+  '/history/client/:id',
+  authenticate,
+  authorize(['services'], ['read']),
+  validateParams(idParamSchema),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { limit = 10, page = 1 } = req.query;
+      
+      const clientId = parseInt(id);
+      const limitNum = parseInt(limit as string);
+      const pageNum = parseInt(page as string);
+      const skip = (pageNum - 1) * limitNum;
+
+      // Verify client exists
+      const client = await prisma.client.findUnique({
+        where: { id: clientId },
+      });
+
+      if (!client) {
+        return res.status(404).json({
+          success: false,
+          message: 'Cliente no encontrado',
+        });
+      }
+
+      // Get services with full details
+      const services = await prisma.service.findMany({
+        where: {
+          clientId: clientId,
+          branchId: (req as any).user.branchId,
+        },
+        include: {
+          vehicle: {
+            select: { id: true, plate: true, brand: true, model: true, year: true }
+          },
+          mechanic: {
+            select: { id: true, name: true }
+          },
+          status: {
+            select: { id: true, name: true, color: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limitNum,
+        skip: skip,
+      });
+
+      // Get totals for summary
+      const totalServices = await prisma.service.count({
+        where: {
+          clientId: clientId,
+          branchId: (req as any).user.branchId,
+        }
+      });
+
+      const totalAmount = await prisma.service.aggregate({
+        where: {
+          clientId: clientId,
+          branchId: (req as any).user.branchId,
+        },
+        _sum: {
+          totalAmount: true,
+        }
+      });
+
+      res.json({
+        success: true,
+        data: {
+          services,
+          summary: {
+            totalServices,
+            totalAmount: totalAmount._sum.totalAmount || 0,
+            totalPages: Math.ceil(totalServices / limitNum),
+            currentPage: pageNum,
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Error getting client service history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+      });
+    }
+  }
+);
+
+// GET /api/services/history/vehicle/:id - Service history for a specific vehicle
+router.get(
+  '/history/vehicle/:id',
+  authenticate,
+  authorize(['services'], ['read']),
+  validateParams(idParamSchema),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { limit = 10, page = 1 } = req.query;
+      
+      const vehicleId = parseInt(id);
+      const limitNum = parseInt(limit as string);
+      const pageNum = parseInt(page as string);
+      const skip = (pageNum - 1) * limitNum;
+
+      // Verify vehicle exists
+      const vehicle = await prisma.vehicle.findUnique({
+        where: { id: vehicleId },
+        include: {
+          client: {
+            select: { id: true, name: true, phone: true }
+          }
+        }
+      });
+
+      if (!vehicle) {
+        return res.status(404).json({
+          success: false,
+          message: 'Vehículo no encontrado',
+        });
+      }
+
+      // Get services with full details
+      const services = await prisma.service.findMany({
+        where: {
+          vehicleId: vehicleId,
+          branchId: (req as any).user.branchId,
+        },
+        include: {
+          client: {
+            select: { id: true, name: true, phone: true }
+          },
+          mechanic: {
+            select: { id: true, name: true }
+          },
+          status: {
+            select: { id: true, name: true, color: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limitNum,
+        skip: skip,
+      });
+
+      // Get totals for summary
+      const totalServices = await prisma.service.count({
+        where: {
+          vehicleId: vehicleId,
+          branchId: (req as any).user.branchId,
+        }
+      });
+
+      const totalAmount = await prisma.service.aggregate({
+        where: {
+          vehicleId: vehicleId,
+          branchId: (req as any).user.branchId,
+        },
+        _sum: {
+          totalAmount: true,
+        }
+      });
+
+      res.json({
+        success: true,
+        data: {
+          vehicle,
+          services,
+          summary: {
+            totalServices,
+            totalAmount: totalAmount._sum.totalAmount || 0,
+            totalPages: Math.ceil(totalServices / limitNum),
+            currentPage: pageNum,
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Error getting vehicle service history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+      });
+    }
+  }
+);
+
 export default router;

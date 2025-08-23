@@ -40,7 +40,11 @@
       "Bash(del check-db.js clean-db.js seed-fresh.js test-branches.js)",
       "Bash(del check-db.js clean-db.js create-branches.js)",
       "Bash(psql:*)",
-      "Bash(start http://localhost:5174)"
+      "Bash(start http://localhost:5174)",
+      "Bash(git rm:*)",
+      "Bash(del clean-mechanics-script.js clean-duplicate-mechanics.sql)",
+      "Bash(del NUL)",
+      "Bash(del fix-branches.sql)"
     ],
     "deny": [],
     "ask": []

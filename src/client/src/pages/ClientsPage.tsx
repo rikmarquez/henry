@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
 import ClientForm from '../components/ClientForm';
+import ServiceHistoryTable from '../components/ServiceHistoryTable';
 import { 
   Users, 
   Search, 
@@ -389,39 +390,69 @@ export default function ClientsPage() {
 
       {showDetailsModal && selectedClient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">Detalles del Cliente</h2>
-            <div className="space-y-3">
-              <div><strong>Nombre:</strong> {selectedClient.name}</div>
-              <div><strong>Email:</strong> {selectedClient.email || 'No registrado'}</div>
-              <div><strong>Teléfono:</strong> {selectedClient.phone || 'No registrado'}</div>
-              <div><strong>Dirección:</strong> {selectedClient.address || 'No registrada'}</div>
-              <div><strong>Documento:</strong> {
-                selectedClient.documentType && selectedClient.documentNumber 
-                  ? `${selectedClient.documentType}: ${selectedClient.documentNumber}`
-                  : 'No registrado'
-              }</div>
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <Users className="w-6 h-6 mr-2" />
+              Detalles del Cliente
+            </h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Client Information */}
               <div>
-                <strong>Vehículos:</strong> {selectedClient.vehicles?.length || 0}
-                {(selectedClient.vehicles?.length || 0) > 0 && (
-                  <button
-                    onClick={() => {
-                      window.location.href = `/vehicles?clientId=${selectedClient.id}`;
-                    }}
-                    className="ml-2 text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    Ver vehículos
-                  </button>
-                )}
+                <h3 className="text-lg font-medium mb-4 text-gray-800">Información Personal</h3>
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                  <div><strong>Nombre:</strong> {selectedClient.name}</div>
+                  <div><strong>Email:</strong> {selectedClient.email || 'No registrado'}</div>
+                  <div><strong>Teléfono:</strong> {selectedClient.phone || 'No registrado'}</div>
+                  <div><strong>Dirección:</strong> {selectedClient.address || 'No registrada'}</div>
+                  <div><strong>Documento:</strong> {
+                    selectedClient.documentType && selectedClient.documentNumber 
+                      ? `${selectedClient.documentType}: ${selectedClient.documentNumber}`
+                      : 'No registrado'
+                  }</div>
+                  <div>
+                    <strong>Vehículos:</strong> {selectedClient.vehicles?.length || 0}
+                    {(selectedClient.vehicles?.length || 0) > 0 && (
+                      <button
+                        onClick={() => {
+                          window.location.href = `/vehicles?clientId=${selectedClient.id}`;
+                        }}
+                        className="ml-2 text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1"
+                      >
+                        <Car className="w-4 h-4" />
+                        <span>Ver vehículos</span>
+                      </button>
+                    )}
+                  </div>
+                  <div><strong>Fecha registro:</strong> {new Date(selectedClient.createdAt).toLocaleDateString('es-MX')}</div>
+                </div>
               </div>
-              <div><strong>Fecha registro:</strong> {new Date(selectedClient.createdAt).toLocaleDateString('es-MX')}</div>
+
+              {/* Service History */}
+              <div>
+                <h3 className="text-lg font-medium mb-4 text-gray-800">Historial de Servicios</h3>
+                <ServiceHistoryTable 
+                  type="client" 
+                  id={selectedClient.id}
+                  compact={true}
+                  limit={5}
+                  showViewAllButton={true}
+                  onViewAll={() => {
+                    // TODO: Navigate to full history page
+                    console.log('Navigate to full history for client', selectedClient.id);
+                  }}
+                />
+              </div>
             </div>
-            <button
-              onClick={() => setShowDetailsModal(false)}
-              className="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-            >
-              Cerrar
-            </button>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
