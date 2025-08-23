@@ -145,12 +145,15 @@ router.get(
   async (req, res) => {
     try {
       const { dateFrom, dateTo } = req.query;
+      const branchId = (req as any).user.branchId;
 
       const dateFilter: any = {};
       if (dateFrom || dateTo) {
         if (dateFrom) dateFilter.gte = new Date(dateFrom as string);
         if (dateTo) dateFilter.lte = new Date(dateTo as string);
       }
+
+      const branchFilter = { branchId };
 
       const [
         servicesByStatus,
@@ -163,7 +166,10 @@ router.get(
         prisma.service.groupBy({
           by: ['statusId'],
           _count: { id: true },
-          where: dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {},
+          where: {
+            ...branchFilter,
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          },
         }),
 
         // Services grouped by mechanic
@@ -172,6 +178,7 @@ router.get(
           _count: { id: true },
           _sum: { totalAmount: true, mechanicCommission: true },
           where: {
+            ...branchFilter,
             mechanicId: { not: null },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           },
@@ -182,6 +189,7 @@ router.get(
           _avg: { totalAmount: true },
           _count: { id: true },
           where: {
+            ...branchFilter,
             totalAmount: { gt: 0 },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           },
@@ -191,12 +199,16 @@ router.get(
         Promise.all([
           prisma.service.count({
             where: {
+              ...branchFilter,
               completedAt: { not: null },
               ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
             },
           }),
           prisma.service.count({
-            where: dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {},
+            where: {
+              ...branchFilter,
+              ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+            },
           }),
         ]).then(([completed, total]) => ({
           completed,
@@ -213,6 +225,7 @@ router.get(
           FROM services 
           WHERE completed_at IS NOT NULL
             AND created_at >= NOW() - INTERVAL '6 months'
+            AND branch_id = ${branchId}
           GROUP BY DATE_TRUNC('month', created_at)
           ORDER BY month DESC
         `,
@@ -224,6 +237,7 @@ router.get(
       });
 
       const mechanics = await prisma.mechanic.findMany({
+        where: branchFilter,
         select: { id: true, name: true },
       });
 
