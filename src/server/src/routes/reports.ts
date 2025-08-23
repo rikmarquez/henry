@@ -147,6 +147,21 @@ router.get(
       const { dateFrom, dateTo } = req.query;
       const branchId = (req as any).user.branchId;
 
+      console.log('🔧 Reports/services - Debug Info:', {
+        branchId,
+        dateFrom,
+        dateTo,
+        userFromReq: (req as any).user
+      });
+
+      if (!branchId) {
+        console.error('❌ Reports/services - Missing branchId in user token');
+        return res.status(400).json({
+          success: false,
+          message: 'Branch ID requerido para generar reportes',
+        });
+      }
+
       const dateFilter: any = {};
       if (dateFrom || dateTo) {
         if (dateFrom) dateFilter.gte = new Date(dateFrom as string);
@@ -154,6 +169,8 @@ router.get(
       }
 
       const branchFilter = { branchId };
+
+      console.log('🔧 Starting reports queries with filters:', { branchFilter, dateFilter });
 
       const [
         servicesByStatus,
@@ -216,20 +233,59 @@ router.get(
           completionRate: total > 0 ? (completed / total) * 100 : 0,
         })),
 
-        // Revenue by month (last 6 months)
-        prisma.$queryRaw`
-          SELECT 
-            DATE_TRUNC('month', created_at) as month,
-            SUM(total_amount) as revenue,
-            COUNT(*) as services_count
-          FROM services 
-          WHERE completed_at IS NOT NULL
-            AND created_at >= NOW() - INTERVAL '6 months'
-            AND branch_id = ${branchId}
-          GROUP BY DATE_TRUNC('month', created_at)
-          ORDER BY month DESC
-        `,
+        // Revenue by month (last 6 months) - with fallback
+        (async () => {
+          try {
+            return await prisma.$queryRaw`
+              SELECT 
+                DATE_TRUNC('month', created_at) as month,
+                SUM(total_amount) as revenue,
+                COUNT(*) as services_count
+              FROM services 
+              WHERE completed_at IS NOT NULL
+                AND created_at >= NOW() - INTERVAL '6 months'
+                AND branch_id = ${branchId}
+              GROUP BY DATE_TRUNC('month', created_at)
+              ORDER BY month DESC
+            `;
+          } catch (error) {
+            console.error('❌ SQL Raw query failed, using fallback:', error);
+            // Fallback to regular Prisma query without raw SQL
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const services = await prisma.service.findMany({
+              where: {
+                ...branchFilter,
+                completedAt: { not: null },
+                createdAt: { gte: sixMonthsAgo }
+              },
+              select: {
+                createdAt: true,
+                totalAmount: true
+              }
+            });
+            
+            // Group by month manually
+            const monthlyData: any = {};
+            services.forEach(service => {
+              const month = new Date(service.createdAt.getFullYear(), service.createdAt.getMonth(), 1);
+              const monthKey = month.toISOString();
+              if (!monthlyData[monthKey]) {
+                monthlyData[monthKey] = { month, revenue: 0, services_count: 0 };
+              }
+              monthlyData[monthKey].revenue += service.totalAmount;
+              monthlyData[monthKey].services_count += 1;
+            });
+            
+            return Object.values(monthlyData).sort((a: any, b: any) => 
+              new Date(b.month).getTime() - new Date(a.month).getTime()
+            );
+          }
+        })(),
       ]);
+
+      console.log('🔧 Queries completed successfully, starting data enhancement');
 
       // Enhance grouped data with related information
       const statuses = await prisma.workStatus.findMany({
@@ -263,10 +319,13 @@ router.get(
         },
       });
     } catch (error) {
-      console.error('Error fetching service reports:', error);
+      console.error('❌ Error fetching service reports:', error);
+      console.error('❌ Error stack:', (error as Error).stack);
+      console.error('❌ Error message:', (error as Error).message);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
+        debug: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
       });
     }
   }
