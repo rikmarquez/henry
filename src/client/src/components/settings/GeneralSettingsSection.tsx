@@ -19,7 +19,7 @@ const generalSettingsSchema = z.object({
 
   // Información de contacto
   phone: z.string().min(10, 'El teléfono debe tener al menos 10 dígitos'),
-  whatsapp: z.string().optional(),
+  whatsapp: z.string().optional().or(z.literal('')),
   email: z.string().email('Email inválido'),
   website: z.string().url('URL inválida').optional().or(z.literal('')),
 
@@ -68,8 +68,8 @@ const generalSettingsSchema = z.object({
   language: z.string().default('es-MX'),
 
   // Información fiscal
-  taxId: z.string().optional(), // RFC en México
-  taxRegime: z.string().optional(),
+  taxId: z.string().optional().or(z.literal('')), // RFC en México
+  taxRegime: z.string().optional().or(z.literal('')),
   
   // Logo y branding
   logoUrl: z.string().optional(),
