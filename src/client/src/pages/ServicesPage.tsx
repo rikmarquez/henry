@@ -539,36 +539,10 @@ export default function ServicesPage() {
     }
   };
 
-  const handleFilter = async (data: ServiceFilterData) => {
+  const handleFilter = (data: ServiceFilterData) => {
     const filters = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value)
     );
-    console.log('🔍 Filters being sent:', JSON.stringify(filters, null, 2));
-    
-    // Debug call first
-    try {
-      const periodFilters = getPeriodFilters();
-      const allFilters = { ...filters, ...periodFilters };
-      const params = new URLSearchParams({
-        page: '1',
-        limit: '10',
-        ...allFilters,
-      });
-      
-      console.log('🐛 Making debug call with params:', params.toString());
-      const debugResponse = await api.get(`/services/debug?${params}`);
-      console.log('🐛 Debug response:', debugResponse.data);
-    } catch (debugError: any) {
-      console.error('🐛 Debug error FULL:', JSON.stringify(debugError.response?.data, null, 2));
-      console.error('🐛 Debug error message:', debugError.message);
-      if (debugError.response?.data?.errors) {
-        console.error('🐛 Validation errors:', JSON.stringify(debugError.response.data.errors, null, 2));
-      }
-      if (debugError.response?.data?.rawQuery) {
-        console.error('🐛 Raw query received by server:', JSON.stringify(debugError.response.data.rawQuery, null, 2));
-      }
-    }
-    
     loadServices(1, filters);
   };
 
