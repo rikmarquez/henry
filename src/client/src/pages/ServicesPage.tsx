@@ -305,10 +305,18 @@ export default function ServicesPage() {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       console.log('🔧 Click outside detected, target:', target.className);
-      if (!target.closest('.client-search-container')) {
-        console.log('🔧 Cerrando dropdown por click fuera');
-        setShowClientDropdown(false);
+      
+      // Check if click is on a dropdown option - if so, don't close
+      if (target.closest('.client-dropdown-option') || target.closest('.client-search-container')) {
+        console.log('🔧 Click en dropdown option o container, no cerrar');
+        return;
       }
+      
+      console.log('🔧 Cerrando dropdown por click fuera');
+      // Use setTimeout to allow onClick to complete first
+      setTimeout(() => {
+        setShowClientDropdown(false);
+      }, 100);
     };
 
     if (showClientDropdown) {
@@ -1056,7 +1064,7 @@ export default function ServicesPage() {
                               console.log('🔧 Estados actualizados para cliente:', client.id);
                             }, 0);
                           }}
-                          className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                          className="client-dropdown-option w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         >
                           <div className="font-medium text-gray-900">{client.name}</div>
                           <div className="text-sm text-gray-500">
@@ -1072,7 +1080,7 @@ export default function ServicesPage() {
                           setShowClientDropdown(false);
                           setShowCreateClientModal(true);
                         }}
-                        className="w-full text-left px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium"
+                        className="client-dropdown-option w-full text-left px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium"
                       >
                         + Crear nuevo cliente "{clientSearch}"
                       </button>
