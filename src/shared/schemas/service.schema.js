@@ -27,10 +27,10 @@ exports.serviceStatusUpdateSchema = zod_1.z.object({
 });
 exports.serviceFilterSchema = common_schema_1.paginationSchema.extend({
     search: zod_1.z.string().optional(),
-    clientId: common_schema_1.idSchema.optional(),
-    vehicleId: common_schema_1.idSchema.optional(),
-    mechanicId: common_schema_1.idSchema.optional(),
-    statusId: common_schema_1.idSchema.optional(),
+    clientId: zod_1.z.coerce.number().optional(),
+    vehicleId: zod_1.z.coerce.number().optional(),
+    mechanicId: zod_1.z.coerce.number().optional(),
+    statusId: zod_1.z.coerce.number().optional(),
     dateFrom: common_schema_1.dateSchema.optional(),
     dateTo: common_schema_1.dateSchema.optional(),
 });

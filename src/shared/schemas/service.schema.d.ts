@@ -37,10 +37,10 @@ export declare const serviceFilterSchema: z.ZodObject<{
     sortBy: z.ZodOptional<z.ZodString>;
     sortOrder: z.ZodPipe<z.ZodOptional<z.ZodString>, z.ZodTransform<"asc" | "desc", string | undefined>>;
     search: z.ZodOptional<z.ZodString>;
-    clientId: z.ZodOptional<z.ZodNumber>;
-    vehicleId: z.ZodOptional<z.ZodNumber>;
-    mechanicId: z.ZodOptional<z.ZodNumber>;
-    statusId: z.ZodOptional<z.ZodNumber>;
+    clientId: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
+    vehicleId: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
+    mechanicId: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
+    statusId: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
     dateFrom: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodDate]>>;
     dateTo: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodDate]>>;
 }, z.core.$strip>;

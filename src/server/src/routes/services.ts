@@ -93,6 +93,13 @@ router.get(
 
       // Date range filter - FIXED: Use createdAt for basic filtering
       if (dateFrom || dateTo) {
+        // DEBUG: Logging temporal para verificar filtros recibidos
+        console.log('📅 DEBUG BACKEND FILTROS:');
+        console.log('- dateFrom:', dateFrom);
+        console.log('- dateTo:', dateTo);
+        console.log('- dateFrom parsed:', dateFrom ? new Date(dateFrom as string).toISOString() : 'null');
+        console.log('- dateTo parsed:', dateTo ? new Date(dateTo as string).toISOString() : 'null');
+        
         where.createdAt = {};
         if (dateFrom) {
           where.createdAt.gte = new Date(dateFrom as string);

@@ -9,3 +9,4 @@ export * from './workstatus.schema';
 export * from './opportunity.schema';
 export * from './statuslog.schema';
 export * from './common.schema';
+export * from './settings.schema';

@@ -25,3 +25,4 @@ __exportStar(require("./workstatus.schema"), exports);
 __exportStar(require("./opportunity.schema"), exports);
 __exportStar(require("./statuslog.schema"), exports);
 __exportStar(require("./common.schema"), exports);
+__exportStar(require("./settings.schema"), exports);

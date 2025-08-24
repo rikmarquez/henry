@@ -1,16 +1,14 @@
 import { z } from 'zod';
 export declare const createClientSchema: z.ZodObject<{
     name: z.ZodString;
-    whatsapp: z.ZodString;
+    whatsapp: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 export declare const updateClientSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     whatsapp: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 export declare const clientFilterSchema: z.ZodObject<{

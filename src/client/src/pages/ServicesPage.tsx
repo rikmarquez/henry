@@ -383,6 +383,13 @@ export default function ServicesPage() {
         weekStart.setDate(today.getDate() - today.getDay()); // Domingo
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6); // Sábado
+        
+        // DEBUG: Logging temporal para verificar fechas
+        console.log('📅 DEBUG SEMANA:');
+        console.log('- Hoy:', today.toISOString());
+        console.log('- Inicio semana:', toStartOfDay(weekStart).toISOString());
+        console.log('- Fin semana:', toEndOfDay(weekEnd).toISOString());
+        
         return {
           dateFrom: toStartOfDay(weekStart),
           dateTo: toEndOfDay(weekEnd) // Hasta fin de semana, no solo hoy
