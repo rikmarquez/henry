@@ -1747,7 +1747,7 @@ export default function ServicesPage() {
                     Año *
                   </label>
                   <input
-                    {...createVehicleForm.register('year', { valueAsNumber: true })}
+                    {...createVehicleForm.register('year')}
                     type="number"
                     min="1900"
                     max={new Date().getFullYear() + 1}
