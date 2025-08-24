@@ -304,14 +304,20 @@ export default function ServicesPage() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
+      console.log('🔧 Click outside detected, target:', target.className);
       if (!target.closest('.client-search-container')) {
+        console.log('🔧 Cerrando dropdown por click fuera');
         setShowClientDropdown(false);
       }
     };
 
     if (showClientDropdown) {
+      console.log('🔧 Agregando listener de click outside');
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () => {
+        console.log('🔧 Removiendo listener de click outside');
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
     }
   }, [showClientDropdown]);
 
@@ -1039,13 +1045,16 @@ export default function ServicesPage() {
                           onClick={() => {
                             console.log('🔧 Cliente seleccionado:', client);
                             console.log('🔧 Client.id tipo:', typeof client.id, 'valor:', client.id);
-                            setSelectedClientIdWithLog(client.id);
-                            console.log('🔧 Después de setSelectedClientId');
-                            setClientSearch(`${client.name} - ${client.phone}`);
-                            setShowClientDropdown(false);
-                            createForm.setValue('clientId', client.id);
-                            // Reset vehicle selection, but don't clear it immediately
-                            createForm.setValue('vehicleId', undefined);
+                            
+                            // Use React 18 batching to prevent race conditions
+                            setTimeout(() => {
+                              setSelectedClientIdWithLog(client.id);
+                              setClientSearch(`${client.name} - ${client.phone}`);
+                              setShowClientDropdown(false);
+                              createForm.setValue('clientId', client.id);
+                              createForm.setValue('vehicleId', undefined);
+                              console.log('🔧 Estados actualizados para cliente:', client.id);
+                            }, 0);
                           }}
                           className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                         >
