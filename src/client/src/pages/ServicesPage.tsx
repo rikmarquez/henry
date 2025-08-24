@@ -379,22 +379,26 @@ export default function ServicesPage() {
           dateTo: toEndOfDay(today)
         };
       case 'week': {
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay()); // Domingo
+        // Usar 'now' original para evitar problemas con 'today' modificado
+        const weekStart = new Date(now);
+        const dayOfWeek = weekStart.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+        weekStart.setDate(weekStart.getDate() - dayOfWeek); // Domingo de esta semana
+        
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // Sábado
+        weekEnd.setDate(weekStart.getDate() + 6); // Sábado de esta semana
         
         // DEBUG: Logging temporal para verificar fechas
-        console.log('📅 DEBUG SEMANA:');
-        console.log('- Hoy:', today.toISOString());
-        console.log('- WeekStart objeto:', weekStart.toISOString());
-        console.log('- WeekEnd objeto:', weekEnd.toISOString());
-        console.log('- Inicio semana:', toStartOfDay(weekStart));
-        console.log('- Fin semana:', toEndOfDay(weekEnd));
+        console.log('📅 DEBUG SEMANA CORREGIDO:');
+        console.log('- Now original:', now.toISOString());
+        console.log('- Day of week:', dayOfWeek);
+        console.log('- WeekStart (domingo):', weekStart.toISOString());
+        console.log('- WeekEnd (sábado):', weekEnd.toISOString());
+        console.log('- Inicio semana ISO:', toStartOfDay(weekStart));
+        console.log('- Fin semana ISO:', toEndOfDay(weekEnd));
         
         return {
           dateFrom: toStartOfDay(weekStart),
-          dateTo: toEndOfDay(weekEnd) // Hasta fin de semana, no solo hoy
+          dateTo: toEndOfDay(weekEnd)
         };
       }
       case 'month': {
