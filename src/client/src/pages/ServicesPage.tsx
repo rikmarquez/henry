@@ -385,7 +385,7 @@ export default function ServicesPage() {
         
         // Calcular días hacia atrás hasta lunes de esta semana
         // Si domingo(0): ir 6 días atrás, lunes(1): ir 0 días, martes(2): ir 1 día atrás, etc.
-        const daysToMonday = (dayOfWeek + 6) % 7;
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         
         // Ir al lunes de esta semana
         weekStart.setDate(weekStart.getDate() - daysToMonday);
