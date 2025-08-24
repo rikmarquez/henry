@@ -191,6 +191,13 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  
+  // Wrapper para setSelectedClientId con logging
+  const setSelectedClientIdWithLog = (value: number | null) => {
+    console.log('🔧 setSelectedClientId called with:', value);
+    console.trace('🔧 Call stack:');
+    setSelectedClientId(value);
+  };
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
@@ -448,7 +455,7 @@ export default function ServicesPage() {
         // Auto-select the new client
         const newClient = response.data.data;
         console.log('🆕 Cliente creado:', newClient);
-        setSelectedClientId(newClient.id);
+        setSelectedClientIdWithLog(newClient.id);
         setClientSearch(`${newClient.name} - ${newClient.phone || newClient.whatsapp}`);
         setShowClientDropdown(false);
         createForm.setValue('clientId', newClient.id);
@@ -485,7 +492,7 @@ export default function ServicesPage() {
           await loadVehiclesByClient(vehicleClientId);
           // Also update selectedClientId if it's null
           if (!selectedClientId) {
-            setSelectedClientId(vehicleClientId);
+            setSelectedClientIdWithLog(vehicleClientId);
           }
         }
         
@@ -515,7 +522,7 @@ export default function ServicesPage() {
         toast.success('Servicio creado exitosamente');
         setShowCreateModal(false);
         createForm.reset();
-        setSelectedClientId(null);
+        setSelectedClientIdWithLog(null);
         setPreloadedAppointment(null);
         loadServices();
       }
@@ -604,7 +611,7 @@ export default function ServicesPage() {
         toast.success('Servicio actualizado exitosamente');
         setShowEditModal(false);
         setSelectedService(null);
-        setSelectedClientId(null);
+        setSelectedClientIdWithLog(null);
         loadServices();
       }
     } catch (error: any) {
@@ -1032,7 +1039,7 @@ export default function ServicesPage() {
                           onClick={() => {
                             console.log('🔧 Cliente seleccionado:', client);
                             console.log('🔧 Client.id tipo:', typeof client.id, 'valor:', client.id);
-                            setSelectedClientId(client.id);
+                            setSelectedClientIdWithLog(client.id);
                             console.log('🔧 Después de setSelectedClientId');
                             setClientSearch(`${client.name} - ${client.phone}`);
                             setShowClientDropdown(false);
@@ -1237,7 +1244,7 @@ export default function ServicesPage() {
                   onClick={() => {
                     setShowCreateModal(false);
                     createForm.reset();
-                    setSelectedClientId(null);
+                    setSelectedClientIdWithLog(null);
                     setPreloadedAppointment(null);
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
@@ -1606,7 +1613,7 @@ export default function ServicesPage() {
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedService(null);
-                    setSelectedClientId(null);
+                    setSelectedClientIdWithLog(null);
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
