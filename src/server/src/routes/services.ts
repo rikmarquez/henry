@@ -102,24 +102,30 @@ router.get(
       }
 
       // Special filtering logic: Filter TERMINADO and PERDIDO services to today only
+      // BUT: Skip this logic if explicit date filters are provided (historical view)
       const currentStatusId = statusId ? parseInt(statusId as string) : null;
+      const hasDateFilters = dateFrom || dateTo;
       const today = new Date();
       const startOfToday = new Date(today.setHours(0, 0, 0, 0));
       const endOfToday = new Date(today.setHours(23, 59, 59, 999));
       
       if (currentStatusId === 5 || currentStatusId === 6) { // TERMINADO or PERDIDO status specifically requested
-        where.AND = [
-          ...(where.AND || []),
-          {
-            OR: [
-              { completedAt: { gte: startOfToday, lte: endOfToday } },
-              { updatedAt: { gte: startOfToday, lte: endOfToday } },
-            ],
-          },
-        ];
+        // Only apply today-only logic if no explicit date filters provided
+        if (!hasDateFilters) {
+          where.AND = [
+            ...(where.AND || []),
+            {
+              OR: [
+                { completedAt: { gte: startOfToday, lte: endOfToday } },
+                { updatedAt: { gte: startOfToday, lte: endOfToday } },
+              ],
+            },
+          ];
+        }
       }
       // For all other requests (including no status filter), apply automatic filtering
-      else {
+      // BUT: Skip this logic if explicit date filters are provided (historical view)
+      else if (!hasDateFilters) {
         const originalOR = where.OR || [];
         where.OR = [
           ...originalOR,
