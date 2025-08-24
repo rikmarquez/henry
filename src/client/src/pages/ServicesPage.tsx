@@ -380,10 +380,12 @@ export default function ServicesPage() {
         };
       case 'week': {
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay());
+        weekStart.setDate(today.getDate() - today.getDay()); // Domingo
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6); // Sábado
         return {
           dateFrom: toStartOfDay(weekStart),
-          dateTo: toEndOfDay(today)
+          dateTo: toEndOfDay(weekEnd) // Hasta fin de semana, no solo hoy
         };
       }
       case 'month': {
@@ -418,7 +420,13 @@ export default function ServicesPage() {
         return {};
       case 'all':
       default:
-        return {}; // No date filters for "all"
+        // Para "todo el histórico", enviamos fechas muy amplias para evitar filtrado automático
+        const veryOldDate = new Date(2000, 0, 1); // 1 enero 2000
+        const futureDate = new Date(2099, 11, 31); // 31 diciembre 2099
+        return {
+          dateFrom: toStartOfDay(veryOldDate),
+          dateTo: toEndOfDay(futureDate)
+        };
     }
   };
 
