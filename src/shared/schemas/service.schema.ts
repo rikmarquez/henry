@@ -28,22 +28,10 @@ export const serviceStatusUpdateSchema = z.object({
 
 export const serviceFilterSchema = paginationSchema.extend({
   search: z.string().optional(),
-  clientId: z.union([z.string(), z.number()]).optional().transform(val => {
-    if (val === undefined || val === null || val === '') return undefined;
-    return typeof val === 'number' ? val : parseInt(String(val));
-  }),
-  vehicleId: z.union([z.string(), z.number()]).optional().transform(val => {
-    if (val === undefined || val === null || val === '') return undefined;
-    return typeof val === 'number' ? val : parseInt(String(val));
-  }),
-  mechanicId: z.union([z.string(), z.number()]).optional().transform(val => {
-    if (val === undefined || val === null || val === '') return undefined;
-    return typeof val === 'number' ? val : parseInt(String(val));
-  }),
-  statusId: z.union([z.string(), z.number()]).optional().transform(val => {
-    if (val === undefined || val === null || val === '') return undefined;
-    return typeof val === 'number' ? val : parseInt(String(val));
-  }),
+  clientId: z.coerce.number().optional(),
+  vehicleId: z.coerce.number().optional(),
+  mechanicId: z.coerce.number().optional(),
+  statusId: z.coerce.number().optional(),
   dateFrom: dateSchema.optional(),
   dateTo: dateSchema.optional(),
 });
