@@ -104,14 +104,19 @@ router.post(
       console.log('🔧 Settings POST - settingsData:', settingsData);
 
       // Check if settings already exist for this branch
+      console.log('🔧 Looking for existing settings with branchId:', branchId, 'type: GENERAL');
+      
       let settings = await prisma.setting.findFirst({
         where: {
-          branchId,
+          branchId: branchId,
           type: 'GENERAL'
         }
       });
+      
+      console.log('🔧 Existing settings found:', settings ? 'YES' : 'NO');
 
       if (settings) {
+        console.log('🔧 Updating existing settings...');
         // Update existing settings
         settings = await prisma.setting.update({
           where: { id: settings.id },
@@ -120,15 +125,18 @@ router.post(
             updatedAt: new Date()
           }
         });
+        console.log('🔧 Settings updated successfully');
       } else {
+        console.log('🔧 Creating new settings...');
         // Create new settings
         settings = await prisma.setting.create({
           data: {
-            branchId,
+            branchId: branchId,
             type: 'GENERAL',
             data: settingsData
           }
         });
+        console.log('🔧 Settings created successfully');
       }
 
       res.json({
@@ -138,11 +146,13 @@ router.post(
       });
 
     } catch (error: any) {
-      console.error('Error saving general settings:', error);
+      console.error('🔧 Error saving general settings:', error);
+      console.error('🔧 Error stack:', error.stack);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor',
-        error: error.message
+        error: error.message,
+        details: error.stack
       });
     }
   }
