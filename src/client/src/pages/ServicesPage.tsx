@@ -291,12 +291,9 @@ export default function ServicesPage() {
 
   // Load vehicles when client is selected
   useEffect(() => {
-    console.log('🔧 useEffect selectedClientId cambió:', selectedClientId);
     if (selectedClientId) {
-      console.log('🔧 Cargando vehículos para cliente ID:', selectedClientId);
       loadVehiclesByClient(selectedClientId);
     } else {
-      console.log('🔧 No hay cliente seleccionado, limpiando vehículos');
       setVehicles([]);
     }
   }, [selectedClientId]);
@@ -544,15 +541,7 @@ export default function ServicesPage() {
 
   const handleFilter = (data: ServiceFilterData) => {
     const filters = Object.fromEntries(
-      Object.entries(data)
-        .filter(([_, value]) => value)
-        .map(([key, value]) => {
-          // Convert ID fields from strings to numbers
-          if (['clientId', 'vehicleId', 'mechanicId', 'statusId'].includes(key)) {
-            return [key, parseInt(value as string)];
-          }
-          return [key, value];
-        })
+      Object.entries(data).filter(([_, value]) => value)
     );
     console.log('🔍 Filters being sent:', filters);
     loadServices(1, filters);

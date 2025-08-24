@@ -28,10 +28,10 @@ export const serviceStatusUpdateSchema = z.object({
 
 export const serviceFilterSchema = paginationSchema.extend({
   search: z.string().optional(),
-  clientId: idSchema.optional(),
-  vehicleId: idSchema.optional(),
-  mechanicId: idSchema.optional(),
-  statusId: idSchema.optional(),
+  clientId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  vehicleId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  mechanicId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  statusId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
   dateFrom: dateSchema.optional(),
   dateTo: dateSchema.optional(),
 });
