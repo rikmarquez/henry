@@ -34,6 +34,7 @@ model Branch {
   appointments  Appointment[]
   services      Service[]
   opportunities Opportunity[]
+  settings      Setting[]
   
   @@map("branches")
 }
@@ -233,4 +234,18 @@ model StatusLog {
   changedByUser User        @relation(fields: [changedBy], references: [id])
   
   @@map("status_logs")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  branchId  Int      @map("branch_id")
+  type      String   // 'GENERAL', 'SERVICES', 'FINANCE', etc.
+  data      Json     // JSON field to store flexible configuration data
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  branch Branch @relation(fields: [branchId], references: [id])
+  
+  @@unique([branchId, type])
+  @@map("settings")
 }

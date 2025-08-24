@@ -18,6 +18,7 @@ import OpportunitiesPage from './pages/OpportunitiesPage';
 import BranchesPage from './pages/BranchesPage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -132,6 +133,14 @@ function App() {
                 <BranchesPage />
               </Layout>
             </AdminRoute>
+          } />
+          
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Layout>
+                <SettingsPage />
+              </Layout>
+            </ProtectedRoute>
           } />
           
           {/* Redirigir raíz al dashboard */}

@@ -11,6 +11,7 @@ import opportunityRoutes from './opportunities';
 import statusLogRoutes from './statuslogs';
 import reportRoutes from './reports';
 import branchRoutes from './branches';
+import settingRoutes from './settings';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/opportunities', opportunityRoutes);
 router.use('/statuslogs', statusLogRoutes);
 router.use('/reports', reportRoutes);
 router.use('/branches', branchRoutes);
+router.use('/settings', settingRoutes);
 
 // Health check
 router.get('/health', (req, res) => {
