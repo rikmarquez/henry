@@ -91,7 +91,7 @@ router.get(
         where.statusId = parseInt(statusId as string);
       }
 
-      // Date range filter
+      // Date range filter - FIXED: Use createdAt for basic filtering
       if (dateFrom || dateTo) {
         where.createdAt = {};
         if (dateFrom) {
@@ -102,56 +102,42 @@ router.get(
         }
       }
 
-      // Special filtering logic: Filter TERMINADO and PERDIDO services to today only
-      // BUT: Skip this logic if explicit date filters are provided (historical view)
-      const currentStatusId = statusId ? parseInt(statusId as string) : null;
+      // SIMPLIFIED LOGIC: Only apply special filtering for "current work" periods (no date filters)
+      // This allows historical views to show all services without complex logic
       const hasDateFilters = dateFrom || dateTo;
-      const today = new Date();
-      const startOfToday = new Date(today.setHours(0, 0, 0, 0));
-      const endOfToday = new Date(today.setHours(23, 59, 59, 999));
       
-      if (currentStatusId === 5 || currentStatusId === 6) { // TERMINADO or PERDIDO status specifically requested
-        // Only apply today-only logic if no explicit date filters provided
-        if (!hasDateFilters) {
-          where.AND = [
-            ...(where.AND || []),
-            {
-              OR: [
-                { completedAt: { gte: startOfToday, lte: endOfToday } },
-                { updatedAt: { gte: startOfToday, lte: endOfToday } },
-              ],
-            },
-          ];
-        }
-      }
-      // For all other requests (including no status filter), apply automatic filtering
-      // BUT: Skip this logic if explicit date filters are provided (historical view)
-      else if (!hasDateFilters) {
+      if (!hasDateFilters) {
+        // Only for "current work" view (no period selected or "today" without explicit dates)
+        // Show all active services + today's completed services
+        const today = new Date();
+        const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
+        const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+        
         const originalOR = where.OR || [];
         where.OR = [
           ...originalOR,
-          // Show all non-final services (not TERMINADO or PERDIDO)
-          { statusId: { notIn: [5, 6] } },
+          // Show all non-completed services
+          { statusId: { notIn: [5, 6] } }, // Not TERMINADO or PERDIDO
           // Show only today's TERMINADO services
           {
             AND: [
-              { statusId: 5 },
+              { statusId: 5 }, // TERMINADO
               {
                 OR: [
                   { completedAt: { gte: startOfToday, lte: endOfToday } },
-                  { updatedAt: { gte: startOfToday, lte: endOfToday } },
+                  { createdAt: { gte: startOfToday, lte: endOfToday } },
                 ],
               },
             ],
           },
-          // Show only today's PERDIDO services
+          // Show only today's PERDIDO services  
           {
             AND: [
-              { statusId: 6 },
+              { statusId: 6 }, // PERDIDO
               {
                 OR: [
                   { completedAt: { gte: startOfToday, lte: endOfToday } },
-                  { updatedAt: { gte: startOfToday, lte: endOfToday } },
+                  { createdAt: { gte: startOfToday, lte: endOfToday } },
                 ],
               },
             ],
