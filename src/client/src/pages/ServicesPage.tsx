@@ -490,14 +490,19 @@ export default function ServicesPage() {
         setFilteredVehicles([]);
       }
     } catch (error: any) {
-      console.error('🚨 Error detallado al crear cliente:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.response?.data?.message,
-        errors: error.response?.data?.errors,
-        fullResponse: error.response
-      });
-      toast.error(error.response?.data?.message || 'Error al crear cliente');
+      console.error('🚨 Error completo:', error);
+      console.error('🚨 Response status:', error.response?.status);
+      console.error('🚨 Response data:', error.response?.data);
+      console.error('🚨 Response headers:', error.response?.headers);
+      
+      // Intenta obtener el mensaje detallado
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Error al crear cliente';
+      
+      console.error('🚨 Mensaje final:', errorMessage);
+      toast.error(errorMessage);
     }
   };
 
