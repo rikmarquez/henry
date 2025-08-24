@@ -194,6 +194,7 @@ export default function ServicesPage() {
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
+  const [vehicleClientId, setVehicleClientId] = useState<number | null>(null); // Store client ID for vehicle creation
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -463,10 +464,12 @@ export default function ServicesPage() {
 
   const handleCreateVehicle = async (data: CreateVehicleData) => {
     try {
-      console.log('🚗 Creating vehicle with data:', { ...data, clientId: selectedClientId });
+      console.log('🚗 Creating vehicle with data:', { ...data, clientId: vehicleClientId });
+      console.log('🚗 selectedClientId actual:', selectedClientId);
+      console.log('🚗 vehicleClientId:', vehicleClientId);
       const response = await api.post('/vehicles', {
         ...data,
-        clientId: selectedClientId, // Use the selected client
+        clientId: vehicleClientId, // Use the stored client ID
       });
       
       console.log('🚗 Vehicle creation response:', response.data);
@@ -474,11 +477,16 @@ export default function ServicesPage() {
       if (response.data.success) {
         toast.success('Vehículo creado exitosamente');
         setShowCreateVehicleModal(false);
+        setVehicleClientId(null);
         createVehicleForm.reset();
         
         // Reload vehicles for the selected client
-        if (selectedClientId) {
-          await loadVehiclesByClient(selectedClientId);
+        if (vehicleClientId) {
+          await loadVehiclesByClient(vehicleClientId);
+          // Also update selectedClientId if it's null
+          if (!selectedClientId) {
+            setSelectedClientId(vehicleClientId);
+          }
         }
         
         // Auto-select the new vehicle
@@ -1110,7 +1118,10 @@ export default function ServicesPage() {
                     <div className="mt-2 text-xs">
                       <button
                         type="button"
-                        onClick={() => setShowCreateVehicleModal(true)}
+                        onClick={() => {
+                          setVehicleClientId(selectedClientId);
+                          setShowCreateVehicleModal(true);
+                        }}
                         className="text-green-600 hover:text-green-800 underline"
                       >
                         + Agregar vehículo a este cliente
@@ -1711,7 +1722,7 @@ export default function ServicesPage() {
       )}
 
       {/* Create Vehicle Modal */}
-      {showCreateVehicleModal && selectedClientId && (
+      {showCreateVehicleModal && vehicleClientId && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[60]">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
@@ -1719,7 +1730,7 @@ export default function ServicesPage() {
                 Agregar Vehículo
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Cliente: {clients.find(c => c.id === selectedClientId)?.name}
+                Cliente: {clients.find(c => c.id === vehicleClientId)?.name}
               </p>
             </div>
 
@@ -1849,6 +1860,7 @@ export default function ServicesPage() {
                   type="button"
                   onClick={() => {
                     setShowCreateVehicleModal(false);
+                    setVehicleClientId(null);
                     createVehicleForm.reset();
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
