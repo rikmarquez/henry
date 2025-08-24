@@ -559,7 +559,12 @@ export default function ServicesPage() {
       const debugResponse = await api.get(`/services/debug?${params}`);
       console.log('🐛 Debug response:', debugResponse.data);
     } catch (debugError: any) {
-      console.error('🐛 Debug error:', debugError.response?.data || debugError.message);
+      console.error('🐛 Debug error FULL:', debugError);
+      console.error('🐛 Debug error response data:', debugError.response?.data);
+      console.error('🐛 Debug error message:', debugError.message);
+      if (debugError.response?.data?.errors) {
+        console.error('🐛 Validation errors:', debugError.response.data.errors);
+      }
     }
     
     loadServices(1, filters);
