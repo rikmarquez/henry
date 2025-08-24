@@ -28,25 +28,21 @@ export const serviceStatusUpdateSchema = z.object({
 
 export const serviceFilterSchema = paginationSchema.extend({
   search: z.string().optional(),
-  clientId: z.string().optional().transform(val => {
-    if (!val || val.trim() === '') return undefined;
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? undefined : parsed;
+  clientId: z.union([z.string(), z.number()]).optional().transform(val => {
+    if (val === undefined || val === null || val === '') return undefined;
+    return typeof val === 'number' ? val : parseInt(String(val));
   }),
-  vehicleId: z.string().optional().transform(val => {
-    if (!val || val.trim() === '') return undefined;
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? undefined : parsed;
+  vehicleId: z.union([z.string(), z.number()]).optional().transform(val => {
+    if (val === undefined || val === null || val === '') return undefined;
+    return typeof val === 'number' ? val : parseInt(String(val));
   }),
-  mechanicId: z.string().optional().transform(val => {
-    if (!val || val.trim() === '') return undefined;
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? undefined : parsed;
+  mechanicId: z.union([z.string(), z.number()]).optional().transform(val => {
+    if (val === undefined || val === null || val === '') return undefined;
+    return typeof val === 'number' ? val : parseInt(String(val));
   }),
-  statusId: z.string().optional().transform(val => {
-    if (!val || val.trim() === '') return undefined;
-    const parsed = parseInt(val);
-    return isNaN(parsed) ? undefined : parsed;
+  statusId: z.union([z.string(), z.number()]).optional().transform(val => {
+    if (val === undefined || val === null || val === '') return undefined;
+    return typeof val === 'number' ? val : parseInt(String(val));
   }),
   dateFrom: dateSchema.optional(),
   dateTo: dateSchema.optional(),
