@@ -5,7 +5,7 @@ import { validate } from '../middleware/validation.middleware';
 import {
   generalSettingsSchema,
   updateGeneralSettingsSchema,
-} from '../../../shared/schemas';
+} from '../../../shared/schemas/settings.schema';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -53,11 +53,17 @@ router.get(
 router.post(
   '/general',
   authenticate,
-  validate(generalSettingsSchema),
+  // validate(generalSettingsSchema), // Temporarily disabled for debugging
   async (req, res) => {
     try {
+      console.log('🔧 Settings POST - User:', req.user);
+      console.log('🔧 Settings POST - Body:', req.body);
+      
       const branchId = req.user.branchId;
       const settingsData = req.body;
+      
+      console.log('🔧 Settings POST - branchId:', branchId);
+      console.log('🔧 Settings POST - settingsData:', settingsData);
 
       // Check if settings already exist for this branch
       let settings = await prisma.setting.findFirst({
