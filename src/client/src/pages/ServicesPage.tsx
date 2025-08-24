@@ -387,8 +387,10 @@ export default function ServicesPage() {
         // DEBUG: Logging temporal para verificar fechas
         console.log('📅 DEBUG SEMANA:');
         console.log('- Hoy:', today.toISOString());
-        console.log('- Inicio semana:', toStartOfDay(weekStart).toISOString());
-        console.log('- Fin semana:', toEndOfDay(weekEnd).toISOString());
+        console.log('- WeekStart objeto:', weekStart.toISOString());
+        console.log('- WeekEnd objeto:', weekEnd.toISOString());
+        console.log('- Inicio semana:', toStartOfDay(weekStart));
+        console.log('- Fin semana:', toEndOfDay(weekEnd));
         
         return {
           dateFrom: toStartOfDay(weekStart),
