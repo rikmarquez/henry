@@ -1145,6 +1145,7 @@ export default function ServicesPage() {
                         type="button"
                         onClick={() => {
                           setVehicleClientId(selectedClientId);
+                          createVehicleForm.setValue('clientId', selectedClientId || 0);
                           setShowCreateVehicleModal(true);
                         }}
                         className="text-green-600 hover:text-green-800 underline"
@@ -1762,6 +1763,11 @@ export default function ServicesPage() {
             <form onSubmit={createVehicleForm.handleSubmit(handleCreateVehicle, (errors) => {
               console.error('🚨 Errores de validación en formulario de vehículo:', errors);
             })} className="p-6 space-y-4">
+              {/* Hidden clientId field */}
+              <input
+                type="hidden"
+                {...createVehicleForm.register('clientId', { value: vehicleClientId })}
+              />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
