@@ -33,11 +33,13 @@ router.get('/debug-schema', async (req, res) => {
       });
     } else {
       console.log('🐛 Schema validation FAILED:', result.error.errors);
+      console.log('🐛 Full error object:', JSON.stringify(result.error, null, 2));
       res.status(400).json({
         success: false,
         message: 'Schema validation failed',
         input: testParams,
-        errors: result.error.errors
+        errors: result.error.errors,
+        fullError: result.error.message
       });
     }
   } catch (error) {
