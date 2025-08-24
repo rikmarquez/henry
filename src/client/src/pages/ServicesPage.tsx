@@ -559,11 +559,13 @@ export default function ServicesPage() {
       const debugResponse = await api.get(`/services/debug?${params}`);
       console.log('🐛 Debug response:', debugResponse.data);
     } catch (debugError: any) {
-      console.error('🐛 Debug error FULL:', debugError);
-      console.error('🐛 Debug error response data:', debugError.response?.data);
+      console.error('🐛 Debug error FULL:', JSON.stringify(debugError.response?.data, null, 2));
       console.error('🐛 Debug error message:', debugError.message);
       if (debugError.response?.data?.errors) {
-        console.error('🐛 Validation errors:', debugError.response.data.errors);
+        console.error('🐛 Validation errors:', JSON.stringify(debugError.response.data.errors, null, 2));
+      }
+      if (debugError.response?.data?.rawQuery) {
+        console.error('🐛 Raw query received by server:', JSON.stringify(debugError.response.data.rawQuery, null, 2));
       }
     }
     
