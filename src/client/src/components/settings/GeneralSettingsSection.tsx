@@ -136,11 +136,12 @@ export default function GeneralSettingsSection() {
         form.reset(response.data.data);
       }
     } catch (error: any) {
-      console.error('Error loading settings:', error);
-      // No mostrar error si es que no existen configuraciones previas
+      // Solo mostrar error si no es un 404 (configuraciones no encontradas)
       if (error.response?.status !== 404) {
+        console.error('Error loading settings:', error);
         toast.error('Error al cargar configuraciones');
       }
+      // 404 es normal en la primera carga, no mostrar error
     } finally {
       setLoading(false);
     }
