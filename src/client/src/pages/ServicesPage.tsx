@@ -153,7 +153,7 @@ const createVehicleSchema = z.object({
   plate: z.string().min(1, 'Placa es requerida'),
   brand: z.string().min(1, 'Marca es requerida'),
   model: z.string().min(1, 'Modelo es requerido'),
-  year: z.number().min(1900).max(new Date().getFullYear() + 1),
+  year: z.string().transform(val => parseInt(val)).pipe(z.number().min(1900).max(new Date().getFullYear() + 1)),
   color: z.string().optional(),
   fuelType: z.string().optional(),
   transmission: z.string().optional(),
@@ -435,21 +435,26 @@ export default function ServicesPage() {
     try {
       const response = await api.post('/clients', {
         ...data,
-        whatsapp: data.phone, // Auto-sync phone with whatsapp
+        whatsapp: data.whatsapp || data.phone, // Use whatsapp if provided, otherwise use phone
       });
 
       if (response.data.success) {
         toast.success('Cliente creado exitosamente');
         setShowCreateClientModal(false);
         createClientForm.reset();
-        loadClients(); // Reload clients list
+        await loadClients(); // Reload clients list and wait for it
         
         // Auto-select the new client
         const newClient = response.data.data;
+        console.log('🆕 Cliente creado:', newClient);
         setSelectedClientId(newClient.id);
-        setClientSearch(`${newClient.name} - ${newClient.phone}`);
+        setClientSearch(`${newClient.name} - ${newClient.phone || newClient.whatsapp}`);
         setShowClientDropdown(false);
         createForm.setValue('clientId', newClient.id);
+        
+        // Also clear the vehicle selection since we have a new client
+        createForm.setValue('vehicleId', 0);
+        setFilteredVehicles([]);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al crear cliente');
@@ -458,10 +463,13 @@ export default function ServicesPage() {
 
   const handleCreateVehicle = async (data: CreateVehicleData) => {
     try {
+      console.log('🚗 Creating vehicle with data:', { ...data, clientId: selectedClientId });
       const response = await api.post('/vehicles', {
         ...data,
         clientId: selectedClientId, // Use the selected client
       });
+      
+      console.log('🚗 Vehicle creation response:', response.data);
 
       if (response.data.success) {
         toast.success('Vehículo creado exitosamente');
@@ -470,14 +478,16 @@ export default function ServicesPage() {
         
         // Reload vehicles for the selected client
         if (selectedClientId) {
-          loadVehiclesByClient(selectedClientId);
+          await loadVehiclesByClient(selectedClientId);
         }
         
         // Auto-select the new vehicle
         const newVehicle = response.data.data;
+        console.log('🚗 Auto-selecting new vehicle:', newVehicle);
         createForm.setValue('vehicleId', newVehicle.id);
       }
     } catch (error: any) {
+      console.error('🚨 Error creating vehicle:', error);
       toast.error(error.response?.data?.message || 'Error al crear vehículo');
     }
   };

@@ -8,7 +8,13 @@ import { X, Loader2 } from 'lucide-react';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  whatsapp: z.string().min(10, 'El WhatsApp debe tener al menos 10 dígitos'),
+  phone: z.string().optional(),
+  whatsapp: z.string().optional(),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
+  address: z.string().optional(),
+}).refine((data) => data.whatsapp || data.phone, {
+  message: 'Al menos WhatsApp o teléfono es requerido',
+  path: ['phone'],
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -16,7 +22,10 @@ type ClientFormData = z.infer<typeof clientSchema>;
 interface Client {
   id: number;
   name: string;
-  whatsapp: string;
+  whatsapp?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 
 interface ClientFormProps {
@@ -40,7 +49,10 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
+      phone: '',
       whatsapp: '',
+      email: '',
+      address: '',
     },
   });
 
@@ -49,13 +61,19 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
     if (client) {
       reset({
         name: client.name || '',
+        phone: client.phone || '',
         whatsapp: client.whatsapp || '',
+        email: client.email || '',
+        address: client.address || '',
       });
     } else {
       // Reset form for new client
       reset({
         name: '',
+        phone: '',
         whatsapp: '',
+        email: '',
+        address: '',
       });
     }
   }, [client, reset]);
@@ -65,10 +83,10 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
     mutationFn: async (data: ClientFormData) => {
       const payload = {
         name: data.name,
-        whatsapp: data.whatsapp,
-        phone: data.whatsapp, // Usar whatsapp como phone también
-        email: null,
-        address: null,
+        whatsapp: data.whatsapp || data.phone,
+        phone: data.phone || data.whatsapp,
+        email: data.email || null,
+        address: data.address || null,
       };
       const response = await api.post('/clients', payload);
       return response.data;
@@ -91,10 +109,10 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
       // Solo enviar los campos específicos que necesitamos
       const payload = {
         name: data.name,
-        whatsapp: data.whatsapp,
-        phone: data.whatsapp, // Usar whatsapp como phone también
-        email: null,
-        address: null,
+        whatsapp: data.whatsapp || data.phone,
+        phone: data.phone || data.whatsapp,
+        email: data.email || null,
+        address: data.address || null,
       };
       const response = await api.put(`/clients/${client.id}`, payload);
       return response.data;
@@ -165,21 +183,75 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
             )}
           </div>
 
+          {/* Teléfono */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Teléfono *
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              {...register('phone')}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="3001234567"
+              disabled={isLoading}
+            />
+            {errors.phone && (
+              <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+            )}
+          </div>
+
           {/* WhatsApp */}
           <div>
             <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
-              WhatsApp *
+              WhatsApp
             </label>
             <input
               type="tel"
               id="whatsapp"
               {...register('whatsapp')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="3001234567"
+              placeholder="3001234567 (opcional)"
               disabled={isLoading}
             />
             {errors.whatsapp && (
               <p className="text-red-500 text-sm mt-1">{errors.whatsapp.message}</p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              {...register('email')}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="correo@ejemplo.com (opcional)"
+              disabled={isLoading}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
+
+          {/* Dirección */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              Dirección
+            </label>
+            <textarea
+              id="address"
+              {...register('address')}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows={2}
+              placeholder="Dirección (opcional)"
+              disabled={isLoading}
+            />
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
             )}
           </div>
 

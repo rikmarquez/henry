@@ -145,8 +145,8 @@ export const clientsController = {
       // Unify phone and WhatsApp - use whatsapp as primary, phone as backup
       const unifiedData = {
         ...clientData,
-        phone: clientData.whatsapp, // Copy whatsapp to phone
-        whatsapp: clientData.whatsapp, // Keep whatsapp as is
+        phone: clientData.phone || clientData.whatsapp, // Use phone if provided, otherwise use whatsapp
+        whatsapp: clientData.whatsapp || clientData.phone, // Use whatsapp if provided, otherwise use phone
       };
 
       const client = await prisma.client.create({
