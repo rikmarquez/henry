@@ -478,16 +478,22 @@ export default function ServicesPage() {
         await loadClients(); // Reload clients list and wait for it
         
         // Auto-select the new client
-        const newClient = response.data.data;
+        const newClient = response.data.data || response.data.client || response.data;
         console.log('🆕 Cliente creado:', newClient);
-        setSelectedClientIdWithLog(newClient.id);
+        console.log('🆕 newClient.id:', newClient?.id);
+        
+        if (newClient?.id) {
+          setSelectedClientIdWithLog(newClient.id);
+        } else {
+          console.error('🚨 newClient.id es undefined:', newClient);
+          return; // No continuar si no hay ID
+        }
         setClientSearch(`${newClient.name} - ${newClient.phone || newClient.whatsapp}`);
         setShowClientDropdown(false);
         createForm.setValue('clientId', newClient.id);
         
         // Also clear the vehicle selection since we have a new client
         createForm.setValue('vehicleId', 0);
-        setFilteredVehicles([]);
       }
     } catch (error: any) {
       console.error('🚨 Error completo:', error);
