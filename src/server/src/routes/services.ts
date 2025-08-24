@@ -14,6 +14,18 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // DEBUG ENDPOINT - Remove after fixing the issue
+router.get('/debug-raw', async (req, res) => {
+  console.log('🐛 RAW DEBUG - Query params:', req.query);
+  console.log('🐛 RAW DEBUG - Headers:', req.headers);
+  res.json({
+    success: true,
+    message: 'Raw debug - no validation',
+    query: req.query,
+    headers: req.headers
+  });
+});
+
+// DEBUG ENDPOINT - Remove after fixing the issue
 router.get('/debug', authenticate, async (req, res) => {
   try {
     console.log('🐛 DEBUG - Raw query params:', req.query);
