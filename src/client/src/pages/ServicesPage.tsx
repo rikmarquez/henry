@@ -381,13 +381,14 @@ export default function ServicesPage() {
       case 'week': {
         // SEMANA DE LUNES A DOMINGO (sistema internacional)
         const weekStart = new Date(now);
-        let dayOfWeek = weekStart.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+        const dayOfWeek = weekStart.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
         
-        // Convertir a sistema lunes=0, domingo=6
-        dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        // Calcular días hacia atrás hasta lunes de esta semana
+        // Si domingo(0): ir 6 días atrás, lunes(1): ir 0 días, martes(2): ir 1 día atrás, etc.
+        const daysToMonday = (dayOfWeek + 6) % 7;
         
         // Ir al lunes de esta semana
-        weekStart.setDate(weekStart.getDate() - dayOfWeek);
+        weekStart.setDate(weekStart.getDate() - daysToMonday);
         
         // Domingo de esta semana (6 días después del lunes)
         const weekEnd = new Date(weekStart);
@@ -396,7 +397,8 @@ export default function ServicesPage() {
         // DEBUG: Logging temporal para verificar fechas
         console.log('📅 DEBUG SEMANA LUNES-DOMINGO:');
         console.log('- Now original:', now.toISOString());
-        console.log('- Day of week ajustado:', dayOfWeek);
+        console.log('- Day of week original:', dayOfWeek);
+        console.log('- Days to Monday:', daysToMonday);
         console.log('- WeekStart (lunes):', weekStart.toISOString());
         console.log('- WeekEnd (domingo):', weekEnd.toISOString());
         console.log('- Inicio semana ISO:', toStartOfDay(weekStart));
