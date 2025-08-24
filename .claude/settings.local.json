@@ -44,7 +44,8 @@
       "Bash(git rm:*)",
       "Bash(del clean-mechanics-script.js clean-duplicate-mechanics.sql)",
       "Bash(del NUL)",
-      "Bash(del fix-branches.sql)"
+      "Bash(del fix-branches.sql)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
