@@ -484,6 +484,7 @@ export default function ServicesPage() {
   };
 
   const handleCreateVehicle = async (data: CreateVehicleData) => {
+    console.log('🚗 🔥 handleCreateVehicle EJECUTADO - Datos recibidos:', data);
     try {
       console.log('🚗 Creating vehicle with data:', { ...data, clientId: vehicleClientId });
       console.log('🚗 selectedClientId actual:', selectedClientId);
@@ -1758,7 +1759,9 @@ export default function ServicesPage() {
               </p>
             </div>
 
-            <form onSubmit={createVehicleForm.handleSubmit(handleCreateVehicle)} className="p-6 space-y-4">
+            <form onSubmit={createVehicleForm.handleSubmit(handleCreateVehicle, (errors) => {
+              console.error('🚨 Errores de validación en formulario de vehículo:', errors);
+            })} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1894,6 +1897,7 @@ export default function ServicesPage() {
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  onClick={() => console.log('🚗 Botón Crear Vehículo clickeado, errores actuales:', createVehicleForm.formState.errors)}
                 >
                   Crear Vehículo
                 </button>
