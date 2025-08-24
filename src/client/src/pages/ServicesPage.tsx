@@ -142,7 +142,7 @@ const createClientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
-  email: z.string().email('Email inválido').nullable().optional(),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().nullable().optional(),
 }).refine((data) => data.whatsapp || data.phone, {
   message: 'Al menos WhatsApp o teléfono es requerido',
