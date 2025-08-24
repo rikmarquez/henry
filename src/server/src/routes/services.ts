@@ -13,6 +13,42 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
+// DEBUG ENDPOINT - Test schema validation manually
+router.get('/debug-schema', async (req, res) => {
+  try {
+    console.log('🐛 SCHEMA DEBUG - Testing with exact params from frontend');
+    const testParams = { page: "1", limit: "10", clientId: "3" };
+    
+    console.log('🐛 Input params:', testParams);
+    
+    const result = serviceFilterSchema.safeParse(testParams);
+    
+    if (result.success) {
+      console.log('🐛 Schema validation SUCCESS:', result.data);
+      res.json({
+        success: true,
+        message: 'Schema validation passed',
+        input: testParams,
+        output: result.data
+      });
+    } else {
+      console.log('🐛 Schema validation FAILED:', result.error.errors);
+      res.status(400).json({
+        success: false,
+        message: 'Schema validation failed',
+        input: testParams,
+        errors: result.error.errors
+      });
+    }
+  } catch (error) {
+    console.error('🐛 SCHEMA DEBUG - Exception:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // DEBUG ENDPOINT - Remove after fixing the issue
 router.get('/debug-raw', async (req, res) => {
   console.log('🐛 RAW DEBUG - Query params:', req.query);
