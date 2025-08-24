@@ -10,6 +10,44 @@ import {
 const router = Router();
 const prisma = new PrismaClient();
 
+// Debug endpoint to test database connection and table existence
+router.get('/debug', authenticate, async (req, res) => {
+  try {
+    console.log('🔧 Settings Debug - Testing database connection...');
+    
+    // Test basic connection
+    await prisma.$connect();
+    console.log('🔧 Settings Debug - Database connected');
+    
+    // Test if settings table exists by trying to count
+    const count = await prisma.setting.count();
+    console.log('🔧 Settings Debug - Settings table exists, count:', count);
+    
+    // Test branch exists
+    const branch = await prisma.branch.findUnique({
+      where: { id: req.user.branchId }
+    });
+    console.log('🔧 Settings Debug - Branch found:', branch?.name);
+    
+    res.json({
+      success: true,
+      message: 'Settings debug successful',
+      data: {
+        settingsCount: count,
+        branchId: req.user.branchId,
+        branchName: branch?.name
+      }
+    });
+  } catch (error) {
+    console.error('🔧 Settings Debug - Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Settings debug failed',
+      error: error.message
+    });
+  }
+});
+
 // GET /api/settings/general - Get general settings
 router.get(
   '/general',
