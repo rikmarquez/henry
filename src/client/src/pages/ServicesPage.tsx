@@ -172,6 +172,17 @@ const statusColors: Record<string, string> = {
   'Entregado': 'bg-gray-100 text-gray-800',
 };
 
+// Period options for historical filtering
+const periodOptions = [
+  { value: 'today', label: 'Hoy', isHistorical: false },
+  { value: 'week', label: 'Esta semana', isHistorical: false },
+  { value: 'month', label: 'Este mes', isHistorical: false },
+  { value: '3months', label: 'Últimos 3 meses', isHistorical: true },
+  { value: 'year', label: 'Este año', isHistorical: true },
+  { value: 'all', label: 'Todo el histórico', isHistorical: true },
+  { value: 'custom', label: 'Rango personalizado', isHistorical: true },
+];
+
 export default function ServicesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentBranchId = useCurrentBranchId();
@@ -192,12 +203,18 @@ export default function ServicesPage() {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   
+  // Historical period filters
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('today');
+  const [customDateFrom, setCustomDateFrom] = useState<string>('');
+  const [customDateTo, setCustomDateTo] = useState<string>('');
+  
   // Wrapper para setSelectedClientId con logging
   const setSelectedClientIdWithLog = (value: number | null) => {
-    console.log('🔧 setSelectedClientId called with:', value);
-    console.trace('🔧 Call stack:');
     setSelectedClientId(value);
   };
+
+  // Determine if current view is historical (readonly)
+  const isHistoricalView = periodOptions.find(p => p.value === selectedPeriod)?.isHistorical || false;
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
@@ -331,16 +348,92 @@ export default function ServicesPage() {
 
   // Debug selectedClientId changes
   useEffect(() => {
-    console.log('🔧 selectedClientId cambió a:', selectedClientId, typeof selectedClientId);
+    // Removed excessive logging
   }, [selectedClientId]);
+
+  // Reload services when period changes
+  useEffect(() => {
+    loadServices();
+  }, [selectedPeriod, customDateFrom, customDateTo]);
+
+  // Generate date filters based on selected period
+  const getPeriodFilters = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Helper to convert date to ISO datetime string for start of day
+    const toStartOfDay = (date: Date) => {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      return start.toISOString();
+    };
+    
+    // Helper to convert date to ISO datetime string for end of day
+    const toEndOfDay = (date: Date) => {
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      return end.toISOString();
+    };
+    
+    switch (selectedPeriod) {
+      case 'today':
+        return {
+          dateFrom: toStartOfDay(today),
+          dateTo: toEndOfDay(today)
+        };
+      case 'week': {
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        return {
+          dateFrom: toStartOfDay(weekStart),
+          dateTo: toEndOfDay(today)
+        };
+      }
+      case 'month': {
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        return {
+          dateFrom: toStartOfDay(monthStart),
+          dateTo: toEndOfDay(today)
+        };
+      }
+      case '3months': {
+        const threeMonthsAgo = new Date(today);
+        threeMonthsAgo.setMonth(today.getMonth() - 3);
+        return {
+          dateFrom: toStartOfDay(threeMonthsAgo),
+          dateTo: toEndOfDay(today)
+        };
+      }
+      case 'year': {
+        const yearStart = new Date(today.getFullYear(), 0, 1);
+        return {
+          dateFrom: toStartOfDay(yearStart),
+          dateTo: toEndOfDay(today)
+        };
+      }
+      case 'custom':
+        if (customDateFrom && customDateTo) {
+          return {
+            dateFrom: toStartOfDay(new Date(customDateFrom)),
+            dateTo: toEndOfDay(new Date(customDateTo))
+          };
+        }
+        return {};
+      case 'all':
+      default:
+        return {}; // No date filters for "all"
+    }
+  };
 
   const loadServices = async (page = 1, filters = {}) => {
     try {
       setLoading(true);
+      const periodFilters = getPeriodFilters();
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pagination.limit.toString(),
         ...filters,
+        ...periodFilters,
       });
       
       const response = await api.get(`/services?${params}`);
@@ -451,8 +544,17 @@ export default function ServicesPage() {
 
   const handleFilter = (data: ServiceFilterData) => {
     const filters = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value)
+      Object.entries(data)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => {
+          // Convert ID fields from strings to numbers
+          if (['clientId', 'vehicleId', 'mechanicId', 'statusId'].includes(key)) {
+            return [key, parseInt(value as string)];
+          }
+          return [key, value];
+        })
     );
+    console.log('🔍 Filters being sent:', filters);
     loadServices(1, filters);
   };
 
@@ -706,12 +808,62 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
-          <p className="text-gray-600">Gestión de órdenes de trabajo y servicios</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Servicios
+            {isHistoricalView && (
+              <span className="ml-2 text-sm font-normal text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                Modo Consulta
+              </span>
+            )}
+          </h1>
+          <p className="text-gray-600">
+            {isHistoricalView 
+              ? 'Consulta histórica de servicios realizados' 
+              : 'Gestión de órdenes de trabajo y servicios'
+            }
+          </p>
         </div>
         <div className="flex items-center space-x-4">
+          {/* Period Selector */}
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-medium text-gray-700">Período:</label>
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              {periodOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Custom Date Range */}
+          {selectedPeriod === 'custom' && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="date"
+                value={customDateFrom}
+                onChange={(e) => setCustomDateFrom(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Desde"
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="date"
+                value={customDateTo}
+                onChange={(e) => setCustomDateTo(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Hasta"
+              />
+            </div>
+          )}
+
           {/* View Toggle */}
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          {!isHistoricalView && (
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('list')}
               className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -734,7 +886,8 @@ export default function ServicesPage() {
               <LayoutGrid className="h-4 w-4" />
               <span>Tablero</span>
             </button>
-          </div>
+            </div>
+          )}
           
           <button
             onClick={() => setShowCreateModal(true)}
