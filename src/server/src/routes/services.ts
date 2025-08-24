@@ -103,20 +103,20 @@ router.get(
   '/',
   authenticate,
   authorize(['services'], ['read']),
-  validateQuery(serviceFilterSchema),
+  // validateQuery(serviceFilterSchema), // Temporarily disabled due to production issues
   async (req, res) => {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        clientId,
-        vehicleId,
-        mechanicId,
-        statusId,
-        dateFrom,
-        dateTo,
-      } = req.query;
+      // Manual conversion to bypass Zod issues in production
+      const query = req.query;
+      const page = parseInt(query.page as string) || 1;
+      const limit = parseInt(query.limit as string) || 10;
+      const search = query.search as string;
+      const clientId = query.clientId ? parseInt(query.clientId as string) : undefined;
+      const vehicleId = query.vehicleId ? parseInt(query.vehicleId as string) : undefined;
+      const mechanicId = query.mechanicId ? parseInt(query.mechanicId as string) : undefined;
+      const statusId = query.statusId ? parseInt(query.statusId as string) : undefined;
+      const dateFrom = query.dateFrom as string;
+      const dateTo = query.dateTo as string;
       const offset = (page - 1) * limit;
 
       const where: any = {};
