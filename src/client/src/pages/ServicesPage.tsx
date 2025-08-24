@@ -376,8 +376,11 @@ export default function ServicesPage() {
       console.log('🔧 Respuesta vehículos:', response.data);
       if (response.data.success) {
         const vehiclesData = response.data.data.vehicles || response.data.data;
-        console.log('🔧 Vehículos cargados:', vehiclesData);
+        console.log('🔧 Vehículos cargados para cliente', clientId, ':', vehiclesData);
         setVehicles(vehiclesData);
+        
+        // Log vehicle IDs for debugging
+        console.log('🔧 IDs de vehículos disponibles:', vehiclesData.map(v => ({ id: v.id, plate: v.plate })));
       }
     } catch (error) {
       console.error('🔧 Error loading vehicles:', error);
@@ -514,7 +517,15 @@ export default function ServicesPage() {
         // Auto-select the new vehicle
         const newVehicle = response.data.data;
         console.log('🚗 Auto-selecting new vehicle:', newVehicle);
-        createForm.setValue('vehicleId', newVehicle.id);
+        
+        // Wait a bit for the vehicles list to update, then set the value
+        setTimeout(() => {
+          createForm.setValue('vehicleId', newVehicle.id);
+          console.log('🚗 Vehículo seleccionado automáticamente:', newVehicle.id);
+          
+          // Force a re-render by updating the form state
+          createForm.trigger('vehicleId');
+        }, 100);
       }
     } catch (error: any) {
       console.error('🚨 Error creating vehicle:', error);
