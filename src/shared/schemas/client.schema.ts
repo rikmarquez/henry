@@ -5,7 +5,6 @@ export const createClientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   whatsapp: phoneSchema.optional(),
   phone: phoneSchema.optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')).nullable(),
   address: z.string().nullable().optional(),
 }).refine((data) => data.whatsapp || data.phone, {
   message: 'Al menos WhatsApp o teléfono es requerido',
@@ -16,7 +15,6 @@ export const updateClientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').optional(),
   whatsapp: phoneSchema.optional(),
   phone: phoneSchema.optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')).nullable(),
   address: z.string().nullable().optional(),
 });
 

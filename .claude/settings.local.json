@@ -45,7 +45,11 @@
       "Bash(del clean-mechanics-script.js clean-duplicate-mechanics.sql)",
       "Bash(del NUL)",
       "Bash(del fix-branches.sql)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(lsof:*)",
+      "Bash(tasklist:*)",
+      "Bash(start http://localhost:5177)",
+      "Bash(start http://localhost:5179)"
     ],
     "deny": [],
     "ask": []

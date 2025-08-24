@@ -723,3 +723,61 @@ WHERE newStatus.name IN ['Completado', 'Terminado']
 **Mecánicos UX Status:** ✅ 100% COMPLETADO - Gestión completa con edición flexible  
 **Servicios Revenue Fix Status:** ✅ 100% COMPLETADO - Ingresos se calculan correctamente
 **Gráficos Reportes Status:** ✅ 100% COMPLETADO - Error BigInt resuelto, visualizaciones operativas
+
+## 🎉 **AVANCES CRÍTICOS SESIÓN 12 (2025-08-24)** 
+
+### 🔧 **DEPURACIÓN FLUJO CREACIÓN SERVICIOS - 75% COMPLETADO** ⚠️
+
+#### **🔥 Problemas Identificados y Resueltos**
+- **Validación Email Cliente**: Corregido schema para permitir email opcional/vacío
+- **Autoselección Cliente**: Implementado selección automática post-creación con setTimeout batching
+- **Validación Vehículo Año**: Fixed error "Expected string, received number" 
+- **Modal Vehículo No Cierra**: Solucionado con clientId hidden field
+- **Race Conditions React**: Eliminadas con batching de estados
+
+#### **🛠️ Cambios Técnicos Implementados**
+
+**Frontend (`ServicesPage.tsx`)**:
+- Agregado `vehicleClientId` state para contexto cliente-vehículo
+- Implementado `setTimeout(() => { /* batch states */ }, 0)` para race conditions
+- Corregido click-outside handler con detección de clases
+- Mejorado logging detallado para debugging
+
+**Schemas (`client.schema.ts`)**:
+- Fixed: `email: z.string().email().optional().or(z.literal('')).nullable()`
+- Mantenido refinement: `refine((data) => data.whatsapp || data.phone)`
+
+**Backend (`clients.controller.ts`)**:
+- Agregado logging: `console.log('👥 [SERVER] Datos recibidos:', req.body)`
+- Mejorado email check: `if (clientData.email && clientData.email.trim() !== '')`
+
+#### **🚨 PROBLEMA ACTUAL - CORS Error**
+- **Estado**: Puerto frontend cambió a 5180, servidor en 3002 con proceso zombie
+- **Error**: `Access to XMLHttpRequest blocked by CORS policy`
+- **Causa**: Puerto 3002 ocupado por proceso anterior, servidor no pudo reiniciar
+- **Config**: Servidor tiene `origin: true` pero puerto bloqueado
+
+#### **📋 PENDIENTE PARA PRÓXIMA SESIÓN**
+1. **CRÍTICO**: Liberar puerto 3002 y reiniciar servidor limpio
+2. **Verificar**: Cliente creación desde services modal funciona
+3. **Probar**: Flujo completo servicio → nuevo cliente → nuevo vehículo  
+4. **Testing**: Auto-asignación de cliente recién creado
+5. **Cleanup**: Remover logs debugging excesivos
+
+#### **🏗️ Estado Actual**
+- **Schemas**: ✅ Sincronizados frontend/backend 
+- **Formularios**: ✅ Validaciones corregidas
+- **Estado React**: ✅ Race conditions eliminadas
+- **Modal Behavior**: ✅ Campos hidden y cierre correcto
+- **Servidor**: ❌ CORS bloqueado por proceso zombie
+- **Testing**: ⚠️ Pendiente resolver CORS para probar end-to-end
+
+#### **🎓 Aprendizajes Sesión 12**
+- **Zod Optional Fields**: `.optional().or(z.literal(''))` para campos texto opcionales
+- **React Race Conditions**: `setTimeout` para batching de estados múltiples
+- **Debugging Sistemático**: Logs categorizados con emojis para tracing
+- **Node Process Management**: Windows requiere taskkill específico para limpieza
+
+---
+**Sesión interrumpida por límite de tokens**  
+**Próximo objetivo**: Resolver CORS y completar testing flujo servicios

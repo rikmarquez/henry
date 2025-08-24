@@ -49,8 +49,7 @@ interface Service {
     id: number;
     name: string;
     phone: string;
-    email?: string;
-  };
+    };
   vehicle: {
     id: number;
     plate: string;
@@ -88,7 +87,6 @@ interface Client {
   id: number;
   name: string;
   phone: string;
-  email?: string;
 }
 
 interface Vehicle {
@@ -142,7 +140,6 @@ const createClientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   phone: z.string().optional(),
   whatsapp: z.string().optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().nullable().optional(),
 }).refine((data) => data.whatsapp || data.phone, {
   message: 'Al menos WhatsApp o teléfono es requerido',
@@ -478,14 +475,16 @@ export default function ServicesPage() {
         await loadClients(); // Reload clients list and wait for it
         
         // Auto-select the new client
-        const newClient = response.data.data || response.data.client || response.data;
+        const newClient = response.data.data?.client || response.data.client;
         console.log('🆕 Cliente creado:', newClient);
         console.log('🆕 newClient.id:', newClient?.id);
+        console.log('🆕 response.data completo:', response.data);
         
         if (newClient?.id) {
           setSelectedClientIdWithLog(newClient.id);
         } else {
           console.error('🚨 newClient.id es undefined:', newClient);
+          console.error('🚨 response.data structure:', response.data);
           return; // No continuar si no hay ID
         }
         setClientSearch(`${newClient.name} - ${newClient.phone || newClient.whatsapp}`);
@@ -1732,22 +1731,6 @@ export default function ServicesPage() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  {...createClientForm.register('email')}
-                  type="email"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Correo electrónico (opcional)"
-                />
-                {createClientForm.formState.errors.email && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {createClientForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
