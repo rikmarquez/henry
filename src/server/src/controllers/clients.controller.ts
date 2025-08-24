@@ -126,10 +126,12 @@ export const clientsController = {
   // POST /api/clients - Crear un nuevo cliente
   createClient: async (req: AuthRequest, res: Response) => {
     try {
+      console.log('👥 [SERVER] Datos recibidos para crear cliente:', req.body);
       const clientData: CreateClientInput = req.body;
+      console.log('👥 [SERVER] ClientData parseado:', clientData);
 
-      // Verificar si el email ya existe (si se proporciona)
-      if (clientData.email) {
+      // Verificar si el email ya existe (si se proporciona y no está vacío)
+      if (clientData.email && clientData.email.trim() !== '') {
         const existingClient = await prisma.client.findFirst({
           where: { email: clientData.email }
         });
@@ -149,6 +151,8 @@ export const clientsController = {
         whatsapp: clientData.whatsapp || clientData.phone, // Use whatsapp if provided, otherwise use phone
       };
 
+      console.log('👥 [SERVER] Datos unificados a enviar a Prisma:', unifiedData);
+      
       const client = await prisma.client.create({
         data: unifiedData,
         include: {
