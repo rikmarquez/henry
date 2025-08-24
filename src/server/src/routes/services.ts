@@ -13,6 +13,41 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
+// DEBUG ENDPOINT - Remove after fixing the issue
+router.get('/debug', authenticate, async (req, res) => {
+  try {
+    console.log('🐛 DEBUG - Raw query params:', req.query);
+    console.log('🐛 DEBUG - Query params types:', Object.entries(req.query).map(([k, v]) => [k, typeof v, v]));
+    
+    // Try to manually validate
+    const result = serviceFilterSchema.safeParse(req.query);
+    console.log('🐛 DEBUG - Schema validation result:', result);
+    
+    if (!result.success) {
+      console.log('🐛 DEBUG - Validation errors:', result.error.errors);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: result.error.errors,
+        rawQuery: req.query
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Debug successful',
+      parsedData: result.data,
+      rawQuery: req.query
+    });
+  } catch (error) {
+    console.error('🐛 DEBUG - Error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // GET /api/services - List services with pagination and filters
 router.get(
   '/',

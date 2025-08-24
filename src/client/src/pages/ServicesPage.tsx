@@ -539,11 +539,29 @@ export default function ServicesPage() {
     }
   };
 
-  const handleFilter = (data: ServiceFilterData) => {
+  const handleFilter = async (data: ServiceFilterData) => {
     const filters = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value)
     );
-    console.log('🔍 Filters being sent:', filters);
+    console.log('🔍 Filters being sent:', JSON.stringify(filters, null, 2));
+    
+    // Debug call first
+    try {
+      const periodFilters = getPeriodFilters();
+      const allFilters = { ...filters, ...periodFilters };
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '10',
+        ...allFilters,
+      });
+      
+      console.log('🐛 Making debug call with params:', params.toString());
+      const debugResponse = await api.get(`/services/debug?${params}`);
+      console.log('🐛 Debug response:', debugResponse.data);
+    } catch (debugError: any) {
+      console.error('🐛 Debug error:', debugError.response?.data || debugError.message);
+    }
+    
     loadServices(1, filters);
   };
 
