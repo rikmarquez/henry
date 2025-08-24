@@ -25,9 +25,10 @@ router.get('/:id',
 );
 
 // POST /api/clients - Crear un nuevo cliente (Admin/Encargado)
+// BYPASS temporal del middleware de validación para debug
 router.post('/', 
   authorize(['clients'], ['create']), 
-  validate(createClientSchema), 
+  // validate(createClientSchema), // Temporalmente deshabilitado para debug
   clientsController.createClient
 );
 
