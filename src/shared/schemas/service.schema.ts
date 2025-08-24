@@ -28,10 +28,26 @@ export const serviceStatusUpdateSchema = z.object({
 
 export const serviceFilterSchema = paginationSchema.extend({
   search: z.string().optional(),
-  clientId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
-  vehicleId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
-  mechanicId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
-  statusId: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  clientId: z.string().optional().transform(val => {
+    if (!val || val.trim() === '') return undefined;
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? undefined : parsed;
+  }),
+  vehicleId: z.string().optional().transform(val => {
+    if (!val || val.trim() === '') return undefined;
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? undefined : parsed;
+  }),
+  mechanicId: z.string().optional().transform(val => {
+    if (!val || val.trim() === '') return undefined;
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? undefined : parsed;
+  }),
+  statusId: z.string().optional().transform(val => {
+    if (!val || val.trim() === '') return undefined;
+    const parsed = parseInt(val);
+    return isNaN(parsed) ? undefined : parsed;
+  }),
   dateFrom: dateSchema.optional(),
   dateTo: dateSchema.optional(),
 });
