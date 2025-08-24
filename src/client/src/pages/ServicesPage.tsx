@@ -379,20 +379,26 @@ export default function ServicesPage() {
           dateTo: toEndOfDay(today)
         };
       case 'week': {
-        // Usar 'now' original para evitar problemas con 'today' modificado
+        // SEMANA DE LUNES A DOMINGO (sistema internacional)
         const weekStart = new Date(now);
-        const dayOfWeek = weekStart.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
-        weekStart.setDate(weekStart.getDate() - dayOfWeek); // Domingo de esta semana
+        let dayOfWeek = weekStart.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
         
+        // Convertir a sistema lunes=0, domingo=6
+        dayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        
+        // Ir al lunes de esta semana
+        weekStart.setDate(weekStart.getDate() - dayOfWeek);
+        
+        // Domingo de esta semana (6 días después del lunes)
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // Sábado de esta semana
+        weekEnd.setDate(weekStart.getDate() + 6);
         
         // DEBUG: Logging temporal para verificar fechas
-        console.log('📅 DEBUG SEMANA CORREGIDO:');
+        console.log('📅 DEBUG SEMANA LUNES-DOMINGO:');
         console.log('- Now original:', now.toISOString());
-        console.log('- Day of week:', dayOfWeek);
-        console.log('- WeekStart (domingo):', weekStart.toISOString());
-        console.log('- WeekEnd (sábado):', weekEnd.toISOString());
+        console.log('- Day of week ajustado:', dayOfWeek);
+        console.log('- WeekStart (lunes):', weekStart.toISOString());
+        console.log('- WeekEnd (domingo):', weekEnd.toISOString());
         console.log('- Inicio semana ISO:', toStartOfDay(weekStart));
         console.log('- Fin semana ISO:', toEndOfDay(weekEnd));
         
