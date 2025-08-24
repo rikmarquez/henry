@@ -139,11 +139,14 @@ const createServiceSchema = z.object({
 type CreateServiceData = z.infer<typeof createServiceSchema>;
 
 const createClientSchema = z.object({
-  name: z.string().min(1, 'Nombre es requerido'),
-  phone: z.string().min(1, 'Teléfono es requerido'),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  phone: z.string().optional(),
   whatsapp: z.string().optional(),
-  address: z.string().optional(),
+  email: z.string().email('Email inválido').nullable().optional(),
+  address: z.string().nullable().optional(),
+}).refine((data) => data.whatsapp || data.phone, {
+  message: 'Al menos WhatsApp o teléfono es requerido',
+  path: ['phone'],
 });
 
 type CreateClientData = z.infer<typeof createClientSchema>;
@@ -458,10 +461,15 @@ export default function ServicesPage() {
 
   const handleCreateClient = async (data: CreateClientData) => {
     try {
-      const response = await api.post('/clients', {
+      const payload = {
         ...data,
         whatsapp: data.whatsapp || data.phone, // Use whatsapp if provided, otherwise use phone
-      });
+      };
+      
+      console.log('👥 Datos de cliente a enviar:', payload);
+      console.log('👥 Tipo de cada campo:', Object.entries(payload).map(([key, value]) => ({ [key]: typeof value })));
+      
+      const response = await api.post('/clients', payload);
 
       if (response.data.success) {
         toast.success('Cliente creado exitosamente');
@@ -482,6 +490,13 @@ export default function ServicesPage() {
         setFilteredVehicles([]);
       }
     } catch (error: any) {
+      console.error('🚨 Error detallado al crear cliente:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.response?.data?.message,
+        errors: error.response?.data?.errors,
+        fullResponse: error.response
+      });
       toast.error(error.response?.data?.message || 'Error al crear cliente');
     }
   };
