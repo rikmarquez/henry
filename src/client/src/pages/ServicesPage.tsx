@@ -136,6 +136,12 @@ const createServiceSchema = z.object({
   problemDescription: z.string().min(1, 'Descripción del problema es requerida'),
   diagnosis: z.string().optional(),
   quotationDetails: z.string().optional(),
+  laborPrice: z.number().min(0).default(0),
+  partsPrice: z.number().min(0).default(0),
+  partsCost: z.number().min(0).default(0),
+  totalAmount: z.number().min(0).default(0),
+  truput: z.number().min(0).default(0),
+  mechanicCommission: z.number().min(0).default(0),
 });
 
 type CreateServiceData = z.infer<typeof createServiceSchema>;
@@ -340,6 +346,45 @@ export default function ServicesPage() {
   useEffect(() => {
     loadServices();
   }, [selectedPeriod, customDateFrom, customDateTo]);
+
+  // Auto-calculate pricing fields in edit mode
+  useEffect(() => {
+    if (!showEditModal || !selectedService) return;
+
+    const subscription = createForm.watch((value, { name }) => {
+      // Only calculate if one of the pricing fields changed
+      if (['laborPrice', 'partsPrice', 'partsCost'].includes(name)) {
+        const laborPrice = Number(value.laborPrice) || 0;
+        const partsPrice = Number(value.partsPrice) || 0;
+        const partsCost = Number(value.partsCost) || 0;
+        
+        // Calculate total amount
+        const totalAmount = laborPrice + partsPrice;
+        
+        // Calculate truput (profit = total revenue - parts cost)
+        const truput = totalAmount - partsCost;
+        
+        // Calculate mechanic commission (based on mechanic's commission percentage)
+        const mechanicCommissionPercentage = selectedService.mechanic?.commissionPercentage || 0;
+        const mechanicCommission = (laborPrice * mechanicCommissionPercentage) / 100;
+        
+        // Update the calculated fields
+        createForm.setValue('totalAmount', totalAmount);
+        createForm.setValue('truput', truput);
+        createForm.setValue('mechanicCommission', mechanicCommission);
+        
+        // Update selectedService to reflect new values for the readonly inputs
+        setSelectedService(prev => prev ? {
+          ...prev,
+          totalAmount,
+          truput,
+          mechanicCommission
+        } : null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [showEditModal, selectedService, createForm]);
 
   // Generate date filters based on selected period
   const getPeriodFilters = () => {
@@ -741,8 +786,12 @@ export default function ServicesPage() {
           problemDescription: service.problemDescription || '',
           diagnosis: service.diagnosis || '',
           quotationDetails: service.quotationDetails || '',
-          totalAmount: service.totalAmount,
-          mechanicCommission: service.mechanicCommission,
+          laborPrice: service.laborPrice || 0,
+          partsPrice: service.partsPrice || 0,
+          partsCost: service.partsCost || 0,
+          totalAmount: service.totalAmount || 0,
+          truput: service.truput || 0,
+          mechanicCommission: service.mechanicCommission || 0,
         });
         
         setShowEditModal(true);
