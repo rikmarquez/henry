@@ -149,6 +149,7 @@ router.get(
   async (req, res) => {
     try {
       const { dateFrom, dateTo } = req.query;
+      const branchId = (req as any).user.branchId;
 
       const dateFilter: any = {};
       if (dateFrom || dateTo) {
@@ -175,32 +176,36 @@ router.get(
         // Revenue
         totalRevenue,
         recentServices,
+        upcomingOpportunities,
       ] = await Promise.all([
         // Total counts
         prisma.client.count(),
         prisma.vehicle.count(),
-        prisma.mechanic.count(),
-        prisma.appointment.count(dateFilter.gte || dateFilter.lte ? { where: { createdAt: dateFilter } } : {}),
-        prisma.service.count(dateFilter.gte || dateFilter.lte ? { where: { createdAt: dateFilter } } : {}),
-        prisma.opportunity.count(dateFilter.gte || dateFilter.lte ? { where: { createdAt: dateFilter } } : {}),
+        prisma.mechanic.count({ where: { branchId } }),
+        prisma.appointment.count(dateFilter.gte || dateFilter.lte ? { where: { branchId, createdAt: dateFilter } } : { where: { branchId } }),
+        prisma.service.count(dateFilter.gte || dateFilter.lte ? { where: { branchId, createdAt: dateFilter } } : { where: { branchId } }),
+        prisma.opportunity.count(dateFilter.gte || dateFilter.lte ? { where: { branchId, createdAt: dateFilter } } : { where: { branchId } }),
 
         // Active counts (clients don't have isActive field, so using total)
         prisma.client.count(),
-        prisma.mechanic.count({ where: { isActive: true } }),
+        prisma.mechanic.count({ where: { branchId, isActive: true } }),
         prisma.appointment.count({ 
           where: { 
+            branchId,
             status: { in: ['scheduled', 'confirmed'] },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           }
         }),
         prisma.service.count({ 
           where: { 
+            branchId,
             completedAt: null,
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           }
         }),
         prisma.opportunity.count({ 
           where: { 
+            branchId,
             status: { in: ['pending', 'contacted', 'interested'] },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           }
@@ -210,6 +215,7 @@ router.get(
         prisma.service.aggregate({
           _sum: { totalAmount: true },
           where: {
+            branchId,
             completedAt: { not: null },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           },
@@ -219,11 +225,31 @@ router.get(
         prisma.service.findMany({
           take: 5,
           orderBy: { createdAt: 'desc' },
-          where: dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {},
+          where: { 
+            branchId,
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          },
           include: {
             client: { select: { name: true } },
             vehicle: { select: { plate: true, brand: true, model: true } },
             status: { select: { name: true, color: true } },
+          },
+        }),
+
+        // Upcoming opportunities (next 7 days)
+        prisma.opportunity.findMany({
+          where: {
+            branchId,
+            followUpDate: {
+              gte: new Date(),
+              lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+            status: { in: ['pending', 'contacted', 'interested'] },
+          },
+          orderBy: { followUpDate: 'asc' },
+          include: {
+            client: { select: { name: true } },
+            vehicle: { select: { plate: true, brand: true, model: true } },
           },
         }),
       ]);
@@ -251,6 +277,7 @@ router.get(
             period: dateFrom && dateTo ? 'custom' : 'all-time',
           },
           recentServices,
+          upcomingOpportunities,
         },
       });
     } catch (error) {
