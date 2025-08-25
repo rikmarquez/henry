@@ -352,11 +352,12 @@ export default function ServicesPage() {
     if (!showEditModal || !selectedService) return;
 
     const subscription = createForm.watch((value, { name }) => {
-      // Only calculate if one of the pricing fields changed
-      if (['laborPrice', 'partsPrice', 'partsCost'].includes(name)) {
+      // Calculate if pricing fields OR mechanic changed
+      if (['laborPrice', 'partsPrice', 'partsCost', 'mechanicId'].includes(name)) {
         const laborPrice = Number(value.laborPrice) || 0;
         const partsPrice = Number(value.partsPrice) || 0;
         const partsCost = Number(value.partsCost) || 0;
+        const mechanicId = Number(value.mechanicId) || 0;
         
         // Calculate total amount
         const totalAmount = laborPrice + partsPrice;
@@ -364,8 +365,9 @@ export default function ServicesPage() {
         // Calculate truput (profit = total revenue - parts cost)
         const truput = totalAmount - partsCost;
         
-        // Calculate mechanic commission (based on mechanic's commission percentage)
-        const mechanicCommissionPercentage = selectedService.mechanic?.commissionPercentage || 0;
+        // Get mechanic commission percentage from the selected mechanic
+        const selectedMechanic = mechanics.find(m => m.id === mechanicId);
+        const mechanicCommissionPercentage = selectedMechanic?.commissionPercentage || 0;
         const mechanicCommission = (laborPrice * mechanicCommissionPercentage) / 100;
         
         // Update the calculated fields
@@ -384,7 +386,7 @@ export default function ServicesPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [showEditModal, selectedService, createForm]);
+  }, [showEditModal, selectedService, createForm, mechanics]);
 
   // Generate date filters based on selected period
   const getPeriodFilters = () => {
