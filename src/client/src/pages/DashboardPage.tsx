@@ -108,38 +108,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Métricas principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Clientes */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Clientes Totales</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalClients || 0}</p>
-                <p className="text-sm text-green-600">
-                  {dashboardData?.active.activeClients || 0} activos
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Vehículos */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100">
-                <Car className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Vehículos</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalVehicles || 0}</p>
-                <p className="text-sm text-gray-500">Registrados</p>
-              </div>
-            </div>
-          </div>
-
+        {/* Primera línea - CITAS, SERVICIOS Y OPORTUNIDADES */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Citas */}
           <div className="bg-white rounded-lg shadow-sm p-6 border">
             <div className="flex items-center">
@@ -171,60 +141,57 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Segunda fila de métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Ingresos */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Ingresos Totales</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(dashboardData?.revenue.total || 0)}
-                </p>
-                <p className="text-sm text-gray-500 capitalize">
-                  {dashboardData?.revenue.period === 'all-time' ? 'Histórico' : 'Periodo personalizado'}
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-green-100">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Mecánicos */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Mecánicos</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalMechanics || 0}</p>
-                <p className="text-sm text-blue-600">
-                  {dashboardData?.active.activeMechanics || 0} activos
-                </p>
-              </div>
-              <div className="p-3 rounded-full bg-blue-100">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
 
           {/* Oportunidades */}
           <div className="bg-white rounded-lg shadow-sm p-6 border">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-orange-100">
+                <Target className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Oportunidades</p>
                 <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalOpportunities || 0}</p>
                 <p className="text-sm text-orange-600">
                   {dashboardData?.active.pendingOpportunities || 0} pendientes
                 </p>
               </div>
-              <div className="p-3 rounded-full bg-orange-100">
-                <TrendingUp className="h-6 w-6 text-orange-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Segunda línea - CLIENTES y VEHÍCULOS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Clientes */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Clientes Totales</p>
+                <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalClients || 0}</p>
+                <p className="text-sm text-green-600">
+                  {dashboardData?.active.activeClients || 0} activos
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Vehículos */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100">
+                <Car className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Vehículos</p>
+                <p className="text-2xl font-bold text-gray-900">{dashboardData?.overview.totalVehicles || 0}</p>
+                <p className="text-sm text-gray-500">Registrados</p>
               </div>
             </div>
           </div>
         </div>
+
 
         {/* Grid para Servicios Recientes y Oportunidades Próximas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
