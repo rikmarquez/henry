@@ -177,6 +177,8 @@ router.get(
         totalRevenue,
         recentServices,
         upcomingOpportunities,
+        servicesByStatus,
+        servicesByMechanic,
       ] = await Promise.all([
         // Total counts
         prisma.client.count(),
@@ -284,7 +286,58 @@ router.get(
             vehicle: { select: { plate: true, brand: true, model: true } },
           },
         }),
+
+        // Services by status for charts
+        prisma.service.groupBy({
+          by: ['statusId'],
+          _count: { id: true },
+          where: { 
+            branchId,
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          },
+        }),
+
+        // Services by mechanic for charts
+        prisma.service.groupBy({
+          by: ['mechanicId'],
+          _count: { id: true },
+          _sum: { totalAmount: true, mechanicCommission: true },
+          where: { 
+            branchId,
+            mechanicId: { not: null },
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          },
+        }),
       ]);
+
+      // Get status and mechanic information for the grouped data
+      const [statusInfo, mechanicInfo] = await Promise.all([
+        // Get all statuses that have services
+        prisma.workStatus.findMany({
+          where: {
+            id: { in: servicesByStatus.map(s => s.statusId) }
+          },
+          select: { id: true, name: true, color: true }
+        }),
+        // Get all mechanics that have services
+        prisma.mechanic.findMany({
+          where: {
+            id: { in: servicesByMechanic.map(s => s.mechanicId).filter(Boolean) }
+          },
+          select: { id: true, name: true }
+        })
+      ]);
+
+      // Merge the grouped data with status/mechanic information
+      const servicesByStatusWithInfo = servicesByStatus.map(item => ({
+        ...item,
+        status: statusInfo.find(s => s.id === item.statusId) || { name: 'Sin estado', color: '#6B7280' }
+      }));
+
+      const servicesByMechanicWithInfo = servicesByMechanic.map(item => ({
+        ...item,
+        mechanic: mechanicInfo.find(m => m.id === item.mechanicId) || { name: 'Sin mecánico' }
+      }));
 
       res.json({
         success: true,
@@ -314,6 +367,8 @@ router.get(
           },
           recentServices,
           upcomingOpportunities,
+          servicesByStatus: servicesByStatusWithInfo,
+          servicesByMechanic: servicesByMechanicWithInfo,
         },
       });
     } catch (error) {

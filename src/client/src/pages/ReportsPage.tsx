@@ -75,6 +75,17 @@ interface DashboardData {
     status: { name: string; color: string };
     createdAt: string;
   }>;
+  servicesByStatus?: Array<{
+    statusId: number;
+    _count: { id: number };
+    status: { name: string; color: string };
+  }>;
+  servicesByMechanic?: Array<{
+    mechanicId: number;
+    _count: { id: number };
+    _sum: { totalAmount: string; mechanicCommission: string };
+    mechanic: { name: string };
+  }>;
 }
 
 interface ServiceReportData {
@@ -202,16 +213,21 @@ export default function ReportsPage() {
     },
   });
 
-  // For now, we'll use mock data for services chart until we have the proper endpoint
+  // Use real data from the backend for services charts
   const servicesData: ServiceReportData | undefined = dashboardData ? {
-    servicesByStatus: [],
-    servicesByMechanic: [],
-    averageServiceValue: 0,
+    servicesByStatus: dashboardData.servicesByStatus || [],
+    servicesByMechanic: dashboardData.servicesByMechanic || [],
+    averageServiceValue: dashboardData.servicesByMechanic?.length > 0 
+      ? (dashboardData.servicesByMechanic.reduce((sum, item) => 
+          sum + parseFloat(item._sum.totalAmount || '0'), 0) / dashboardData.servicesByMechanic.reduce((sum, item) => sum + item._count.id, 0))
+      : 0,
     totalServices: dashboardData.overview.totalServices,
     completion: {
-      completed: 0,
+      completed: dashboardData.servicesByStatus?.find(s => s.status.name === 'Completado')?._count.id || 0,
       total: dashboardData.overview.totalServices,
-      completionRate: 0,
+      completionRate: dashboardData.overview.totalServices > 0 
+        ? ((dashboardData.servicesByStatus?.find(s => s.status.name === 'Completado')?._count.id || 0) / dashboardData.overview.totalServices) * 100 
+        : 0,
     },
   } : undefined;
 
