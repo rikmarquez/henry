@@ -43,6 +43,9 @@
 - JWT con `branchId` para segregación automática
 - Context pattern para estado global de sucursales
 - Route protection declarativa con `AdminRoute`
+- **🌍 IMPORTANTE**: Clientes y vehículos son GLOBALES (sin branchId)
+  - Cualquier cliente puede ser atendido en cualquier taller
+  - Solo mecánicos y servicios están segregados por sucursal
 
 ### Performance & UX
 - Autocompletado inteligente para grandes DBs
