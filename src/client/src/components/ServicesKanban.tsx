@@ -10,7 +10,8 @@ import {
   DollarSign,
   Eye,
   Edit2,
-  Wrench
+  Wrench,
+  Target
 } from 'lucide-react';
 
 // Types (duplicated from ServicesPage for independence)
@@ -81,6 +82,7 @@ interface ServicesKanbanProps {
   onStatusChange: (serviceId: number, newStatusId: number) => void;
   onViewDetails: (service: Service) => void;
   onEdit: (service: Service) => void;
+  onCreateOpportunity: (service: Service) => void;
   isLoading?: boolean;
 }
 
@@ -146,6 +148,7 @@ export default function ServicesKanban({
   onStatusChange,
   onViewDetails,
   onEdit,
+  onCreateOpportunity,
   isLoading = false
 }: ServicesKanbanProps) {
   const [draggedService, setDraggedService] = useState<Service | null>(null);
@@ -265,6 +268,16 @@ export default function ServicesKanban({
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
+                      {/* Show create opportunity button only for completed/finished services */}
+                      {(service.status.name === 'Terminado' || service.status.name === 'Completado' || service.status.name === 'Entregado') && (
+                        <button
+                          onClick={() => onCreateOpportunity(service)}
+                          className="text-gray-400 hover:text-green-600 transition-colors"
+                          title="Crear Oportunidad"
+                        >
+                          <Target className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 

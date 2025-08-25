@@ -26,8 +26,10 @@ import {
   Wrench,
   List,
   LayoutGrid,
+  Target,
 } from 'lucide-react';
 import ServicesKanban from '../components/ServicesKanban';
+import OpportunityFromServiceModal from '../components/OpportunityFromServiceModal';
 
 // Types
 interface Service {
@@ -218,6 +220,8 @@ export default function ServicesPage() {
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
+  const [showOpportunityModal, setShowOpportunityModal] = useState(false);
+  const [selectedServiceForOpportunity, setSelectedServiceForOpportunity] = useState<Service | null>(null);
   const [vehicleClientId, setVehicleClientId] = useState<number | null>(null); // Store client ID for vehicle creation
   const [pagination, setPagination] = useState({
     page: 1,
@@ -771,6 +775,16 @@ export default function ServicesPage() {
     }
   };
 
+  const handleCreateOpportunity = (service: Service) => {
+    setSelectedServiceForOpportunity(service);
+    setShowOpportunityModal(true);
+  };
+
+  const handleOpportunitySuccess = () => {
+    // Optionally refresh services or show success message
+    toast.success('¡Oportunidad creada! Puedes gestionarla desde el módulo de Oportunidades.');
+  };
+
   const handleUpdateService = async (data: CreateServiceData) => {
     if (!selectedService) return;
     
@@ -1041,6 +1055,7 @@ export default function ServicesPage() {
             onStatusChange={handleStatusChange}
             onViewDetails={(service) => handleViewService(service.id)}
             onEdit={(service) => handleEditService(service.id)}
+            onCreateOpportunity={handleCreateOpportunity}
             isLoading={loading}
           />
         ) : (
@@ -1166,6 +1181,16 @@ export default function ServicesPage() {
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
+                        {/* Show create opportunity button only for completed/finished services */}
+                        {(service.status.name === 'Terminado' || service.status.name === 'Completado' || service.status.name === 'Entregado') && (
+                          <button
+                            onClick={() => handleCreateOpportunity(service)}
+                            className="text-green-600 hover:text-green-800"
+                            title="Crear Oportunidad"
+                          >
+                            <Target className="h-4 w-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDeleteService(service.id, service.client.name)}
                           className="text-red-600 hover:text-red-800"
@@ -2101,6 +2126,19 @@ export default function ServicesPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Opportunity From Service Modal */}
+      {selectedServiceForOpportunity && (
+        <OpportunityFromServiceModal
+          service={selectedServiceForOpportunity}
+          isOpen={showOpportunityModal}
+          onClose={() => {
+            setShowOpportunityModal(false);
+            setSelectedServiceForOpportunity(null);
+          }}
+          onSuccess={handleOpportunitySuccess}
+        />
       )}
     </div>
   );
