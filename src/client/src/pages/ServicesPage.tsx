@@ -136,8 +136,6 @@ const createServiceSchema = z.object({
   problemDescription: z.string().min(1, 'Descripción del problema es requerida'),
   diagnosis: z.string().optional(),
   quotationDetails: z.string().optional(),
-  totalAmount: z.number().min(0).default(0),
-  mechanicCommission: z.number().min(0).default(0),
 });
 
 type CreateServiceData = z.infer<typeof createServiceSchema>;
@@ -244,8 +242,6 @@ export default function ServicesPage() {
     resolver: zodResolver(createServiceSchema),
     defaultValues: {
       statusId: 1,
-      totalAmount: 0,
-      mechanicCommission: 0,
     },
   });
 
@@ -264,22 +260,6 @@ export default function ServicesPage() {
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
 
-  // Auto-calculate mechanic commission
-  const watchMechanicId = createForm.watch('mechanicId');
-  const watchTotalAmount = createForm.watch('totalAmount');
-
-  useEffect(() => {
-    if (watchMechanicId && watchTotalAmount) {
-      const selectedMechanic = mechanics.find(m => m.id === watchMechanicId);
-      if (selectedMechanic) {
-        const commission = (watchTotalAmount * selectedMechanic.commissionPercentage) / 100;
-        createForm.setValue('mechanicCommission', Number(commission.toFixed(2)));
-      }
-    } else if (!watchMechanicId) {
-      // Clear commission if no mechanic selected
-      createForm.setValue('mechanicCommission', 0);
-    }
-  }, [watchMechanicId, watchTotalAmount, mechanics, createForm]);
 
   // Load data
   useEffect(() => {
@@ -1458,38 +1438,6 @@ export default function ServicesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Total Amount */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Monto Total
-                  </label>
-                  <input
-                    {...createForm.register('totalAmount', { valueAsNumber: true })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Mechanic Commission */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comisión Mecánico <span className="text-gray-500 text-xs">(calculada automáticamente)</span>
-                  </label>
-                  <input
-                    {...createForm.register('mechanicCommission', { valueAsNumber: true })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    readOnly
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
-                  />
-                </div>
-              </div>
 
               {/* Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
