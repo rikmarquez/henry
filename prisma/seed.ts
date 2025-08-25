@@ -35,7 +35,6 @@ async function main() {
       code: 'HD001',
       address: 'Dirección Principal',
       phone: '+52-555-000-0000',
-      email: 'central@henrydiagnostics.com',
       city: 'Ciudad Principal',
     },
   });
