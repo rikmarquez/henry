@@ -319,12 +319,9 @@ router.post(
       const userId = (req as any).user.userId;
       const userBranchId = (req as any).user.branchId;
 
-      // Verify client exists and belongs to same branch
+      // Verify client exists (global - no branchId filter)
       const client = await prisma.client.findUnique({
-        where: { 
-          id: clientId,
-          branchId: userBranchId 
-        },
+        where: { id: clientId },
       });
 
       if (!client) {
@@ -334,18 +331,9 @@ router.post(
         });
       }
 
-      // Verify vehicle exists and belongs to client and same branch
+      // Verify vehicle exists and belongs to client (global - no branchId filter)
       const vehicle = await prisma.vehicle.findUnique({
-        where: { 
-          id: vehicleId,
-          clientId: clientId,
-          client: {
-            branchId: userBranchId
-          }
-        },
-        include: {
-          client: true
-        }
+        where: { id: vehicleId },
       });
 
       if (!vehicle || vehicle.clientId !== clientId) {
