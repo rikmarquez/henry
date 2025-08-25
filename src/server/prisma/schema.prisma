@@ -7,245 +7,231 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Branch {
+  id            Int           @id @default(autoincrement())
+  name          String
+  code          String        @unique
+  address       String?
+  phone         String?
+  city          String?
+  isActive      Boolean       @default(true) @map("is_active")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  appointments  Appointment[]
+  mechanics     Mechanic[]
+  opportunities Opportunity[]
+  services      Service[]
+  settings      settings[]
+  users         User[]
+
+  @@map("branches")
+}
+
 model Role {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   permissions Json?
   createdAt   DateTime @default(now()) @map("created_at")
-  
-  users User[]
-  
+  users       User[]
+
   @@map("roles")
 }
 
-model Branch {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  address   String?
-  city      String?
-  phone     String?
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  users         User[]
-  mechanics     Mechanic[]
-  appointments  Appointment[]
-  services      Service[]
-  opportunities Opportunity[]
-  settings      Setting[]
-  
-  @@map("branches")
-}
-
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String?  @unique
-  phone        String?
-  passwordHash String   @map("password_hash")
-  roleId       Int      @map("role_id")
-  branchId     Int      @default(1) @map("branch_id")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
-  role   Role   @relation(fields: [roleId], references: [id])
-  branch Branch @relation(fields: [branchId], references: [id])
-  
+  id                   Int           @id @default(autoincrement())
+  name                 String
+  email                String?       @unique
+  phone                String?
+  passwordHash         String        @map("password_hash")
+  roleId               Int           @map("role_id")
+  isActive             Boolean       @default(true) @map("is_active")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+  branchId             Int           @default(1) @map("branch_id")
   createdAppointments  Appointment[]
-  createdServices      Service[]
   createdOpportunities Opportunity[]
+  createdServices      Service[]
   statusLogs           StatusLog[]
-  
+  branch               Branch        @relation(fields: [branchId], references: [id])
+  role                 Role          @relation(fields: [roleId], references: [id])
+
   @@map("users")
 }
 
 model Client {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String
-  whatsapp  String?
-  email     String?
-  address   String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  vehicles      Vehicle[]
+  id            Int           @id @default(autoincrement())
+  name          String
+  phone         String
+  whatsapp      String?
+  email         String?
+  address       String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
   appointments  Appointment[]
-  services      Service[]
   opportunities Opportunity[]
-  
+  services      Service[]
+  vehicles      Vehicle[]
+
   @@map("clients")
 }
 
 model Vehicle {
-  id           Int      @id @default(autoincrement())
-  plate        String   @unique
-  brand        String
-  model        String
-  year         Int?
-  color        String?
-  fuelType     String?  @map("fuel_type")
-  transmission String?
-  engineNumber String?  @map("engine_number")
-  chassisNumber String? @map("chassis_number")
-  clientId     Int      @map("client_id")
-  notes        String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  
+  id            Int           @id @default(autoincrement())
+  plate         String        @unique
+  brand         String
+  model         String
+  year          Int?
+  color         String?
+  fuelType      String?       @map("fuel_type")
+  transmission  String?
+  engineNumber  String?       @map("engine_number")
+  chassisNumber String?       @map("chassis_number")
+  clientId      Int           @map("client_id")
+  notes         String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
   appointments  Appointment[]
-  services      Service[]
   opportunities Opportunity[]
-  
+  services      Service[]
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
   @@map("vehicles")
 }
 
 model Mechanic {
-  id                    Int     @id @default(autoincrement())
-  name                  String
-  phone                 String?
-  branchId              Int     @default(1) @map("branch_id")
-  commissionPercentage  Decimal @default(0.00) @map("commission_percentage") @db.Decimal(5, 2)
-  isActive              Boolean @default(true) @map("is_active")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
-  
-  branch   Branch    @relation(fields: [branchId], references: [id])
-  services Service[]
-  
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  phone                String?
+  commissionPercentage Decimal   @default(0.00) @map("commission_percentage") @db.Decimal(5, 2)
+  isActive             Boolean   @default(true) @map("is_active")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updated_at           DateTime  @default(now())
+  branchId             Int       @default(1) @map("branch_id")
+  branch               Branch    @relation(fields: [branchId], references: [id])
+  services             Service[]
+
   @@map("mechanics")
 }
 
 model WorkStatus {
-  id         Int      @id @default(autoincrement())
-  name       String
-  orderIndex Int      @map("order_index")
-  color      String   @default("#6B7280")
-  createdAt  DateTime @default(now()) @map("created_at")
-  
-  services         Service[]
-  oldStatusLogs    StatusLog[] @relation("OldStatus")
-  newStatusLogs    StatusLog[] @relation("NewStatus")
-  
+  id            Int         @id @default(autoincrement())
+  name          String
+  orderIndex    Int         @map("order_index")
+  color         String      @default("#6B7280")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  services      Service[]
+  newStatusLogs StatusLog[] @relation("NewStatus")
+  oldStatusLogs StatusLog[] @relation("OldStatus")
+
   @@map("work_statuses")
 }
 
 model Appointment {
-  id                 Int       @id @default(autoincrement())
-  clientId           Int       @map("client_id")
-  vehicleId          Int       @map("vehicle_id")
-  opportunityId      Int?      @map("opportunity_id")
-  branchId           Int       @default(1) @map("branch_id")
-  scheduledDate      DateTime  @map("scheduled_date")
-  status             String    @default("scheduled")
-  notes              String?
-  isFromOpportunity  Boolean   @default(false) @map("is_from_opportunity")
-  createdBy          Int       @map("created_by")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  
-  client        Client       @relation(fields: [clientId], references: [id])
-  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id])
-  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
-  branch        Branch       @relation(fields: [branchId], references: [id])
-  createdByUser User         @relation(fields: [createdBy], references: [id])
-  
-  services Service[]
-  
+  id                Int          @id @default(autoincrement())
+  clientId          Int          @map("client_id")
+  vehicleId         Int          @map("vehicle_id")
+  opportunityId     Int?         @map("opportunity_id")
+  scheduledDate     DateTime     @map("scheduled_date")
+  status            String       @default("scheduled")
+  notes             String?
+  isFromOpportunity Boolean      @default(false) @map("is_from_opportunity")
+  createdBy         Int          @map("created_by")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  branchId          Int          @default(1) @map("branch_id")
+  branch            Branch       @relation(fields: [branchId], references: [id])
+  client            Client       @relation(fields: [clientId], references: [id])
+  createdByUser     User         @relation(fields: [createdBy], references: [id])
+  opportunity       Opportunity? @relation(fields: [opportunityId], references: [id])
+  vehicle           Vehicle      @relation(fields: [vehicleId], references: [id])
+  services          Service[]
+
   @@map("appointments")
 }
 
 model Service {
-  id                  Int       @id @default(autoincrement())
-  appointmentId       Int?      @map("appointment_id")
-  clientId            Int       @map("client_id")
-  vehicleId           Int       @map("vehicle_id")
-  mechanicId          Int?      @map("mechanic_id")
-  branchId            Int       @default(1) @map("branch_id")
-  statusId            Int       @default(1) @map("status_id")
-  problemDescription  String?   @map("problem_description")
-  diagnosis           String?
-  quotationDetails    String?   @map("quotation_details")
-  totalAmount         Decimal   @default(0.00) @map("total_amount") @db.Decimal(10, 2)
-  mechanicCommission  Decimal   @default(0.00) @map("mechanic_commission") @db.Decimal(10, 2)
-  startedAt           DateTime? @map("started_at")
-  completedAt         DateTime? @map("completed_at")
-  createdBy           Int       @map("created_by")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  
-  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
-  client        Client       @relation(fields: [clientId], references: [id])
-  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id])
-  mechanic      Mechanic?    @relation(fields: [mechanicId], references: [id])
-  branch        Branch       @relation(fields: [branchId], references: [id])
-  status        WorkStatus   @relation(fields: [statusId], references: [id])
-  createdByUser User         @relation(fields: [createdBy], references: [id])
-  
-  opportunities Opportunity[]
-  statusLogs    StatusLog[]
-  
+  id                 Int           @id @default(autoincrement())
+  appointmentId      Int?          @map("appointment_id")
+  clientId           Int           @map("client_id")
+  vehicleId          Int           @map("vehicle_id")
+  mechanicId         Int?          @map("mechanic_id")
+  statusId           Int           @default(1) @map("status_id")
+  problemDescription String?       @map("problem_description")
+  diagnosis          String?
+  quotationDetails   String?       @map("quotation_details")
+  laborPrice         Decimal       @default(0.00) @map("labor_price") @db.Decimal(10, 2) // Force schema refresh
+  partsPrice         Decimal       @default(0.00) @map("parts_price") @db.Decimal(10, 2)
+  partsCost          Decimal       @default(0.00) @map("parts_cost") @db.Decimal(10, 2)
+  totalAmount        Decimal       @default(0.00) @map("total_amount") @db.Decimal(10, 2)
+  truput             Decimal       @default(0.00) @map("truput") @db.Decimal(10, 2)
+  mechanicCommission Decimal       @default(0.00) @map("mechanic_commission") @db.Decimal(10, 2)
+  startedAt          DateTime?     @map("started_at")
+  completedAt        DateTime?     @map("completed_at")
+  createdBy          Int           @map("created_by")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+  branchId           Int           @default(1) @map("branch_id")
+  opportunities      Opportunity[]
+  appointment        Appointment?  @relation(fields: [appointmentId], references: [id])
+  branch             Branch        @relation(fields: [branchId], references: [id])
+  client             Client        @relation(fields: [clientId], references: [id])
+  createdByUser      User          @relation(fields: [createdBy], references: [id])
+  mechanic           Mechanic?     @relation(fields: [mechanicId], references: [id])
+  status             WorkStatus    @relation(fields: [statusId], references: [id])
+  vehicle            Vehicle       @relation(fields: [vehicleId], references: [id])
+  statusLogs         StatusLog[]
+
   @@map("services")
 }
 
 model Opportunity {
-  id           Int      @id @default(autoincrement())
-  clientId     Int      @map("client_id")
-  vehicleId    Int      @map("vehicle_id")
-  serviceId    Int?     @map("service_id")
-  branchId     Int      @default(1) @map("branch_id")
-  type         String
-  description  String
-  followUpDate DateTime @map("follow_up_date") @db.Date
-  status       String   @default("pending")
-  notes        String?
-  createdBy    Int      @map("created_by")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
-  client        Client    @relation(fields: [clientId], references: [id])
-  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id])
-  service       Service?  @relation(fields: [serviceId], references: [id])
-  branch        Branch    @relation(fields: [branchId], references: [id])
-  createdByUser User      @relation(fields: [createdBy], references: [id])
-  
-  appointments Appointment[]
-  
+  id            Int           @id @default(autoincrement())
+  clientId      Int           @map("client_id")
+  vehicleId     Int           @map("vehicle_id")
+  serviceId     Int?          @map("service_id")
+  type          String
+  description   String
+  followUpDate  DateTime      @map("follow_up_date") @db.Date
+  status        String        @default("pending")
+  notes         String?
+  createdBy     Int           @map("created_by")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  branchId      Int           @default(1) @map("branch_id")
+  appointments  Appointment[]
+  branch        Branch        @relation(fields: [branchId], references: [id])
+  client        Client        @relation(fields: [clientId], references: [id])
+  createdByUser User          @relation(fields: [createdBy], references: [id])
+  service       Service?      @relation(fields: [serviceId], references: [id])
+  vehicle       Vehicle       @relation(fields: [vehicleId], references: [id])
+
   @@map("opportunities")
 }
 
 model StatusLog {
-  id           Int      @id @default(autoincrement())
-  serviceId    Int      @map("service_id")
-  oldStatusId  Int?     @map("old_status_id")
-  newStatusId  Int      @map("new_status_id")
-  changedBy    Int      @map("changed_by")
-  notes        String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  
-  service       Service     @relation(fields: [serviceId], references: [id])
-  oldStatus     WorkStatus? @relation("OldStatus", fields: [oldStatusId], references: [id])
-  newStatus     WorkStatus  @relation("NewStatus", fields: [newStatusId], references: [id])
+  id            Int         @id @default(autoincrement())
+  serviceId     Int         @map("service_id")
+  oldStatusId   Int?        @map("old_status_id")
+  newStatusId   Int         @map("new_status_id")
+  changedBy     Int         @map("changed_by")
+  notes         String?
+  createdAt     DateTime    @default(now()) @map("created_at")
   changedByUser User        @relation(fields: [changedBy], references: [id])
-  
+  newStatus     WorkStatus  @relation("NewStatus", fields: [newStatusId], references: [id])
+  oldStatus     WorkStatus? @relation("OldStatus", fields: [oldStatusId], references: [id])
+  service       Service     @relation(fields: [serviceId], references: [id])
+
   @@map("status_logs")
 }
 
-model Setting {
-  id        Int      @id @default(autoincrement())
-  branchId  Int      @map("branch_id")
-  type      String   // 'GENERAL', 'SERVICES', 'FINANCE', etc.
-  data      Json     // JSON field to store flexible configuration data
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  branch Branch @relation(fields: [branchId], references: [id])
-  
-  @@unique([branchId, type])
-  @@map("settings")
+model settings {
+  id         Int      @id @default(autoincrement())
+  branch_id  Int
+  type       String
+  data       Json
+  created_at DateTime @default(now())
+  updated_at DateTime
+  branches   Branch   @relation(fields: [branch_id], references: [id])
+
+  @@unique([branch_id, type])
 }
