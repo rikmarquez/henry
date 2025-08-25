@@ -671,6 +671,13 @@ export default function ServicesPage() {
       const serviceData = {
         ...data,
         branchId: currentBranchId,
+        // Add default pricing fields
+        laborPrice: 0,
+        partsPrice: 0,
+        partsCost: 0,
+        totalAmount: 0,
+        truput: 0,
+        mechanicCommission: 0,
         ...(preloadedAppointment && { appointmentId: preloadedAppointment.id })
       };
       
