@@ -10,7 +10,7 @@
     "lint": "eslint src --ext .ts --fix",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "postinstall": "npx prisma db push --accept-data-loss && npx prisma generate && node scripts/safe-seed.js",
+    "postinstall": "echo 'POSTINSTALL: Starting...' && rm -rf node_modules/.prisma && echo 'POSTINSTALL: Removed .prisma cache' && npx prisma db push --accept-data-loss && echo 'POSTINSTALL: DB push completed' && npx prisma generate && echo 'POSTINSTALL: Generate completed' && node scripts/safe-seed.js && echo 'POSTINSTALL: All done'",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
