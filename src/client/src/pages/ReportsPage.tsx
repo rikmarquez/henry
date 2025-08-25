@@ -60,6 +60,10 @@ interface DashboardData {
   };
   revenue: {
     total: string | number;
+    laborPrice: string | number;
+    partsPrice: string | number;
+    partsCost: string | number;
+    truput: string | number;
     period: string;
   };
   recentServices: Array<{
@@ -110,28 +114,106 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+// Function to calculate date ranges based on selected period
+const getDateRange = (period: string, customFrom?: string, customTo?: string): { dateFrom?: string; dateTo?: string } => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (period) {
+    case 'today':
+      return {
+        dateFrom: today.toISOString(),
+        dateTo: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1).toISOString()
+      };
+
+    case 'this-week': {
+      // Calculate Monday of current week (lunes a domingo)
+      const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days to Monday
+      const monday = new Date(today.getTime() - daysFromMonday * 24 * 60 * 60 * 1000);
+      const sunday = new Date(monday.getTime() + 6 * 24 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000 - 1);
+      
+      return {
+        dateFrom: monday.toISOString(),
+        dateTo: sunday.toISOString()
+      };
+    }
+
+    case 'this-month': {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      
+      return {
+        dateFrom: firstDay.toISOString(),
+        dateTo: lastDay.toISOString()
+      };
+    }
+
+    case 'this-year': {
+      const firstDay = new Date(now.getFullYear(), 0, 1);
+      const lastDay = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      
+      return {
+        dateFrom: firstDay.toISOString(),
+        dateTo: lastDay.toISOString()
+      };
+    }
+
+    case 'custom': {
+      if (customFrom && customTo) {
+        const fromDate = new Date(customFrom + 'T00:00:00.000Z');
+        const toDate = new Date(customTo + 'T23:59:59.999Z');
+        
+        return {
+          dateFrom: fromDate.toISOString(),
+          dateTo: toDate.toISOString()
+        };
+      }
+      return {}; // No dates selected yet
+    }
+
+    case 'all-time':
+    default:
+      return {}; // No date filters
+  }
+};
+
 export default function ReportsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>('all-time');
+  
+  // Custom date range state
+  const [showCustomRange, setShowCustomRange] = useState(false);
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
+  const [customRangeLabel, setCustomRangeLabel] = useState('');
 
   // Main dashboard data
   const { data: dashboardData, isLoading: loadingDashboard, error: dashboardError } = useQuery<DashboardData>({
-    queryKey: ['dashboard', selectedPeriod],
+    queryKey: ['dashboard', selectedPeriod, customDateFrom, customDateTo],
     queryFn: async () => {
-      const params = selectedPeriod !== 'all-time' ? `?period=${selectedPeriod}` : '';
-      const response = await api.get(`/reports/dashboard${params}`);
+      const dateRange = getDateRange(selectedPeriod, customDateFrom, customDateTo);
+      const params = new URLSearchParams();
+      if (dateRange.dateFrom) params.append('dateFrom', dateRange.dateFrom);
+      if (dateRange.dateTo) params.append('dateTo', dateRange.dateTo);
+      
+      const queryString = params.toString();
+      const response = await api.get(`/reports/dashboard${queryString ? `?${queryString}` : ''}`);
       return response.data.data;
     },
   });
 
-  // Services report data for charts
-  const { data: servicesData, isLoading: loadingServices } = useQuery<ServiceReportData>({
-    queryKey: ['services-report', selectedPeriod],
-    queryFn: async () => {
-      const params = selectedPeriod !== 'all-time' ? `?period=${selectedPeriod}` : '';
-      const response = await api.get(`/reports/services${params}`);
-      return response.data.data;
+  // For now, we'll use mock data for services chart until we have the proper endpoint
+  const servicesData: ServiceReportData | undefined = dashboardData ? {
+    servicesByStatus: [],
+    servicesByMechanic: [],
+    averageServiceValue: 0,
+    totalServices: dashboardData.overview.totalServices,
+    completion: {
+      completed: 0,
+      total: dashboardData.overview.totalServices,
+      completionRate: 0,
     },
-  });
+  } : undefined;
 
   if (loadingDashboard) {
     return (
@@ -270,19 +352,32 @@ export default function ReportsPage() {
         <div className="flex space-x-2">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value === 'custom') {
+                setShowCustomRange(true);
+              } else {
+                setSelectedPeriod(e.target.value);
+                setCustomRangeLabel('');
+              }
+            }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="all-time">Todo el tiempo</option>
-            <option value="last-month">Último mes</option>
-            <option value="last-week">Última semana</option>
             <option value="today">Hoy</option>
+            <option value="this-week">Esta semana</option>
+            <option value="this-month">Este mes</option>
+            <option value="this-year">Este año</option>
+            <option value="all-time">Todo el tiempo</option>
+            {customRangeLabel ? (
+              <option value="custom">📅 {customRangeLabel}</option>
+            ) : (
+              <option value="custom">📅 Rango personalizado...</option>
+            )}
           </select>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* KPI Cards - Pricing Breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -296,8 +391,8 @@ export default function ReportsPage() {
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">Servicios Totales</p>
-              <p className="text-2xl font-bold">{dashboardData.overview.totalServices}</p>
+              <p className="text-green-100 text-sm font-medium">Mano de Obra</p>
+              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.laborPrice)}</p>
             </div>
             <Wrench className="w-8 h-8 text-green-200" />
           </div>
@@ -306,20 +401,73 @@ export default function ReportsPage() {
         <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">Clientes</p>
-              <p className="text-2xl font-bold">{dashboardData.overview.totalClients}</p>
+              <p className="text-purple-100 text-sm font-medium">Precio Refacciones</p>
+              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.partsPrice)}</p>
             </div>
-            <Users className="w-8 h-8 text-purple-200" />
+            <Package className="w-8 h-8 text-purple-200" />
           </div>
         </div>
 
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm font-medium">Vehículos</p>
-              <p className="text-2xl font-bold">{dashboardData.overview.totalVehicles}</p>
+              <p className="text-orange-100 text-sm font-medium">Costo Refacciones</p>
+              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.partsCost)}</p>
             </div>
-            <Car className="w-8 h-8 text-orange-200" />
+            <ArrowDown className="w-8 h-8 text-orange-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-emerald-100 text-sm font-medium">Truput (Ganancia)</p>
+              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.truput)}</p>
+            </div>
+            <TrendingUp className="w-8 h-8 text-emerald-200" />
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Servicios Totales</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardData.overview.totalServices}</p>
+            </div>
+            <Wrench className="w-8 h-8 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Clientes</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardData.overview.totalClients}</p>
+            </div>
+            <Users className="w-8 h-8 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Vehículos</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardData.overview.totalVehicles}</p>
+            </div>
+            <Car className="w-8 h-8 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Citas</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardData.overview.totalAppointments}</p>
+            </div>
+            <Calendar className="w-8 h-8 text-gray-400" />
           </div>
         </div>
       </div>
@@ -439,6 +587,102 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* Custom Date Range Modal */}
+      {showCustomRange && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Seleccionar Rango de Fechas</h3>
+              <p className="text-sm text-gray-600 mt-1">Elige las fechas para filtrar los reportes</p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de inicio
+                  </label>
+                  <input
+                    type="date"
+                    value={customDateFrom}
+                    onChange={(e) => setCustomDateFrom(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de fin
+                  </label>
+                  <input
+                    type="date"
+                    value={customDateTo}
+                    onChange={(e) => setCustomDateTo(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Preview */}
+              {customDateFrom && customDateTo && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Vista previa:</strong> Mostrando datos del{' '}
+                    {new Date(customDateFrom).toLocaleDateString('es-MX', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })} al{' '}
+                    {new Date(customDateTo).toLocaleDateString('es-MX', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowCustomRange(false);
+                  setCustomDateFrom('');
+                  setCustomDateTo('');
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  if (customDateFrom && customDateTo) {
+                    const fromDate = new Date(customDateFrom);
+                    const toDate = new Date(customDateTo);
+                    
+                    const label = `${fromDate.toLocaleDateString('es-MX', { 
+                      day: 'numeric', 
+                      month: 'short' 
+                    })} - ${toDate.toLocaleDateString('es-MX', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}`;
+                    
+                    setCustomRangeLabel(label);
+                    setSelectedPeriod('custom');
+                    setShowCustomRange(false);
+                  }
+                }}
+                disabled={!customDateFrom || !customDateTo}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -211,9 +211,15 @@ router.get(
           }
         }),
 
-        // Revenue calculation
+        // Revenue calculation with pricing breakdown
         prisma.service.aggregate({
-          _sum: { totalAmount: true },
+          _sum: { 
+            totalAmount: true,
+            laborPrice: true,
+            partsPrice: true,
+            partsCost: true,
+            truput: true
+          },
           where: {
             branchId,
             completedAt: { not: null },
@@ -274,6 +280,10 @@ router.get(
           },
           revenue: {
             total: totalRevenue._sum.totalAmount || 0,
+            laborPrice: totalRevenue._sum.laborPrice || 0,
+            partsPrice: totalRevenue._sum.partsPrice || 0,
+            partsCost: totalRevenue._sum.partsCost || 0,
+            truput: totalRevenue._sum.truput || 0,
             period: dateFrom && dateTo ? 'custom' : 'all-time',
           },
           recentServices,
