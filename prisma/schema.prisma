@@ -21,6 +21,7 @@ model Branch {
   mechanics     Mechanic[]
   opportunities Opportunity[]
   services      Service[]
+  settings      settings[]
   users         User[]
 
   @@map("branches")
@@ -158,7 +159,11 @@ model Service {
   problemDescription String?       @map("problem_description")
   diagnosis          String?
   quotationDetails   String?       @map("quotation_details")
+  laborPrice         Decimal       @default(0.00) @map("labor_price") @db.Decimal(10, 2)
+  partsPrice         Decimal       @default(0.00) @map("parts_price") @db.Decimal(10, 2)
+  partsCost          Decimal       @default(0.00) @map("parts_cost") @db.Decimal(10, 2)
   totalAmount        Decimal       @default(0.00) @map("total_amount") @db.Decimal(10, 2)
+  truput             Decimal       @default(0.00) @map("truput") @db.Decimal(10, 2)
   mechanicCommission Decimal       @default(0.00) @map("mechanic_commission") @db.Decimal(10, 2)
   startedAt          DateTime?     @map("started_at")
   completedAt        DateTime?     @map("completed_at")
@@ -217,4 +222,16 @@ model StatusLog {
   service       Service     @relation(fields: [serviceId], references: [id])
 
   @@map("status_logs")
+}
+
+model settings {
+  id         Int      @id @default(autoincrement())
+  branch_id  Int
+  type       String
+  data       Json
+  created_at DateTime @default(now())
+  updated_at DateTime
+  branches   Branch   @relation(fields: [branch_id], references: [id])
+
+  @@unique([branch_id, type])
 }

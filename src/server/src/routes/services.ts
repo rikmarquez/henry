@@ -307,9 +307,15 @@ router.post(
         problemDescription,
         diagnosis,
         quotationDetails,
-        totalAmount = 0,
+        laborPrice = 0,
+        partsPrice = 0,
+        partsCost = 0,
         mechanicCommission = 0,
       } = req.body;
+
+      // Calcular campos automáticamente
+      const totalAmount = Number(laborPrice) + Number(partsPrice);
+      const truput = totalAmount - Number(partsCost);
       const userId = (req as any).user.userId;
 
       // Verify client exists
@@ -386,7 +392,11 @@ router.post(
           problemDescription,
           diagnosis,
           quotationDetails,
+          laborPrice,
+          partsPrice,
+          partsCost,
           totalAmount,
+          truput,
           mechanicCommission,
           createdBy: userId,
         },
@@ -442,6 +452,16 @@ router.put(
           success: false,
           message: 'Servicio no encontrado',
         });
+      }
+
+      // Calcular campos automáticamente si se actualizan los precios
+      if (updateData.laborPrice !== undefined || updateData.partsPrice !== undefined || updateData.partsCost !== undefined) {
+        const laborPrice = updateData.laborPrice !== undefined ? Number(updateData.laborPrice) : Number(existingService.laborPrice);
+        const partsPrice = updateData.partsPrice !== undefined ? Number(updateData.partsPrice) : Number(existingService.partsPrice);
+        const partsCost = updateData.partsCost !== undefined ? Number(updateData.partsCost) : Number(existingService.partsCost);
+        
+        updateData.totalAmount = laborPrice + partsPrice;
+        updateData.truput = updateData.totalAmount - partsCost;
       }
 
       // Verify mechanic if being updated

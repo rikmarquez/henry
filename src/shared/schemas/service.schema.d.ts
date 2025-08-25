@@ -8,7 +8,9 @@ export declare const createServiceSchema: z.ZodObject<{
     problemDescription: z.ZodOptional<z.ZodString>;
     diagnosis: z.ZodOptional<z.ZodString>;
     quotationDetails: z.ZodOptional<z.ZodString>;
-    totalAmount: z.ZodDefault<z.ZodNumber>;
+    laborPrice: z.ZodDefault<z.ZodNumber>;
+    partsPrice: z.ZodDefault<z.ZodNumber>;
+    partsCost: z.ZodDefault<z.ZodNumber>;
     mechanicCommission: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strip>;
 export declare const updateServiceSchema: z.ZodObject<{
@@ -20,7 +22,9 @@ export declare const updateServiceSchema: z.ZodObject<{
     problemDescription: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     diagnosis: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     quotationDetails: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    totalAmount: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    laborPrice: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    partsPrice: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    partsCost: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
     mechanicCommission: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
     id: z.ZodNumber;
     startedAt: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodDate]>>;

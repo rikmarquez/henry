@@ -10,7 +10,9 @@ export const createServiceSchema = z.object({
   problemDescription: z.string().optional(),
   diagnosis: z.string().optional(),
   quotationDetails: z.string().optional(),
-  totalAmount: z.number().min(0).default(0),
+  laborPrice: z.number().min(0).default(0),
+  partsPrice: z.number().min(0).default(0),
+  partsCost: z.number().min(0).default(0),
   mechanicCommission: z.number().min(0).default(0),
 });
 

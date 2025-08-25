@@ -42,7 +42,11 @@ interface Service {
   problemDescription?: string;
   diagnosis?: string;
   quotationDetails?: string;
+  laborPrice: number;
+  partsPrice: number;
+  partsCost: number;
   totalAmount: number;
+  truput: number;
   mechanicCommission: number;
   startedAt?: string;
   completedAt?: string;
@@ -1820,15 +1824,49 @@ export default function ServicesPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Total Amount */}
+                {/* Labor Price */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Monto Total
+                    Precio Mano de Obra
                   </label>
                   <input
-                    {...createForm.register('totalAmount', { 
+                    {...createForm.register('laborPrice', { 
                       valueAsNumber: true,
-                      value: selectedService.totalAmount
+                      value: selectedService.laborPrice || 0
+                    })}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Parts Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Precio Refacciones
+                  </label>
+                  <input
+                    {...createForm.register('partsPrice', { 
+                      valueAsNumber: true,
+                      value: selectedService.partsPrice || 0
+                    })}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Parts Cost */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Costo Refacciones
+                  </label>
+                  <input
+                    {...createForm.register('partsCost', { 
+                      valueAsNumber: true,
+                      value: selectedService.partsCost || 0
                     })}
                     type="number"
                     step="0.01"
@@ -1850,6 +1888,35 @@ export default function ServicesPage() {
                     type="number"
                     step="0.01"
                     min="0"
+                    readOnly
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              {/* Calculated Fields (Read-only) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Cotizado <span className="text-gray-500 text-xs">(Calculado automáticamente)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={selectedService.totalAmount || 0}
+                    readOnly
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Truput (Ganancia) <span className="text-gray-500 text-xs">(Calculado automáticamente)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={selectedService.truput || 0}
                     readOnly
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
                   />

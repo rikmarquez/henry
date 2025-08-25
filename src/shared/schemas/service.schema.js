@@ -12,7 +12,9 @@ exports.createServiceSchema = zod_1.z.object({
     problemDescription: zod_1.z.string().optional(),
     diagnosis: zod_1.z.string().optional(),
     quotationDetails: zod_1.z.string().optional(),
-    totalAmount: zod_1.z.number().min(0).default(0),
+    laborPrice: zod_1.z.number().min(0).default(0),
+    partsPrice: zod_1.z.number().min(0).default(0),
+    partsCost: zod_1.z.number().min(0).default(0),
     mechanicCommission: zod_1.z.number().min(0).default(0),
 });
 exports.updateServiceSchema = exports.createServiceSchema.partial().extend({
