@@ -317,10 +317,14 @@ router.post(
       const totalAmount = Number(laborPrice) + Number(partsPrice);
       const truput = totalAmount - Number(partsCost);
       const userId = (req as any).user.userId;
+      const userBranchId = (req as any).user.branchId;
 
-      // Verify client exists
+      // Verify client exists and belongs to same branch
       const client = await prisma.client.findUnique({
-        where: { id: clientId },
+        where: { 
+          id: clientId,
+          branchId: userBranchId 
+        },
       });
 
       if (!client) {
@@ -330,9 +334,18 @@ router.post(
         });
       }
 
-      // Verify vehicle exists and belongs to client
+      // Verify vehicle exists and belongs to client and same branch
       const vehicle = await prisma.vehicle.findUnique({
-        where: { id: vehicleId },
+        where: { 
+          id: vehicleId,
+          clientId: clientId,
+          client: {
+            branchId: userBranchId
+          }
+        },
+        include: {
+          client: true
+        }
       });
 
       if (!vehicle || vehicle.clientId !== clientId) {
@@ -345,7 +358,10 @@ router.post(
       // Verify mechanic if provided
       if (mechanicId) {
         const mechanic = await prisma.mechanic.findUnique({
-          where: { id: mechanicId },
+          where: { 
+            id: mechanicId,
+            branchId: userBranchId 
+          },
         });
 
         if (!mechanic || !mechanic.isActive) {
@@ -399,6 +415,7 @@ router.post(
           truput,
           mechanicCommission,
           createdBy: userId,
+          branchId: userBranchId,
         },
         include: {
           client: {
