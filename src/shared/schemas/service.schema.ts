@@ -13,6 +13,8 @@ export const createServiceSchema = z.object({
   laborPrice: z.number().min(0).default(0),
   partsPrice: z.number().min(0).default(0),
   partsCost: z.number().min(0).default(0),
+  totalAmount: z.number().min(0).default(0),
+  truput: z.number().min(0).default(0),
   mechanicCommission: z.number().min(0).default(0),
 });
 
