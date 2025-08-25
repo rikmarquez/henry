@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc --noCheck",
-    "start": "echo 'START: Initializing Prisma...' && rm -rf node_modules/.prisma && npx prisma db push --accept-data-loss && npx prisma generate && echo 'START: Prisma ready, starting server...' && node dist/server.js",
+    "start": "echo 'START: Initializing Prisma...' && rm -rf node_modules/.prisma && npx prisma db push --accept-data-loss --schema=../../prisma/schema.prisma && npx prisma generate --schema=../../prisma/schema.prisma && echo 'START: Prisma ready, starting server...' && node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src --ext .ts --fix",
     "test": "vitest",

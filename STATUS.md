@@ -47,6 +47,11 @@
   - Cualquier cliente puede ser atendido en cualquier taller
   - Solo mecánicos y servicios están segregados por sucursal
 
+### Prisma Architecture
+- **📁 UN SOLO SCHEMA**: `/prisma/schema.prisma` (raíz del proyecto)
+- ❌ NO hay schema en `/src/server/prisma/` (eliminado)
+- Railway usa `--schema=../../prisma/schema.prisma`
+
 ### Performance & UX
 - Autocompletado inteligente para grandes DBs
 - Sistema Kanban con drag & drop
