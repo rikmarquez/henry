@@ -159,7 +159,7 @@ model Service {
   problemDescription String?       @map("problem_description")
   diagnosis          String?
   quotationDetails   String?       @map("quotation_details")
-  laborPrice         Decimal       @default(0.00) @map("labor_price") @db.Decimal(10, 2)
+  laborPrice         Decimal       @default(0.00) @map("labor_price") @db.Decimal(10, 2) // Force schema refresh
   partsPrice         Decimal       @default(0.00) @map("parts_price") @db.Decimal(10, 2)
   partsCost          Decimal       @default(0.00) @map("parts_cost") @db.Decimal(10, 2)
   totalAmount        Decimal       @default(0.00) @map("total_amount") @db.Decimal(10, 2)
