@@ -2,9 +2,15 @@
 
 ## 📊 Estado General
 - **Proyecto**: Sistema de Gestión de Taller Mecánico
-- **Estado**: MVP + Multi-Taller + Dashboard 100% COMPLETADOS ✅
+- **Estado**: MVP + Multi-Taller + Dashboard COMPLETADOS ✅ | PRICING SYSTEM 95% (Issue crítico pendiente)
 - **Stack**: React + TypeScript + Node.js + PostgreSQL + Prisma
-- **URLs**: Frontend: http://localhost:5178 | Backend: http://localhost:3002
+- **URLs**: Frontend: Railway deployed | Backend: Railway deployed
+
+## 🚨 ISSUE CRÍTICO - SESIÓN 2025-08-25
+- **Error 500 en creación de servicios** - Railway no sincroniza campos pricing
+- **Causa**: Campos `labor_price`, `parts_price`, `parts_cost`, `truput` no existen en tabla `services`  
+- **Solución**: Script manual preparado en `fix_pricing_fields.sql` + `ISSUE_SERVICIOS_500.md`
+- **Estado**: PENDIENTE ejecución script en pgAdmin Railway database
 
 ## ✅ Funcionalidades Completadas (100%)
 
@@ -55,8 +61,23 @@
 - **Backend**: http://localhost:3002
 - **Producción**: Railway deployment activo
 
-## 📋 Pendientes Menores
-- Testing final flujo servicios completo
+## 📋 Pendientes Next Session
+### 🔥 PRIORIDAD CRÍTICA:
+1. **Ejecutar script pricing fields en Railway database**
+2. **Probar creación servicios en production** 
+3. **Verificar sistema pricing end-to-end**
+
+### 📱 Sistema Pricing Implementado (Ready to deploy):
+- ✅ Dashboard mobile-first reorganizado (3+2 KPIs layout)
+- ✅ 4 campos pricing: labor_price, parts_price, parts_cost, truput  
+- ✅ Reportes avanzados con breakdown financiero completo
+- ✅ Filtros temporales: Hoy, Semana (Lun-Dom), Mes, Año, Custom
+- ✅ Formularios UX optimizados (create=básico, edit=pricing)
+- ✅ Fallback system para migración gradual
+- ✅ Data cleanup completado
+
+### 🔧 Pendientes Menores:
 - Implementar 5 secciones adicionales configuración
+- Testing final flujo servicios completo  
 - Optimizaciones UX menores
 
