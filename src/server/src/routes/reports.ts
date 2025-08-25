@@ -168,7 +168,7 @@ router.get(
 
         // Active counts
         activeClients,
-        activeMechanics,
+        completedServices,
         pendingAppointments,
         inProgressServices,
         pendingOpportunities,
@@ -190,7 +190,13 @@ router.get(
 
         // Active counts (clients don't have isActive field, so using total)
         prisma.client.count(),
-        prisma.mechanic.count({ where: { branchId, isActive: true } }),
+        prisma.service.count({ 
+          where: { 
+            branchId,
+            completedAt: { not: null },
+            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+          }
+        }),
         prisma.appointment.count({ 
           where: { 
             branchId,
@@ -352,10 +358,17 @@ router.get(
           },
           active: {
             activeClients,
-            activeMechanics,
+            completedServices,
             pendingAppointments,
             inProgressServices,
             pendingOpportunities,
+          },
+          completion: {
+            completedServices,
+            inProgressServices,
+            completionRate: (completedServices + inProgressServices) > 0 
+              ? Math.round((completedServices / (completedServices + inProgressServices)) * 100)
+              : 0,
           },
           revenue: {
             total: totalRevenue._sum.totalAmount || 0,

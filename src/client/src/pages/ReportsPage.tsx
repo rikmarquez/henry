@@ -53,10 +53,15 @@ interface DashboardData {
   };
   active: {
     activeClients: number;
-    activeMechanics: number;
+    completedServices: number;
     pendingAppointments: number;
     inProgressServices: number;
     pendingOpportunities: number;
+  };
+  completion: {
+    completedServices: number;
+    inProgressServices: number;
+    completionRate: number;
   };
   revenue: {
     total: string | number;
@@ -223,11 +228,9 @@ export default function ReportsPage() {
       : 0,
     totalServices: dashboardData.overview.totalServices,
     completion: {
-      completed: dashboardData.servicesByStatus?.find(s => s.status.name === 'Completado')?._count.id || 0,
-      total: dashboardData.overview.totalServices,
-      completionRate: dashboardData.overview.totalServices > 0 
-        ? ((dashboardData.servicesByStatus?.find(s => s.status.name === 'Completado')?._count.id || 0) / dashboardData.overview.totalServices) * 100 
-        : 0,
+      completed: dashboardData.completion.completedServices,
+      total: dashboardData.completion.completedServices + dashboardData.completion.inProgressServices,
+      completionRate: dashboardData.completion.completionRate,
     },
   } : undefined;
 
@@ -532,8 +535,8 @@ export default function ReportsPage() {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Estadísticas Rápidas</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Mecánicos Activos</span>
-              <span className="font-semibold">{dashboardData.active.activeMechanics}</span>
+              <span className="text-gray-600">Servicios Terminados</span>
+              <span className="font-semibold text-green-600">{dashboardData.active.completedServices}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Servicios en Progreso</span>
@@ -554,7 +557,7 @@ export default function ReportsPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Tasa de Finalización</span>
                   <span className="font-semibold text-green-600">
-                    {servicesData.completion.completionRate.toFixed(1)}%
+                    {dashboardData.completion.completionRate}%
                   </span>
                 </div>
               </>
