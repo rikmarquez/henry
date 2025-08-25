@@ -211,21 +211,47 @@ router.get(
           }
         }),
 
-        // Revenue calculation with pricing breakdown
-        prisma.service.aggregate({
-          _sum: { 
-            totalAmount: true,
-            laborPrice: true,
-            partsPrice: true,
-            partsCost: true,
-            truput: true
-          },
-          where: {
-            branchId,
-            completedAt: { not: null },
-            ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
-          },
-        }),
+        // Revenue calculation - check if new pricing fields exist
+        (async () => {
+          try {
+            // Try with new pricing fields first
+            return await prisma.service.aggregate({
+              _sum: { 
+                totalAmount: true,
+                laborPrice: true,
+                partsPrice: true,
+                partsCost: true,
+                truput: true
+              },
+              where: {
+                branchId,
+                completedAt: { not: null },
+                ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+              },
+            });
+          } catch (error) {
+            console.log('⚠️ New pricing fields not available, using fallback');
+            // Fallback to basic totalAmount only
+            const result = await prisma.service.aggregate({
+              _sum: { totalAmount: true },
+              where: {
+                branchId,
+                completedAt: { not: null },
+                ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
+              },
+            });
+            
+            return {
+              _sum: {
+                totalAmount: result._sum.totalAmount,
+                laborPrice: 0,
+                partsPrice: 0,
+                partsCost: 0,
+                truput: 0,
+              }
+            };
+          }
+        })(),
 
         // Recent services for quick overview
         prisma.service.findMany({
