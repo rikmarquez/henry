@@ -45,6 +45,26 @@ async function createTablesManually() {
       }
     }
 
+    // Add pricing fields to services table if they don't exist
+    const pricingFields = [
+      { name: 'labor_price', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+      { name: 'parts_price', type: 'DECIMAL(10,2) DEFAULT 0.00' }, 
+      { name: 'parts_cost', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+      { name: 'truput', type: 'DECIMAL(10,2) DEFAULT 0.00' }
+    ];
+
+    for (const field of pricingFields) {
+      try {
+        await prisma.$executeRawUnsafe(`
+          ALTER TABLE "services" 
+          ADD COLUMN IF NOT EXISTS "${field.name}" ${field.type}
+        `);
+        console.log(`✅ Added ${field.name} to services table`);
+      } catch (error) {
+        console.log(`⚠️ Could not add ${field.name} to services: ${error.message}`);
+      }
+    }
+
     // Create default branch
     await prisma.$executeRaw`
       INSERT INTO "branches" ("name", "code", "address", "phone", "email", "city")
@@ -93,6 +113,28 @@ async function main() {
       const success = await createTablesManually();
       if (!success) {
         process.exit(1);
+      }
+    } else {
+      // Force pricing fields creation even if branches exist
+      console.log('🔧 Forcing pricing fields creation...');
+      
+      const pricingFields = [
+        { name: 'labor_price', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+        { name: 'parts_price', type: 'DECIMAL(10,2) DEFAULT 0.00' }, 
+        { name: 'parts_cost', type: 'DECIMAL(10,2) DEFAULT 0.00' },
+        { name: 'truput', type: 'DECIMAL(10,2) DEFAULT 0.00' }
+      ];
+
+      for (const field of pricingFields) {
+        try {
+          await prisma.$executeRawUnsafe(`
+            ALTER TABLE "services" 
+            ADD COLUMN IF NOT EXISTS "${field.name}" ${field.type}
+          `);
+          console.log(`✅ Added ${field.name} to services table`);
+        } catch (error) {
+          console.log(`⚠️ Could not add ${field.name} to services: ${error.message}`);
+        }
       }
     }
 
