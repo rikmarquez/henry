@@ -273,11 +273,20 @@ const CreateAppointmentModal = ({
     });
   };
 
-  // Set minimum date/time to now
+  // Set minimum date/time to now (in local timezone)
   const getMinDateTime = () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 30); // At least 30 minutes from now
-    return now.toISOString().slice(0, 16);
+    
+    // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+    // We need to adjust for local timezone offset
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   if (!isOpen) return null;
