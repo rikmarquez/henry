@@ -34,12 +34,12 @@ export default function Layout({ children }: LayoutProps) {
   const getNavigation = () => {
     const baseNavigation = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
-      { name: 'Clientes', href: '/clients', icon: Users },
-      { name: 'Vehículos', href: '/vehicles', icon: Car },
-      { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
       { name: 'Citas', href: '/appointments', icon: Calendar },
       { name: 'Servicios', href: '/services', icon: Wrench },
       { name: 'Oportunidades', href: '/opportunities', icon: Target },
+      { name: 'Clientes', href: '/clients', icon: Users },
+      { name: 'Vehículos', href: '/vehicles', icon: Car },
+      { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
       { name: 'Reportes', href: '/reports', icon: BarChart3 },
     ];
 
