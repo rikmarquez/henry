@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, Car, User, Calendar, Clock, AlertCircle, Search } from 'lucide-react';
+import { X, Phone, Car, User, Calendar, Clock, AlertCircle, Search, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../../services/api';
+import VehicleForm from '../VehicleForm';
 
 // Schema para cita telefónica (datos mínimos)
 const phoneAppointmentSchema = z.object({
@@ -89,6 +90,7 @@ const CreateAppointmentModal = ({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [phoneClientSuggestion, setPhoneClientSuggestion] = useState<Client | null>(null);
+  const [showVehicleForm, setShowVehicleForm] = useState(false);
 
   // Helper function to format date for datetime-local input
   const formatDateTimeLocal = (date: Date) => {
@@ -557,24 +559,50 @@ const CreateAppointmentModal = ({
                   </div>
 
                   {/* Vehicle Selection */}
-                  {selectedClient && vehiclesData?.data?.vehicles?.length > 0 && (
+                  {selectedClient && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        <Car className="inline h-4 w-4 mr-1" />
-                        Seleccionar Vehículo
-                      </label>
-                      <select
-                        {...opportunityForm.register('vehicleId', { valueAsNumber: true })}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value={0}>Selecciona un vehículo</option>
-                        {vehiclesData.data.vehicles.map((vehicle: Vehicle) => (
-                          <option key={vehicle.id} value={vehicle.id}>
-                            {vehicle.brand} {vehicle.model} - {vehicle.plate}
-                            {vehicle.year && ` (${vehicle.year})`}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium text-gray-700">
+                          <Car className="inline h-4 w-4 mr-1" />
+                          Seleccionar Vehículo
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowVehicleForm(true)}
+                          className="inline-flex items-center px-3 py-1 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Nuevo Vehículo
+                        </button>
+                      </div>
+                      
+                      {vehiclesData?.data?.vehicles?.length > 0 ? (
+                        <select
+                          {...opportunityForm.register('vehicleId', { valueAsNumber: true })}
+                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                          <option value={0}>Selecciona un vehículo</option>
+                          {vehiclesData.data.vehicles.map((vehicle: Vehicle) => (
+                            <option key={vehicle.id} value={vehicle.id}>
+                              {vehicle.brand} {vehicle.model} - {vehicle.plate}
+                              {vehicle.year && ` (${vehicle.year})`}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                          <p className="text-sm text-yellow-800">
+                            Este cliente no tiene vehículos registrados. 
+                            <button
+                              type="button"
+                              onClick={() => setShowVehicleForm(true)}
+                              className="font-medium text-blue-600 hover:text-blue-500 ml-1"
+                            >
+                              Crear el primer vehículo
+                            </button>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -629,6 +657,18 @@ const CreateAppointmentModal = ({
             </form>
           )}
         </div>
+        
+        {/* Vehicle Form Modal */}
+        <VehicleForm
+          isOpen={showVehicleForm}
+          onClose={() => setShowVehicleForm(false)}
+          preselectedClientId={selectedClient?.id}
+          onSuccess={() => {
+            // Refresh vehicles data after creating a new vehicle
+            setShowVehicleForm(false);
+            toast.success('Vehículo creado. Ahora puedes seleccionarlo.');
+          }}
+        />
       </div>
     </div>
   );
