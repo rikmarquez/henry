@@ -41,7 +41,7 @@ const updateBranchSchema = z.object({
       .max(200, 'Dirección no puede exceder 200 caracteres')
       .optional(),
     phone: z.string()
-      .min(10, 'Teléfono debe tener al menos 10 caracteres')
+      .min(1, 'Teléfono no puede estar vacío')
       .max(20, 'Teléfono no puede exceder 20 caracteres')
       .optional(),
     city: z.string()

@@ -91,6 +91,15 @@
 3. **Optimizaciones UX menores**
 4. **Documentación final usuario**
 
+## 🐛 BUG FIX - SESIÓN 2025-08-26
+### ✅ CORREGIDO: Error 400 en edición de sucursales
+- **Issue**: Error 400 al actualizar sucursales existentes  
+- **Root Cause**: Middleware de validación incorrecto en endpoint PUT /branches/:id
+- **Solución**: 
+  - Reemplazado middleware genérico por validación personalizada en branches.ts:405-437
+  - Relajada validación campo teléfono (min 1 char vs 10 chars)
+- **Estado**: ✅ RESUELTO - Edición de sucursales funcionando correctamente
+
 ### 🎯 PROGRESO PRICING SYSTEM 100% COMPLETADO:
 - ✅ **CRÍTICO RESUELTO**: Error 500 en creación servicios
 - ✅ **DB Schema**: Campos pricing en producción 

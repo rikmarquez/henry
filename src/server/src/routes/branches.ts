@@ -403,7 +403,35 @@ router.post('/',
 );
 
 router.put('/:id', 
-  validate(updateBranchSchema),
+  (req: any, res: any, next: any) => {
+    try {
+      // Validar parámetros y body por separado
+      const params = { id: req.params.id };
+      const parsedParams = updateBranchSchema.shape.params.parse(params);
+      const parsedBody = updateBranchSchema.shape.body.parse(req.body);
+      
+      req.params = parsedParams;
+      req.body = parsedBody;
+      next();
+    } catch (error: any) {
+      console.log('❌ VALIDATION ERROR:', error);
+      if (error.errors) {
+        return res.status(400).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          errors: error.errors.map((err: any) => ({
+            field: err.path.join('.'),
+            message: err.message,
+          })),
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        error: error.message
+      });
+    }
+  },
   authorize(['branches'], ['update']),
   updateBranch
 );
