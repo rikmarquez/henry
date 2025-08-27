@@ -101,9 +101,9 @@ const DailyCalendar = ({
     }
   };
 
-  // Time slots for the day (6 AM to 10 PM)
-  const timeSlots = Array.from({ length: 32 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 6;
+  // Time slots for the day (8 AM to 7 PM)
+  const timeSlots = Array.from({ length: 22 }, (_, i) => {
+    const hour = Math.floor(i / 2) + 8;
     const minute = i % 2 === 0 ? '00' : '30';
     return `${hour.toString().padStart(2, '0')}:${minute}`;
   });
