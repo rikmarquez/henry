@@ -216,7 +216,7 @@ const AppointmentCalendar = ({
                           {new Date(appointment.scheduledDate).toLocaleTimeString('es-ES', {
                             hour: '2-digit',
                             minute: '2-digit'
-                          })} - {appointment.client.name}
+                          })} - {appointment.vehicle.brand} {appointment.vehicle.model}
                         </div>
                       ))}
                       {dayAppointments.length > 3 && (
