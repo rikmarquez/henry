@@ -84,6 +84,35 @@
 - **Solución**: UN SOLO schema en `/prisma/schema.prisma`
 - **Status**: Servicios se crean exitosamente con todos los campos pricing
 
+## 🚀 MEJORAS UX MÓDULO CITAS - SESIÓN 2025-08-27
+
+### ✅ COMPLETADO: Funcionalidad crear vehículo desde citas
+- **Feature**: Botón "Nuevo Vehículo" en modal de creación de citas
+- **UX**: Modal integrado reutilizando componente VehicleForm existente
+- **Automático**: Cliente preseleccionado al crear vehículo desde cita
+- **Smart UX**: Mensaje cuando cliente no tiene vehículos registrados
+- **Real-time**: Actualización automática de lista tras crear vehículo
+- **Commit**: `feat: agregar funcionalidad crear vehículo desde modal de citas`
+
+### ✅ COMPLETADO: Ajuste horarios calendario diario 
+- **Cambio**: Horario de 6:00 AM - 10:00 PM → **8:00 AM - 7:00 PM**
+- **Optimización**: Reducido de 32 a 22 slots de tiempo (horario laboral)
+- **UX**: Horarios más realistas para taller mecánico
+- **Commit**: `fix: ajustar horarios del calendario diario de citas a 8am-7pm`
+
+### ✅ COMPLETADO: Vista mensual mostrar vehículos
+- **Cambio**: Vista mensual ahora muestra **marca + modelo** en lugar de nombre cliente
+- **Beneficio**: Identificación rápida de tipos de vehículos por día  
+- **UX**: Más relevante para operaciones de taller mecánico
+- **Commit**: `fix: mostrar vehículo en lugar de cliente en vista mensual de citas`
+
+## 🐛 BUG FIX - SESIÓN 2025-09-10
+### ✅ CORREGIDO: Modal de oportunidades se quedaba en blanco
+- **Issue**: Al hacer clic en ver (👁️) detalles de una oportunidad, la pantalla se quedaba en blanco
+- **Root Cause**: Componente `Wrench` de Lucide React no estaba importado pero se usaba en línea 1092
+- **Solución**: Agregado `Wrench` a las importaciones de lucide-react en OpportunitiesPage.tsx
+- **Estado**: ✅ RESUELTO - Modal de detalles funcionando correctamente
+
 ## 📋 Pendientes Next Session  
 ### 🚀 NUEVAS PRIORIDADES:
 1. **Testing exhaustivo sistema pricing completo**
