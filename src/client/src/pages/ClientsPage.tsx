@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
@@ -52,22 +52,47 @@ export default function ClientsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  
+  const [allClients, setAllClients] = useState<Client[]>([]);
+
   const queryClient = useQueryClient();
 
-  // Fetch clients
+  // Fetch all clients (only once on mount)
   const { data: clientsData, isLoading, error } = useQuery({
-    queryKey: ['clients', currentPage, searchTerm],
+    queryKey: ['clients'],
     queryFn: async (): Promise<ClientsResponse> => {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '10',
-        ...(searchTerm && { search: searchTerm })
-      });
-      const response = await api.get(`/clients?${params}`);
+      const response = await api.get('/clients?limit=1000');
       return response.data.data;
     },
   });
+
+  // Update local clients when data changes
+  useEffect(() => {
+    if (clientsData?.clients) {
+      setAllClients(clientsData.clients);
+    }
+  }, [clientsData]);
+
+  // Frontend-only filtering
+  const filteredClients = allClients.filter(client => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      client.name.toLowerCase().includes(search) ||
+      (client.whatsapp && client.whatsapp.includes(search))
+    );
+  });
+
+  // Pagination for filtered results
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedClients = filteredClients.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Delete client mutation
   const deleteClientMutation = useMutation({
@@ -81,7 +106,7 @@ export default function ClientsPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPage(1);
+    // Search is handled by frontend filtering, no need for additional logic
   };
 
   const handleDeleteClient = async (client: Client) => {
@@ -125,8 +150,13 @@ export default function ClientsPage() {
     );
   }
 
-  const clients = clientsData?.clients || [];
-  const pagination = clientsData?.pagination;
+  const clients = paginatedClients;
+  const pagination = {
+    page: currentPage,
+    limit: itemsPerPage,
+    total: filteredClients.length,
+    pages: totalPages
+  };
 
   return (
     <div className="bg-gray-50">
@@ -178,10 +208,7 @@ export default function ClientsPage() {
               {searchTerm && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => setSearchTerm('')}
                   className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
                 >
                   Limpiar

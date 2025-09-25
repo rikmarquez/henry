@@ -59,6 +59,7 @@ export default function VehiclesPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [allVehicles, setAllVehicles] = useState<Vehicle[]>([]);
 
   // Check URL parameters for preselected client
   useEffect(() => {
@@ -68,23 +69,59 @@ export default function VehiclesPage() {
       setSelectedClientId(clientId);
     }
   }, []);
-  
+
   const queryClient = useQueryClient();
 
-  // Fetch vehicles
+  // Fetch all vehicles (only once on mount)
   const { data: vehiclesData, isLoading, error } = useQuery({
-    queryKey: ['vehicles', currentPage, searchTerm, selectedClientId],
+    queryKey: ['vehicles'],
     queryFn: async (): Promise<VehiclesResponse> => {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: '10',
-        ...(searchTerm && { search: searchTerm }),
-        ...(selectedClientId && { clientId: selectedClientId })
-      });
-      const response = await api.get(`/vehicles?${params}`);
+      const response = await api.get('/vehicles?limit=1000');
       return response.data.data;
     },
   });
+
+  // Update local vehicles when data changes
+  useEffect(() => {
+    if (vehiclesData?.vehicles) {
+      setAllVehicles(vehiclesData.vehicles);
+    }
+  }, [vehiclesData]);
+
+  // Frontend-only filtering
+  const filteredVehicles = allVehicles.filter(vehicle => {
+    // Filter by search term
+    let matchesSearch = true;
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      matchesSearch = (
+        vehicle.plate.toLowerCase().includes(search) ||
+        vehicle.brand.toLowerCase().includes(search) ||
+        vehicle.model.toLowerCase().includes(search) ||
+        vehicle.client.name.toLowerCase().includes(search)
+      );
+    }
+
+    // Filter by selected client
+    let matchesClient = true;
+    if (selectedClientId) {
+      matchesClient = vehicle.client.id.toString() === selectedClientId;
+    }
+
+    return matchesSearch && matchesClient;
+  });
+
+  // Pagination for filtered results
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredVehicles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedVehicles = filteredVehicles.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedClientId]);
 
   // Fetch clients for filter
   const { data: clientsData } = useQuery({
@@ -107,7 +144,7 @@ export default function VehiclesPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPage(1);
+    // Search is handled by frontend filtering, no need for additional logic
   };
 
   const handleDeleteVehicle = async (vehicle: Vehicle) => {
@@ -134,7 +171,6 @@ export default function VehiclesPage() {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedClientId('');
-    setCurrentPage(1);
   };
 
   if (isLoading) {
@@ -157,8 +193,13 @@ export default function VehiclesPage() {
     );
   }
 
-  const vehicles = vehiclesData?.vehicles || [];
-  const pagination = vehiclesData?.pagination;
+  const vehicles = paginatedVehicles;
+  const pagination = {
+    page: currentPage,
+    limit: itemsPerPage,
+    total: filteredVehicles.length,
+    pages: totalPages
+  };
   const clients = clientsData || [];
 
   return (
@@ -221,10 +262,7 @@ export default function VehiclesPage() {
                 <div className="flex-1">
                   <select
                     value={selectedClientId}
-                    onChange={(e) => {
-                      setSelectedClientId(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => setSelectedClientId(e.target.value)}
                     className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Todos los clientes</option>
