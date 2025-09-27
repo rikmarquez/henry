@@ -25,7 +25,7 @@ const env = {
   bcryptSaltRounds: process.env.BCRYPT_SALT_ROUNDS || 12,
   rateLimitWindowMs: process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
   rateLimitMaxRequests: process.env.RATE_LIMIT_MAX_REQUESTS || (process.env.NODE_ENV === 'production' ? 1000 : 100),
-  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180,http://localhost:5181,http://localhost:5200,http://localhost:5201',
+  allowedOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180,http://localhost:5181,http://localhost:5200,http://localhost:5201',
 };
 
 export const config = configSchema.parse(env);

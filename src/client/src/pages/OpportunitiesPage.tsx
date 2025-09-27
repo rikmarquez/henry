@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../services/api';
+import PermissionGate from '../components/PermissionGate';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -411,13 +412,19 @@ export default function OpportunitiesPage() {
             Gestiona el seguimiento de trabajos futuros y mantenimientos programados
           </p>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        <PermissionGate
+          resource="opportunities"
+          action="create"
+          fallbackMode="disable"
         >
-          <Plus className="w-5 h-5" />
-          Nueva Oportunidad
-        </button>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Oportunidad
+          </button>
+        </PermissionGate>
       </div>
 
       {/* Upcoming Follow-ups Alert */}
@@ -611,21 +618,33 @@ export default function OpportunitiesPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => openEditModal(opportunity)}
-                          className="text-gray-600 hover:text-green-600 transition-colors"
-                          title="Editar"
+                        <PermissionGate
+                          resource="opportunities"
+                          action="update"
+                          fallbackMode="disable"
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        {opportunity.status !== 'converted' && (
                           <button
-                            onClick={() => handleDeleteOpportunity(opportunity.id)}
-                            className="text-gray-600 hover:text-red-600 transition-colors"
-                            title="Eliminar"
+                            onClick={() => openEditModal(opportunity)}
+                            className="text-gray-600 hover:text-green-600 transition-colors"
+                            title="Editar"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
+                        </PermissionGate>
+                        {opportunity.status !== 'converted' && (
+                          <PermissionGate
+                            resource="opportunities"
+                            action="delete"
+                            fallbackMode="disable"
+                          >
+                            <button
+                              onClick={() => handleDeleteOpportunity(opportunity.id)}
+                              className="text-gray-600 hover:text-red-600 transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </PermissionGate>
                         )}
                         {(opportunity.status === 'interested' || opportunity.status === 'contacted') && (
                           <button

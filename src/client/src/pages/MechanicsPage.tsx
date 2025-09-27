@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
-import { 
-  Wrench, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Phone, 
+import PermissionGate from '../components/PermissionGate';
+import {
+  Wrench,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Phone,
   Percent,
   Loader2,
   AlertCircle,
@@ -178,13 +179,20 @@ export default function MechanicsPage() {
           <Wrench className="h-8 w-8 text-blue-600 mr-3" />
           <h1 className="text-3xl font-bold text-gray-900">Mecánicos</h1>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+        <PermissionGate
+          resource="mechanics"
+          action="create"
+          fallbackMode="disable"
+          fallbackMessage="Solo administradores y encargados pueden crear nuevos mecánicos"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Mecánico
-        </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Mecánico
+          </button>
+        </PermissionGate>
       </div>
 
       {/* Filtros */}
@@ -321,30 +329,42 @@ export default function MechanicsPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleEdit(mechanic)}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Editar"
+                          <PermissionGate
+                            resource="mechanics"
+                            action="update"
+                            fallbackMode="disable"
                           >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          {mechanic.isActive ? (
                             <button
-                              onClick={() => handleDelete(mechanic)}
-                              className="text-red-600 hover:text-red-900"
-                              title="Desactivar"
+                              onClick={() => handleEdit(mechanic)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Editar"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </button>
-                          ) : (
-                            <button
-                              onClick={() => handleActivate(mechanic)}
-                              className="text-green-600 hover:text-green-900"
-                              title="Reactivar"
-                            >
-                              <UserCheck className="h-4 w-4" />
-                            </button>
-                          )}
+                          </PermissionGate>
+                          <PermissionGate
+                            resource="mechanics"
+                            action="delete"
+                            fallbackMode="disable"
+                          >
+                            {mechanic.isActive ? (
+                              <button
+                                onClick={() => handleDelete(mechanic)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Desactivar"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleActivate(mechanic)}
+                                className="text-green-600 hover:text-green-900"
+                                title="Reactivar"
+                              >
+                                <UserCheck className="h-4 w-4" />
+                              </button>
+                            )}
+                          </PermissionGate>
                         </div>
                       </td>
                     </tr>

@@ -11,9 +11,8 @@ interface User {
     id: number;
     name: string;
     permissions: {
-      resource: string;
-      actions: string[];
-    }[];
+      [resource: string]: string[];
+    };
   };
   branch: {
     id: number;
@@ -117,10 +116,10 @@ export const useAuthStore = create<AuthStore>()(
 
       hasPermission: (resource: string, action: string): boolean => {
         const { user } = get();
-        if (!user || !user.role) return false;
+        if (!user || !user.role || !user.role.permissions) return false;
 
-        const permission = user.role.permissions.find(p => p.resource === resource);
-        return permission ? permission.actions.includes(action) : false;
+        const resourcePermissions = user.role.permissions[resource];
+        return resourcePermissions ? resourcePermissions.includes(action) : false;
       },
     }),
     {

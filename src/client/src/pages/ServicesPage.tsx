@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
+import PermissionGate from '../components/PermissionGate';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -962,13 +963,19 @@ export default function ServicesPage() {
             </div>
           )}
           
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          <PermissionGate
+            resource="services"
+            action="create"
+            fallbackMode="disable"
           >
-            <Plus className="h-4 w-4" />
-            <span>Nuevo Servicio</span>
-          </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nuevo Servicio</span>
+            </button>
+          </PermissionGate>
         </div>
       </div>
 

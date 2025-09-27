@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
+import PermissionGate from '../components/PermissionGate';
 import AppointmentCalendar from '../components/appointments/AppointmentCalendar';
 import WeeklyCalendar from '../components/appointments/WeeklyCalendar';
 import DailyCalendar from '../components/appointments/DailyCalendar';
@@ -236,13 +237,19 @@ const AppointmentsPage = () => {
             </button>
           </div>
           
-          <button
-            onClick={() => handleCreateAppointment()}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          <PermissionGate
+            resource="appointments"
+            action="create"
+            fallbackMode="disable"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Cita
-          </button>
+            <button
+              onClick={() => handleCreateAppointment()}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nueva Cita
+            </button>
+          </PermissionGate>
         </div>
       </div>
 

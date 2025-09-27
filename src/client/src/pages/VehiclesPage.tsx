@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
 import VehicleForm from '../components/VehicleForm';
 import ServiceHistoryTable from '../components/ServiceHistoryTable';
-import { 
-  Car, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import PermissionGate from '../components/PermissionGate';
+import {
+  Car,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
   User,
   Calendar,
   Loader2,
@@ -217,13 +218,19 @@ export default function VehiclesPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            <PermissionGate
+              resource="vehicles"
+              action="create"
+              fallbackMode="disable"
             >
-              <Plus className="h-5 w-5" />
-              Nuevo Vehículo
-            </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Nuevo Vehículo
+              </button>
+            </PermissionGate>
           </div>
         </div>
       </div>
@@ -366,21 +373,33 @@ export default function VehiclesPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleEditVehicle(vehicle)}
-                          className="text-yellow-600 hover:text-yellow-900 p-1 rounded"
-                          title="Editar"
+                        <PermissionGate
+                          resource="vehicles"
+                          action="update"
+                          fallbackMode="disable"
                         >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteVehicle(vehicle)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Eliminar"
-                          disabled={deleteVehicleMutation.isPending}
+                          <button
+                            onClick={() => handleEditVehicle(vehicle)}
+                            className="text-yellow-600 hover:text-yellow-900 p-1 rounded"
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                        </PermissionGate>
+                        <PermissionGate
+                          resource="vehicles"
+                          action="delete"
+                          fallbackMode="disable"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                          <button
+                            onClick={() => handleDeleteVehicle(vehicle)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                            title="Eliminar"
+                            disabled={deleteVehicleMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </PermissionGate>
                       </div>
                     </td>
                   </tr>

@@ -53,11 +53,20 @@ export const authorize = (resources: string[], actions: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
+        console.log('❌ Authorization failed: No user in request');
         return res.status(401).json({
           success: false,
           message: 'Usuario no autenticado',
         });
       }
+
+      console.log('🔧 Authorization check for:', {
+        userId: req.user.userId,
+        email: req.user.email,
+        roleId: req.user.roleId,
+        requiredResources: resources,
+        requiredActions: actions
+      });
 
       // Get user role permissions from database
       const { prisma } = await import('../config/database');
@@ -65,7 +74,14 @@ export const authorize = (resources: string[], actions: string[]) => {
         where: { id: req.user.roleId }
       });
 
+      console.log('🔧 Role from database:', {
+        roleId: req.user.roleId,
+        roleName: userRole?.name,
+        permissions: userRole?.permissions
+      });
+
       if (!userRole || !userRole.permissions) {
+        console.log('❌ Authorization failed: No role or permissions found');
         return res.status(403).json({
           success: false,
           message: 'Acceso denegado - Sin permisos configurados',
@@ -76,6 +92,7 @@ export const authorize = (resources: string[], actions: string[]) => {
 
       // Check for admin/all permissions first
       if (permissions.all === true) {
+        console.log('✅ Authorization granted: Admin permissions');
         next();
         return;
       }
@@ -83,23 +100,39 @@ export const authorize = (resources: string[], actions: string[]) => {
       // Check if user has permission for at least one resource-action combination
       const hasPermission = resources.some(resource => {
         const resourcePermissions = permissions[resource];
+        console.log(`🔧 Checking resource '${resource}':`, {
+          resourcePermissions,
+          isArray: Array.isArray(resourcePermissions),
+          requiredActions: actions
+        });
+
         if (!resourcePermissions || !Array.isArray(resourcePermissions)) {
           return false;
         }
 
-        return actions.some(action => resourcePermissions.includes(action));
+        const hasAction = actions.some(action => {
+          const hasIt = resourcePermissions.includes(action);
+          console.log(`🔧 Action '${action}' in [${resourcePermissions.join(', ')}]: ${hasIt}`);
+          return hasIt;
+        });
+
+        return hasAction;
       });
 
+      console.log('🔧 Final permission result:', hasPermission);
+
       if (!hasPermission) {
+        console.log('❌ Authorization failed: Insufficient permissions');
         return res.status(403).json({
           success: false,
           message: 'Acceso denegado - Permisos insuficientes',
         });
       }
 
+      console.log('✅ Authorization granted');
       next();
     } catch (error) {
-      console.error('Authorization error:', error);
+      console.error('❌ Authorization error:', error);
       res.status(500).json({
         success: false,
         message: 'Error en la autorización',

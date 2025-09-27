@@ -4,17 +4,18 @@ import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
 import ClientForm from '../components/ClientForm';
 import ServiceHistoryTable from '../components/ServiceHistoryTable';
-import { 
-  Users, 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Phone, 
+import PermissionGate from '../components/PermissionGate';
+import {
+  Users,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Phone,
   Car,
   Loader2,
-  AlertCircle 
+  AlertCircle
 } from 'lucide-react';
 
 interface Client {
@@ -173,13 +174,19 @@ export default function ClientsPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            <PermissionGate
+              resource="clients"
+              action="create"
+              fallbackMode="disable"
             >
-              <Plus className="h-5 w-5" />
-              Nuevo Cliente
-            </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Plus className="h-5 w-5" />
+                Nuevo Cliente
+              </button>
+            </PermissionGate>
           </div>
         </div>
       </div>
@@ -286,21 +293,33 @@ export default function ClientsPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleEditClient(client)}
-                          className="text-yellow-600 hover:text-yellow-900 p-1 rounded"
-                          title="Editar"
+                        <PermissionGate
+                          resource="clients"
+                          action="update"
+                          fallbackMode="disable"
                         >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClient(client)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Eliminar"
-                          disabled={deleteClientMutation.isPending}
+                          <button
+                            onClick={() => handleEditClient(client)}
+                            className="text-yellow-600 hover:text-yellow-900 p-1 rounded"
+                            title="Editar"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                        </PermissionGate>
+                        <PermissionGate
+                          resource="clients"
+                          action="delete"
+                          fallbackMode="disable"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                          <button
+                            onClick={() => handleDeleteClient(client)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                            title="Eliminar"
+                            disabled={deleteClientMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </PermissionGate>
                       </div>
                     </td>
                   </tr>

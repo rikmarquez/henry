@@ -43,7 +43,17 @@ async function main() {
 
   const receptionistRole = await prisma.role.upsert({
     where: { name: 'RECEPCIONISTA' },
-    update: {},
+    update: {
+      permissions: {
+        clients: ['create', 'read', 'update'],
+        vehicles: ['create', 'read', 'update'],
+        appointments: ['create', 'read', 'update', 'delete'],
+        services: ['create', 'read', 'update'],
+        opportunities: ['create', 'read', 'update'],
+        mechanics: ['read'],
+        reports: ['read']
+      },
+    },
     create: {
       name: 'RECEPCIONISTA',
       permissions: {
@@ -52,6 +62,7 @@ async function main() {
         appointments: ['create', 'read', 'update', 'delete'],
         services: ['create', 'read', 'update'],
         opportunities: ['create', 'read', 'update'],
+        mechanics: ['read'],
         reports: ['read']
       },
     },

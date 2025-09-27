@@ -67,6 +67,43 @@ router.get(
   }
 );
 
+// GET /api/reports/permission-test - Test user permissions
+router.get(
+  '/permission-test',
+  authenticate,
+  async (req, res) => {
+    try {
+      console.log('🔧 Permission-test endpoint called');
+      const user = (req as any).user;
+      console.log('🔧 User from token:', user);
+
+      // Get user role permissions from database
+      const { prisma } = await import('../config/database');
+      const userRole = await prisma.role.findUnique({
+        where: { id: user.roleId }
+      });
+
+      console.log('🔧 Role from database:', userRole);
+
+      res.json({
+        success: true,
+        debug: {
+          userFromToken: user,
+          roleFromDatabase: userRole,
+          hasReportsPermission: userRole?.permissions && (userRole.permissions as any)?.reports?.includes('read'),
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('❌ Permission-test error:', error);
+      res.status(500).json({
+        success: false,
+        error: (error as Error).message
+      });
+    }
+  }
+);
+
 // GET /api/reports/step1 - Test servicesByStatus query
 router.get('/step1', authenticate, async (req, res) => {
   try {
