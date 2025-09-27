@@ -15,6 +15,8 @@ exports.createServiceSchema = zod_1.z.object({
     laborPrice: zod_1.z.number().min(0).default(0),
     partsPrice: zod_1.z.number().min(0).default(0),
     partsCost: zod_1.z.number().min(0).default(0),
+    totalAmount: zod_1.z.number().min(0).default(0),
+    truput: zod_1.z.number().min(0).default(0),
     mechanicCommission: zod_1.z.number().min(0).default(0),
 });
 exports.updateServiceSchema = exports.createServiceSchema.partial().extend({

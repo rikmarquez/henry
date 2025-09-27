@@ -39,6 +39,17 @@
 
 ## 🎓 Aprendizajes Clave
 
+### Frontend-Only Filtering Pattern (2025-09-25)
+- **Problema**: Pérdida de foco en inputs de búsqueda por re-renders
+- **Patrón Solución**:
+  1. Carga inicial única: `useQuery({ queryKey: ['data'], ... limit=1000 })`
+  2. Estado local: `const [allData, setAllData] = useState([])`
+  3. Filtrado frontend: `allData.filter(item => searchTerm === '' || item.name.includes(search))`
+  4. Paginación local: `filteredData.slice(startIndex, endIndex)`
+  5. Auto-reset página: `useEffect(() => setPage(1), [searchTerm])`
+- **Beneficios**: Sin pérdida de foco + búsqueda instantánea + menos tráfico de red
+- **Aplicado en**: ClientsPage, VehiclesPage
+
 ### Multi-Tenant Architecture
 - JWT con `branchId` para segregación automática
 - Context pattern para estado global de sucursales
@@ -105,6 +116,19 @@
 - **Beneficio**: Identificación rápida de tipos de vehículos por día  
 - **UX**: Más relevante para operaciones de taller mecánico
 - **Commit**: `fix: mostrar vehículo en lugar de cliente en vista mensual de citas`
+
+## 🔍 UX FIX - SESIÓN 2025-09-25
+### ✅ CORREGIDO: Pérdida de foco en búsquedas (Frontend-Only Filtering)
+- **Issue**: Inputs de búsqueda perdían foco al escribir cada carácter en clientes y vehículos
+- **Root Cause**: useQuery con searchTerm en queryKey causaba re-renders constantes
+- **Solución**: Implementado patrón "Frontend-Only Filtering"
+  - ✅ Carga única de todos los datos (limit=1000)
+  - ✅ Filtrado local sin llamadas API durante búsqueda
+  - ✅ Paginación frontend con arrays locales
+  - ✅ Reset automático a página 1 al cambiar filtros
+- **Archivos**: ClientsPage.tsx, VehiclesPage.tsx
+- **Beneficios**: Sin pérdida de foco + búsqueda instantánea + menos tráfico de red
+- **Commit**: `fix: implementar Frontend-Only Filtering en búsquedas de clientes y vehículos`
 
 ## 🐛 BUG FIX - SESIÓN 2025-09-10
 ### ✅ CORREGIDO: Modal de oportunidades se quedaba en blanco

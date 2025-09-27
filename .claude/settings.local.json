@@ -51,7 +51,8 @@
       "Bash(start http://localhost:5177)",
       "Bash(start http://localhost:5179)",
       "Bash(del auth.json dashboard.json)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(npm run dev:server:*)"
     ],
     "deny": [],
     "ask": []

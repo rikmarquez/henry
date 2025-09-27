@@ -74,13 +74,19 @@ export const authorize = (resources: string[], actions: string[]) => {
 
       const permissions = userRole.permissions as any;
 
+      // Check for admin/all permissions first
+      if (permissions.all === true) {
+        next();
+        return;
+      }
+
       // Check if user has permission for at least one resource-action combination
       const hasPermission = resources.some(resource => {
         const resourcePermissions = permissions[resource];
         if (!resourcePermissions || !Array.isArray(resourcePermissions)) {
           return false;
         }
-        
+
         return actions.some(action => resourcePermissions.includes(action));
       });
 
