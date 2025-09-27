@@ -51,7 +51,8 @@ async function main() {
         vehicles: ['create', 'read', 'update'],
         appointments: ['create', 'read', 'update', 'delete'],
         services: ['create', 'read', 'update'],
-        opportunities: ['read']
+        opportunities: ['create', 'read', 'update'],
+        reports: ['read']
       },
     },
   });
