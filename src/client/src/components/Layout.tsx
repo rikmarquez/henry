@@ -40,17 +40,17 @@ export default function Layout({ children }: LayoutProps) {
       { name: 'Clientes', href: '/clients', icon: Users },
       { name: 'Vehículos', href: '/vehicles', icon: Car },
       { name: 'Mecánicos', href: '/mechanics', icon: UserCog },
-      { name: 'Reportes', href: '/reports', icon: BarChart3 },
     ];
 
     // Add admin-only routes
     if (isAdmin) {
+      baseNavigation.push({ name: 'Reportes', href: '/reports', icon: BarChart3 });
       baseNavigation.push({ name: 'Usuarios', href: '/users', icon: Users });
       baseNavigation.push({ name: 'Sucursales', href: '/branches', icon: Building2 });
     }
 
     baseNavigation.push({ name: 'Configuración', href: '/settings', icon: Settings });
-    
+
     return baseNavigation;
   };
 
