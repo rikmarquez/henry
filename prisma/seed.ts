@@ -6,10 +6,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Create roles first 
+  // Create roles first
   const adminRole = await prisma.role.upsert({
     where: { name: 'ADMIN' },
-    update: {},
+    update: {
+      permissions: {
+        users: ['create', 'read', 'update', 'delete'],
+        clients: ['create', 'read', 'update', 'delete'],
+        vehicles: ['create', 'read', 'update', 'delete'],
+        appointments: ['create', 'read', 'update', 'delete'],
+        services: ['create', 'read', 'update', 'delete'],
+        opportunities: ['create', 'read', 'update', 'delete'],
+        mechanics: ['create', 'read', 'update', 'delete'],
+        branches: ['create', 'read', 'update', 'delete'],
+        reports: ['read']
+      },
+    },
     create: {
       name: 'ADMIN',
       permissions: {
@@ -70,7 +82,17 @@ async function main() {
 
   const managerRole = await prisma.role.upsert({
     where: { name: 'ENCARGADO' },
-    update: {},
+    update: {
+      permissions: {
+        clients: ['create', 'read', 'update', 'delete'],
+        vehicles: ['create', 'read', 'update', 'delete'],
+        appointments: ['create', 'read', 'update', 'delete'],
+        services: ['create', 'read', 'update', 'delete'],
+        opportunities: ['create', 'read', 'update', 'delete'],
+        mechanics: ['read'],
+        reports: ['read']
+      },
+    },
     create: {
       name: 'ENCARGADO',
       permissions: {

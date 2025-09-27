@@ -116,15 +116,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-md">
-            <p className="text-xs text-gray-600 mb-2 font-medium">Credenciales de prueba:</p>
-            <p className="text-xs text-gray-500">
-              <strong>Email:</strong> admin@henrydiagnostics.com<br />
-              <strong>Contraseña:</strong> admin123
-            </p>
-          </div>
         </div>
       </div>
     </div>
