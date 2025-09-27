@@ -47,9 +47,8 @@ export default function Layout({ children }: LayoutProps) {
       baseNavigation.push({ name: 'Reportes', href: '/reports', icon: BarChart3 });
       baseNavigation.push({ name: 'Usuarios', href: '/users', icon: Users });
       baseNavigation.push({ name: 'Sucursales', href: '/branches', icon: Building2 });
+      baseNavigation.push({ name: 'Configuración', href: '/settings', icon: Settings });
     }
-
-    baseNavigation.push({ name: 'Configuración', href: '/settings', icon: Settings });
 
     return baseNavigation;
   };
