@@ -229,6 +229,7 @@ export default function ServicesPage() {
   const [preloadedAppointment, setPreloadedAppointment] = useState<any>(null);
   const [showCreateClientModal, setShowCreateClientModal] = useState(false);
   const [showCreateVehicleModal, setShowCreateVehicleModal] = useState(false);
+  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
   const [showOpportunityModal, setShowOpportunityModal] = useState(false);
   const [selectedServiceForOpportunity, setSelectedServiceForOpportunity] = useState<Service | null>(null);
   const [vehicleClientId, setVehicleClientId] = useState<number | null>(null); // Store client ID for vehicle creation
@@ -710,6 +711,34 @@ export default function ServicesPage() {
     } catch (error: any) {
       console.error('🚨 Error creating vehicle:', error);
       toast.error(error.response?.data?.message || 'Error al crear vehículo');
+    }
+  };
+
+  const handleEditVehicle = async (data: CreateVehicleData) => {
+    try {
+      if (!selectedService?.vehicle?.id) return;
+
+      const response = await api.put(`/vehicles/${selectedService.vehicle.id}`, data);
+
+      if (response.data.success) {
+        toast.success('Vehículo actualizado exitosamente');
+        setShowEditVehicleModal(false);
+        createVehicleForm.reset();
+
+        // Reload vehicles list
+        if (selectedClientId) {
+          await loadVehiclesByClient(selectedClientId);
+        }
+
+        // Update selectedService to reflect changes
+        setSelectedService(prev => prev ? {
+          ...prev,
+          vehicle: { ...prev.vehicle, ...data }
+        } : null);
+      }
+    } catch (error: any) {
+      console.error('Error updating vehicle:', error);
+      toast.error(error.response?.data?.message || 'Error al actualizar vehículo');
     }
   };
 
@@ -1735,21 +1764,35 @@ export default function ServicesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Vehículo *
                   </label>
-                  <select
-                    {...createForm.register('vehicleId', { 
-                      valueAsNumber: true,
-                      value: selectedService.vehicleId
-                    })}
-                    disabled={!selectedClientId}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                  >
-                    <option value="">Seleccionar vehículo</option>
-                    {ensureArray<Vehicle>(vehicles).map((vehicle) => (
-                      <option key={vehicle.id} value={vehicle.id}>
-                        {vehicle.plate} - {vehicle.brand} {vehicle.model} ({vehicle.year})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex space-x-2">
+                    <select
+                      {...createForm.register('vehicleId', { valueAsNumber: true })}
+                      disabled={!selectedClientId}
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                    >
+                      <option value="">Seleccionar vehículo</option>
+                      {ensureArray<Vehicle>(vehicles).map((vehicle) => (
+                        <option key={vehicle.id} value={vehicle.id}>
+                          {vehicle.plate} - {vehicle.brand} {vehicle.model} ({vehicle.year})
+                        </option>
+                      ))}
+                    </select>
+                    {selectedService && (
+                      <button
+                        type="button"
+                        onClick={() => setShowEditVehicleModal(true)}
+                        className="px-3 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        title="Editar datos del vehículo"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  {createForm.formState.errors.vehicleId && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {createForm.formState.errors.vehicleId.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Mechanic */}
@@ -2202,6 +2245,131 @@ export default function ServicesPage() {
                   onClick={() => console.log('🚗 Botón Crear Vehículo clickeado, errores actuales:', createVehicleForm.formState.errors)}
                 >
                   Crear Vehículo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Vehicle Modal */}
+      {showEditVehicleModal && selectedService && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">
+                Editar Vehículo
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Cliente: {selectedService.client.name}
+              </p>
+            </div>
+
+            <form onSubmit={createVehicleForm.handleSubmit(handleEditVehicle)} className="p-6 space-y-4">
+              {/* Plate */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Placa *
+                </label>
+                <input
+                  {...createVehicleForm.register('plate')}
+                  type="text"
+                  defaultValue={selectedService.vehicle.plate}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                {createVehicleForm.formState.errors.plate && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {createVehicleForm.formState.errors.plate.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Brand */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Marca *
+                </label>
+                <input
+                  {...createVehicleForm.register('brand')}
+                  type="text"
+                  defaultValue={selectedService.vehicle.brand}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                {createVehicleForm.formState.errors.brand && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {createVehicleForm.formState.errors.brand.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Model */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Modelo *
+                </label>
+                <input
+                  {...createVehicleForm.register('model')}
+                  type="text"
+                  defaultValue={selectedService.vehicle.model}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                {createVehicleForm.formState.errors.model && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {createVehicleForm.formState.errors.model.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Year */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Año
+                </label>
+                <input
+                  {...createVehicleForm.register('year', { valueAsNumber: true })}
+                  type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
+                  defaultValue={selectedService.vehicle.year || ''}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                {createVehicleForm.formState.errors.year && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {createVehicleForm.formState.errors.year.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Color */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Color
+                </label>
+                <input
+                  {...createVehicleForm.register('color')}
+                  type="text"
+                  defaultValue={selectedService.vehicle.color || ''}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditVehicleModal(false);
+                    createVehicleForm.reset();
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Actualizar Vehículo
                 </button>
               </div>
             </form>
