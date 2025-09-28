@@ -190,11 +190,52 @@
 - ✅ Permisos aplicados consistentemente en todos módulos
 - ✅ Sistema robusto sin degradación performance
 
+## 🔧 BUG FIXES Y MEJORAS UX - SESIÓN 2025-09-27
+
+### ✅ CRÍTICO RESUELTO: Duplicación de servicios en "Recibir Auto"
+- **Issue**: Botón "Recibir Auto" creaba servicios automáticamente + formulario creaba segundo servicio
+- **Root Cause**: Endpoint `/api/appointments/:id/complete` auto-creaba servicios cuando no existían
+- **Debugging**: Logs de console mostraron que problema era en backend, no frontend
+- **Solución Implementada**:
+  - ✅ Eliminada auto-creación de servicios en endpoint `/complete`
+  - ✅ Botón "Recibir Auto" ahora solo navega al formulario (sin completar cita)
+  - ✅ Cita se completa automáticamente cuando servicios están terminados
+  - ✅ Removidos logs de debug temporales
+
+### ✅ COMPLETADO: Mejoras formularios de servicios con edición de vehículos
+- **Feature**: Campos editables de vehículo en creación desde citas telefónicas
+  - 📝 **Placa real** - reemplazar placas temporales (TEMP-xxxxx)
+  - 📅 **Año** del vehículo
+  - 🎨 **Color** del vehículo
+  - 📋 **Notas adicionales** - detalles extra
+- **Auto-actualización**: Datos del vehículo se actualizan automáticamente al crear servicio
+- **UX mejorada**: Notificaciones cuando se actualizan datos del vehículo
+
+### ✅ CORREGIDO: Precarga del campo automóvil en edición de servicios
+- **Issue**: Campo vehículo no se precargaba al editar servicios existentes
+- **Root Cause**: `createForm.reset()` se ejecutaba antes de cargar vehículos del cliente
+- **Solución**: Modificado `handleEditService` para usar `await loadVehiclesByClient()` antes del reset
+- **Resultado**: Campo automóvil se precarga correctamente en todas las ediciones
+
+### 🎯 **Flujo completo mejorado**:
+1. **Cita telefónica** → "Recibir Auto" → **Formulario con campos editables** → Datos actualizados
+2. **Edición servicios** → Campo automóvil precargado → Todos los datos editables
+3. **Sin duplicaciones** → Un solo servicio por acción del usuario
+
+### 📊 **ESTADÍSTICAS SESIÓN 2025-09-27**:
+- **Commits realizados**: 2 commits principales
+- **Archivos modificados**:
+  - `src/server/src/routes/appointments.ts` - Eliminada auto-creación servicios
+  - `src/client/src/pages/AppointmentsPage.tsx` - Cambio comportamiento "Recibir Auto"
+  - `src/client/src/pages/ServicesPage.tsx` - Campos editables + precarga arreglada
+- **Tiempo debugging**: ~1 hora identificando root cause en backend
+- **Lección clave**: Logs de console son cruciales para identificar dónde ocurren los problemas
+
 ## 📋 Pendientes Next Session
-### 🚀 PRIORIDADES POST-PERMISOS:
-1. **Testing final sistema permisos** (diferentes roles/usuarios)
-2. **Configurar datos iniciales** (clientes, vehículos, mecánicos de prueba)
-3. **Optimizaciones finales UX**
+### 🚀 PRIORIDADES POST-MEJORAS UX:
+1. **Testing end-to-end del flujo completo** (cita → servicio → completar)
+2. **Validar campos de vehículo** en formularios de servicios desde citas
+3. **Optimizaciones finales UX** según feedback de usuario
 4. **Documentación de usuario completa**
 5. **Capacitación del sistema**
 

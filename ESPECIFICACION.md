@@ -81,6 +81,10 @@
 - ✅ Timestamps automáticos (started_at, completed_at)
 - ✅ Logs de auditoría de cambios de estado
 - ✅ Segregación por sucursal (branchId)
+- ✅ **Integración con citas:** Creación de servicios desde citas confirmadas
+- ✅ **Edición de vehículos inline:** Campos editables en formulario de servicios desde citas
+- ✅ **Precarga automática:** Campo automóvil se precarga correctamente en edición
+- ✅ **Actualización de datos:** Auto-actualización de vehículo al crear servicio desde cita
 
 ### 3.6 Módulo de Búsqueda y Consultas ✅ IMPLEMENTADO
 **Funcionalidades implementadas:**
