@@ -117,7 +117,9 @@ const AppointmentDetails = ({
       return;
     }
 
-    const newScheduledDate = `${editDate}T${editTime}:00.000Z`;
+    // Create date in local timezone (no UTC conversion)
+    const localDateTime = new Date(`${editDate}T${editTime}`);
+    const newScheduledDate = localDateTime.toISOString();
     updateAppointmentMutation.mutate({ scheduledDate: newScheduledDate });
   };
 
