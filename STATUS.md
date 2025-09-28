@@ -40,6 +40,22 @@
   - ⚡ **Mejor rendimiento** visual sin pérdida de funcionalidad
 - **Información preservada**: Color y fecha siguen disponibles en modal "Ver detalles"
 
+### ✅ COMPLETADO: Optimización Dashboard de Reportes
+- **Feature**: Eliminación de métricas de costos y truput del dashboard principal
+- **Métricas removidas**:
+  - ❌ **Costo de Refacciones** - No se está capturando actualmente
+  - ❌ **Truput (Ganancia)** - Dato irreal sin costos reales de refacciones
+- **Métricas conservadas**:
+  - ✅ **Total Ingresos** - Métrica principal del taller
+  - ✅ **Mano de Obra** - Ingresos por trabajo realizado
+  - ✅ **Precio Refacciones** - Ingresos por venta de refacciones
+- **Beneficios**:
+  - 📊 **Dashboard más limpio** enfocado en métricas reales
+  - 🎯 **Información precisa** sin datos irreales
+  - 📱 **Mejor layout** con 3 cards en lugar de 5
+- **Backend**: Datos siguen disponibles para reactivación futura
+- **Commit**: Optimización del módulo de reportes
+
 ### 🔧 **Issues Críticos Resueltos**:
 
 #### 1. **Timezone Bug en Reagendamiento** ✅

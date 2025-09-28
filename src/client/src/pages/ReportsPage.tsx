@@ -23,8 +23,6 @@ import {
   Car,
   Calendar,
   Package,
-  ArrowUp,
-  ArrowDown,
   Loader2,
   AlertCircle
 } from 'lucide-react';
@@ -396,7 +394,7 @@ export default function ReportsPage() {
       </div>
 
       {/* KPI Cards - Pricing Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
@@ -424,26 +422,6 @@ export default function ReportsPage() {
               <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.partsPrice)}</p>
             </div>
             <Package className="w-8 h-8 text-purple-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-100 text-sm font-medium">Costo Refacciones</p>
-              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.partsCost)}</p>
-            </div>
-            <ArrowDown className="w-8 h-8 text-orange-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-100 text-sm font-medium">Truput (Ganancia)</p>
-              <p className="text-2xl font-bold">{formatCurrency(dashboardData.revenue.truput)}</p>
-            </div>
-            <TrendingUp className="w-8 h-8 text-emerald-200" />
           </div>
         </div>
       </div>
