@@ -229,6 +229,7 @@ const CreateAppointmentModal = ({
         email: ''
       };
       setSelectedClient(clientData);
+      setClientSearch(preselectedClient.clientName); // Set the search field to show client name
       opportunityForm.setValue('clientId', preselectedClient.clientId);
 
       // If vehicle is also preselected, set vehicle data
