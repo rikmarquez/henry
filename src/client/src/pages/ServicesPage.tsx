@@ -580,8 +580,14 @@ export default function ServicesPage() {
         const appointment = response.data.data;
         setPreloadedAppointment(appointment);
         setSelectedClientId(appointment.clientId);
-        
-        // Pre-fill the form
+
+        // Set the client search display
+        setClientSearch(`${appointment.client.name} - ${appointment.client.phone}`);
+
+        // First load the vehicles for this client
+        await loadVehiclesByClient(appointment.clientId);
+
+        // Then pre-fill the form with both client and vehicle
         createForm.reset({
           clientId: appointment.clientId,
           vehicleId: appointment.vehicleId,
