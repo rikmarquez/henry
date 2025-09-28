@@ -755,6 +755,12 @@ export default function ServicesPage() {
           const vehicleUpdates: any = {};
 
           // Only update fields that were edited (non-empty values)
+          if (preloadedAppointment.vehicle.brand) {
+            vehicleUpdates.brand = preloadedAppointment.vehicle.brand;
+          }
+          if (preloadedAppointment.vehicle.model) {
+            vehicleUpdates.model = preloadedAppointment.vehicle.model;
+          }
           if (preloadedAppointment.vehicle.plate && !preloadedAppointment.vehicle.plate.startsWith('TEMP-')) {
             vehicleUpdates.plate = preloadedAppointment.vehicle.plate;
           }
@@ -1480,6 +1486,40 @@ export default function ServicesPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Marca *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Toyota, Honda, etc."
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.brand || ''}
+                            onChange={(e) => {
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, brand: e.target.value }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Modelo *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Corolla, Civic, etc."
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.model || ''}
+                            onChange={(e) => {
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, model: e.target.value }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
                             Placa real *
                           </label>
                           <input
@@ -1488,7 +1528,6 @@ export default function ServicesPage() {
                             className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                             value={preloadedAppointment.vehicle?.plate?.startsWith('TEMP-') ? '' : preloadedAppointment.vehicle?.plate || ''}
                             onChange={(e) => {
-                              // Update preloadedAppointment vehicle data for form submission
                               setPreloadedAppointment(prev => ({
                                 ...prev,
                                 vehicle: { ...prev.vehicle, plate: e.target.value }
