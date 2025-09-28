@@ -749,10 +749,40 @@ export default function ServicesPage() {
         ...(preloadedAppointment && { appointmentId: preloadedAppointment.id })
       };
       
+      // Update vehicle data if coming from appointment with edited fields
+      if (preloadedAppointment && preloadedAppointment.vehicle) {
+        try {
+          const vehicleUpdates: any = {};
+
+          // Only update fields that were edited (non-empty values)
+          if (preloadedAppointment.vehicle.plate && !preloadedAppointment.vehicle.plate.startsWith('TEMP-')) {
+            vehicleUpdates.plate = preloadedAppointment.vehicle.plate;
+          }
+          if (preloadedAppointment.vehicle.year) {
+            vehicleUpdates.year = preloadedAppointment.vehicle.year;
+          }
+          if (preloadedAppointment.vehicle.color) {
+            vehicleUpdates.color = preloadedAppointment.vehicle.color;
+          }
+          if (preloadedAppointment.vehicle.notes) {
+            vehicleUpdates.notes = preloadedAppointment.vehicle.notes;
+          }
+
+          // Update vehicle if there are changes
+          if (Object.keys(vehicleUpdates).length > 0) {
+            await api.put(`/vehicles/${preloadedAppointment.vehicle.id}`, vehicleUpdates);
+          }
+        } catch (vehicleError) {
+          console.warn('Warning: Could not update vehicle data:', vehicleError);
+          // Continue with service creation even if vehicle update fails
+        }
+      }
+
       const response = await api.post('/services', serviceData);
-      
+
       if (response.data.success) {
-        toast.success('Servicio creado exitosamente');
+        toast.success('Servicio creado exitosamente' +
+          (preloadedAppointment ? ' y datos del vehículo actualizados' : ''));
         setShowCreateModal(false);
         createForm.reset();
         setSelectedClientIdWithLog(null);
@@ -799,8 +829,11 @@ export default function ServicesPage() {
         const service = response.data.data;
         setSelectedService(service);
         setSelectedClientId(service.clientId);
-        
-        // Populate form with current service data
+
+        // Load vehicles for the client first
+        await loadVehiclesByClient(service.clientId);
+
+        // Then populate form with current service data after vehicles are loaded
         createForm.reset({
           clientId: service.clientId,
           vehicleId: service.vehicleId,
@@ -816,7 +849,7 @@ export default function ServicesPage() {
           // truput: service.truput || 0, // HIDDEN FIELD
           mechanicCommission: service.mechanicCommission || 0,
         });
-        
+
         setShowEditModal(true);
       }
     } catch (error: any) {
@@ -1437,9 +1470,94 @@ export default function ServicesPage() {
                       {createForm.formState.errors.vehicleId.message}
                     </p>
                   )}
-                  
+
+                  {/* Vehicle editing from appointment */}
+                  {preloadedAppointment && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <h4 className="text-sm font-medium text-yellow-800 mb-3">
+                        📝 Completar datos del vehículo (desde cita telefónica)
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Placa real *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="ABC-1234"
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.plate?.startsWith('TEMP-') ? '' : preloadedAppointment.vehicle?.plate || ''}
+                            onChange={(e) => {
+                              // Update preloadedAppointment vehicle data for form submission
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, plate: e.target.value }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Año
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="2020"
+                            min="1990"
+                            max="2030"
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.year || ''}
+                            onChange={(e) => {
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, year: parseInt(e.target.value) || null }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Color
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Blanco, Azul, etc."
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.color || ''}
+                            onChange={(e) => {
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, color: e.target.value }
+                              }));
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">
+                            Notas adicionales
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Detalles del vehículo..."
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            value={preloadedAppointment.vehicle?.notes || ''}
+                            onChange={(e) => {
+                              setPreloadedAppointment(prev => ({
+                                ...prev,
+                                vehicle: { ...prev.vehicle, notes: e.target.value }
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-yellow-700 mt-2">
+                        💡 Estos datos se guardarán junto con el servicio para completar la información del vehículo.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Quick actions for new vehicle */}
-                  {selectedClientId && (
+                  {selectedClientId && !preloadedAppointment && (
                     <div className="mt-2 text-xs">
                       <button
                         type="button"
