@@ -56,6 +56,7 @@ interface AppointmentFilters {
 
 const AppointmentsPage = () => {
   const currentBranchId = useCurrentBranchId();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<AppointmentFilters>({
     page: 1,
     limit: 20
@@ -70,7 +71,7 @@ const AppointmentsPage = () => {
     appointmentId: number | null;
     action: 'confirm' | 'complete' | 'cancel' | null;
   }>({ show: false, appointmentId: null, action: null });
-  
+
   const queryClient = useQueryClient();
 
   // Fetch appointments
@@ -176,6 +177,10 @@ const AppointmentsPage = () => {
       case 'cancelled': return 'Cancelada';
       default: return status;
     }
+  };
+
+  const handleCreateService = (appointment: Appointment) => {
+    navigate(`/services?appointmentId=${appointment.id}`);
   };
 
   return (
@@ -490,6 +495,7 @@ const AppointmentsPage = () => {
           onStatusUpdate={handleStatusUpdate}
           isUpdating={updateStatusMutation.isPending}
           onConfirmAction={handleConfirmAction}
+          onCreateService={handleCreateService}
         />
       )}
 
