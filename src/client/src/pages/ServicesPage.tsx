@@ -743,6 +743,10 @@ export default function ServicesPage() {
   };
 
   const handleCreateService = async (data: CreateServiceData) => {
+    console.log('🚨 DEBUG: handleCreateService ejecutado!');
+    console.log('🚨 DEBUG: Datos recibidos:', data);
+    console.log('🚨 DEBUG: preloadedAppointment:', preloadedAppointment);
+    console.trace('🚨 DEBUG: Stack trace de handleCreateService');
     try {
       // Include appointment ID if creating from appointment and branch ID
       const serviceData = {
