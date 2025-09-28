@@ -58,16 +58,18 @@ interface AppointmentDetailsProps {
   isUpdating: boolean;
   onConfirmAction: (appointmentId: number, action: 'confirm' | 'complete' | 'cancel') => void;
   onCreateService?: (appointment: Appointment) => void;
+  onReceiveCarComplete?: (appointment: Appointment) => void;
 }
 
-const AppointmentDetails = ({ 
-  appointment, 
-  isOpen, 
-  onClose, 
-  onStatusUpdate, 
+const AppointmentDetails = ({
+  appointment,
+  isOpen,
+  onClose,
+  onStatusUpdate,
   isUpdating,
   onConfirmAction,
-  onCreateService
+  onCreateService,
+  onReceiveCarComplete
 }: AppointmentDetailsProps) => {
 
   if (!isOpen) return null;
@@ -111,11 +113,9 @@ const AppointmentDetails = ({
   };
 
   const handleReceiveCar = () => {
-    // Primero actualizar status a completed
-    handleStatusAction('complete');
-    // Luego navegar a crear servicio
-    if (onCreateService) {
-      onCreateService(appointment);
+    // Llamar al callback que maneja el timing correctamente
+    if (onReceiveCarComplete) {
+      onReceiveCarComplete(appointment);
     }
   };
 
@@ -327,7 +327,7 @@ const AppointmentDetails = ({
                 </button>
               )}
               
-              {canReceiveCar && onCreateService && (
+              {canReceiveCar && onReceiveCarComplete && (
                 <button
                   onClick={handleReceiveCar}
                   disabled={isUpdating}
@@ -335,6 +335,30 @@ const AppointmentDetails = ({
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Recibir Auto
+                </button>
+              )}
+
+              {/* Manual status change buttons for completed appointments */}
+              {appointment.status === 'completed' && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleStatusAction('confirm')}
+                    disabled={isUpdating}
+                    className="inline-flex items-center px-3 py-1 border border-green-300 rounded text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  >
+                    ← Confirmar
+                  </button>
+                </div>
+              )}
+
+              {/* Manual status change buttons for confirmed appointments */}
+              {appointment.status === 'confirmed' && appointment._count.services > 0 && (
+                <button
+                  onClick={() => handleStatusAction('complete')}
+                  disabled={isUpdating}
+                  className="inline-flex items-center px-3 py-1 border border-blue-300 rounded text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  Marcar Completada →
                 </button>
               )}
 
