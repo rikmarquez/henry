@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../services/api';
-import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight, Search, Plus, UserPlus, Phone } from 'lucide-react';
+import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight, Search, Plus, UserPlus, Phone, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -173,6 +173,11 @@ export default function DashboardPage() {
     navigate('/clients?mode=create');
   };
 
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setShowResults(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -249,13 +254,28 @@ export default function DashboardPage() {
                   setShowResults(e.target.value.length >= 2);
                 }}
                 onFocus={() => setShowResults(searchTerm.length >= 2)}
-                className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                className="block w-full pl-10 pr-16 py-4 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
               />
-              {isSearching && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+
+              {/* Área de botones del lado derecho */}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 space-x-2">
+                {/* Botón limpiar búsqueda */}
+                {searchTerm && !isSearching && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                    title="Limpiar búsqueda"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* Indicador de carga */}
+                {isSearching && (
                   <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Resultados de búsqueda */}
