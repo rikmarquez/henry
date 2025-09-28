@@ -1,7 +1,13 @@
 # CLAUDE.md - Memory de Henry Diagnostics App
 
 ## 📋 Context inicial importante
-**SIEMPRE leer STATUS.md al inicio de cada sesión para ponerse al tanto del desarrollo de la app.**
+**OBLIGATORIO AL INICIO DE CADA SESIÓN:**
+1. **Leer STATUS.md** - Para ponerse al tanto del desarrollo actual de la app
+2. **Leer ESPECIFICACION.md** - Para conocer el estado de implementación de cada módulo
+
+**OBLIGATORIO AL FINAL DE CADA SESIÓN:**
+1. **Actualizar STATUS.md** - Con los cambios, logros y aprendizajes de la sesión
+2. **Actualizar ESPECIFICACION.md** - Si se implementaron nuevas funcionalidades o cambios en la arquitectura
 
 ## 🎯 Objetivo del Proyecto
 Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web completa para gestionar clientes, vehículos, servicios, mecánicos y operaciones del taller.
@@ -41,10 +47,10 @@ Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web co
 6. Implementar CRUD básico de usuarios y roles
 
 ## 📝 Notas importantes
-- Siempre actualizar STATUS.md al final de cada sesión
-- Seguir la especificación detallada en ESPECIFICACION.md
+- **PROTOCOLO SESIONES:** Leer STATUS.md + ESPECIFICACION.md al inicio, actualizarlos al final
+- Seguir la especificación detallada en ESPECIFICACION.md como referencia técnica
 - Mantener la estructura monolítica para simplicidad en Railway
-- Priorizar MVP funcional antes que funciones avanzadas
+- Priorizar funcionalidades basadas en el estado actual documentado
 - **⚠️ CRÍTICO RAILWAY:** Siempre compilar TypeScript antes del deploy (`npm run build`)
   - Ver DEPLOYMENT.md para guía completa de deployment
   - Railway NO compila TypeScript automáticamente
