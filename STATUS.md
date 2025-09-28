@@ -14,6 +14,51 @@
 - **Dashboard**: Error 403 solucionado, funcionando correctamente
 - **Deploy**: Cambios deployados automáticamente en Railway
 
+## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-09-28
+
+### ✅ COMPLETADO: Funcionalidad de Reagendamiento de Citas
+- **Feature**: Capacidad completa de reagendar citas existentes (fecha y hora)
+- **Ubicación**: Modal de detalles de citas con botón "Reagendar"
+- **UX**: Campos editables inline con botones Guardar/Cancelar
+- **Validaciones**:
+  - ✅ Verificación automática de conflictos de horarios
+  - ✅ Solo citas no completadas/canceladas son editables
+  - ✅ Campos requeridos (fecha y hora obligatorios)
+- **Backend**: Endpoint PUT `/api/appointments/:id` ya existía y funcionaba
+- **Timezone Fix**: Solucionado problema de desfase -6 horas en zona horaria México
+- **Notificaciones**: Toast de éxito/error + cierre automático del modal
+- **Commit**: `005f54d` - Implementación inicial + `0f0e4b1` - Fix timezone
+
+### ✅ COMPLETADO: Mejoras UX Listado de Vehículos
+- **Optimización**: Eliminación de columnas innecesarias del listado principal
+- **Columnas removidas**:
+  - ❌ **Color** - Información secundaria movida a modal de detalles
+  - ❌ **Fecha de Registro** - Disponible en modal, no crítica para listado
+- **Beneficios**:
+  - 📱 **Mejor responsive** en pantallas pequeñas
+  - 👀 **Tabla más limpia** enfocada en información esencial
+  - ⚡ **Mejor rendimiento** visual sin pérdida de funcionalidad
+- **Información preservada**: Color y fecha siguen disponibles en modal "Ver detalles"
+
+### 🔧 **Issues Críticos Resueltos**:
+
+#### 1. **Timezone Bug en Reagendamiento** ✅
+- **Problema**: Reagendar citas a 10:00 AM las guardaba como 4:00 AM (-6 horas)
+- **Root Cause**: Concatenación manual con 'Z' forzaba interpretación UTC
+- **Solución**: `new Date(localString).toISOString()` respeta timezone local
+- **Testing**: Validado con múltiples horarios (8AM, 10AM, 2PM) ✅
+
+#### 2. **UX Mejoras Tabla Vehículos** ✅
+- **Antes**: 7 columnas (algunas redundantes)
+- **Ahora**: 5 columnas (información esencial)
+- **Impacto**: Mejor experiencia especialmente en tablets/móviles
+
+### 🎯 **Resultados Alcanzados**:
+- **Reagendamiento**: Funcionalidad 100% operativa para uso diario del taller
+- **UX**: Interfaces más limpias y enfocadas en operación
+- **Timezone**: Horarios ahora se manejan correctamente en zona México
+- **Validaciones**: Sistema robusto previene conflictos de citas
+
 ## ✅ Funcionalidades Completadas (100%)
 
 ### Core MVP
@@ -230,6 +275,19 @@
   - `src/client/src/pages/ServicesPage.tsx` - Campos editables + precarga arreglada
 - **Tiempo debugging**: ~1 hora identificando root cause en backend
 - **Lección clave**: Logs de console son cruciales para identificar dónde ocurren los problemas
+
+### 📊 **ESTADÍSTICAS SESIÓN 2025-09-28**:
+- **Commits realizados**: 2 commits principales
+- **Archivos modificados**:
+  - `src/client/src/components/appointments/AppointmentDetails.tsx` - Reagendamiento + fix timezone
+  - `src/client/src/pages/VehiclesPage.tsx` - Optimización listado (eliminar columnas)
+- **Funcionalidades entregadas**: 2 features completas
+- **Issues críticos resueltos**: 1 (timezone bug)
+- **Tiempo total desarrollo**: ~2 horas
+- **Lecciones clave**:
+  - **Timezone handling**: `new Date(localString).toISOString()` vs concatenación manual 'Z'
+  - **UX optimization**: Menos columnas = mejor experiencia en móviles
+  - **Backend validation**: Endpoints PUT ya existían, solo faltaba frontend
 
 ## 📋 Pendientes Next Session
 ### 🚀 PRIORIDADES POST-MEJORAS UX:
