@@ -1,0 +1,361 @@
+/* =================================
+   CSS OPTIMIZADO PARA IMPRESIÓN
+   Henry Diagnostics - Agendas
+   ================================= */
+
+@media print {
+  /* Reset básico para impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar elementos no necesarios en impresión */
+  .no-print,
+  .sidebar,
+  .navigation,
+  button:not(.print-button),
+  .tooltip,
+  .modal-overlay,
+  nav,
+  .search-bar,
+  .filters,
+  .pagination {
+    display: none !important;
+  }
+
+  /* Configuración de página - TAMAÑO CARTA */
+  @page {
+    size: letter; /* 8.5" x 11" - Tamaño carta estándar */
+    margin: 1.5cm;
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font-size: 10px;
+      color: #666;
+    }
+  }
+
+  /* Configuración específica para vista DIARIA - VERTICAL */
+  .print-daily @page {
+    size: letter portrait; /* Carta vertical para agenda diaria */
+    margin: 1.5cm 2cm;
+  }
+
+  /* Configuración específica para vista SEMANAL - HORIZONTAL */
+  .print-weekly @page {
+    size: letter landscape; /* Carta horizontal para agenda semanal */
+    margin: 1.5cm 1cm;
+  }
+
+  /* Configuración del body para impresión */
+  body {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000;
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Container principal de impresión */
+  .print-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: white;
+    box-shadow: none;
+    border: none;
+  }
+
+  /* Header de impresión */
+  .print-header {
+    width: 100%;
+    border-bottom: 2px solid #2563eb;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    page-break-inside: avoid;
+  }
+
+  .print-header h1 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2563eb;
+    margin: 0 0 5px 0;
+    text-align: center;
+  }
+
+  .print-header h2 {
+    font-size: 16px;
+    color: #1f2937;
+    margin: 0 0 10px 0;
+    text-align: center;
+  }
+
+  .print-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  /* Tabla de citas */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 11px;
+  }
+
+  .print-table th {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+    font-weight: bold;
+    padding: 8px 6px;
+    border: 1px solid #d1d5db;
+    text-align: left;
+  }
+
+  .print-table td {
+    padding: 6px;
+    border: 1px solid #d1d5db;
+    vertical-align: top;
+  }
+
+  .print-table tr:nth-child(even) {
+    background-color: #f9fafb !important;
+  }
+
+  /* Estados de citas */
+  .status-scheduled {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .status-confirmed {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .status-completed {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .status-cancelled {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  /* Vista semanal - Grid de días */
+  .print-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 20px;
+  }
+
+  .print-day-header {
+    background-color: #2563eb !important;
+    color: white !important;
+    padding: 8px 4px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+  }
+
+  .print-day-column {
+    border: 1px solid #d1d5db;
+    min-height: 200px;
+    padding: 4px;
+  }
+
+  .print-day-date {
+    font-weight: bold;
+    font-size: 12px;
+    color: #374151;
+    text-align: center;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .print-appointment-card {
+    background-color: #f8fafc !important;
+    border-left: 3px solid #2563eb;
+    padding: 4px;
+    margin-bottom: 6px;
+    font-size: 9px;
+  }
+
+  .print-appointment-time {
+    font-weight: bold;
+    color: #1f2937;
+  }
+
+  .print-appointment-client {
+    color: #374151;
+    margin-top: 2px;
+  }
+
+  .print-appointment-vehicle {
+    color: #6b7280;
+    font-style: italic;
+    margin-top: 1px;
+  }
+
+  /* Vista diaria - Lista de horarios */
+  .print-daily-schedule {
+    width: 100%;
+  }
+
+  .print-time-slot {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 0;
+    min-height: 40px;
+  }
+
+  .print-time-label {
+    width: 80px;
+    font-weight: bold;
+    color: #374151;
+    padding-right: 15px;
+    border-right: 2px solid #e5e7eb;
+  }
+
+  .print-appointment-details {
+    flex: 1;
+    padding-left: 15px;
+  }
+
+  .print-client-name {
+    font-weight: bold;
+    color: #1f2937;
+    font-size: 12px;
+  }
+
+  .print-vehicle-info {
+    color: #6b7280;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .print-phone {
+    color: #2563eb;
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .print-notes {
+    color: #374151;
+    font-size: 10px;
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* Footer de impresión */
+  .print-footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #d1d5db;
+    font-size: 10px;
+    color: #6b7280;
+    display: flex;
+    justify-content: space-between;
+    page-break-inside: avoid;
+  }
+
+  /* Evitar saltos de página problemáticos */
+  .print-no-break {
+    page-break-inside: avoid;
+  }
+
+  .print-break-before {
+    page-break-before: always;
+  }
+
+  /* Responsive para impresión */
+  .print-hide-mobile {
+    display: table-cell !important;
+  }
+
+  /* Espaciado específico para impresión */
+  .print-spacing {
+    margin-bottom: 15px;
+  }
+
+  /* Texto de instrucción para cuando no hay citas */
+  .print-no-appointments {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    padding: 40px 20px;
+    background-color: #f9fafb !important;
+    border: 1px dashed #d1d5db;
+  }
+}
+
+/* Estilos para vista previa en pantalla */
+.print-preview {
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px;
+  max-width: 21cm;
+  min-height: 29.7cm;
+}
+
+.print-preview .print-header h1 {
+  color: #2563eb;
+}
+
+.print-preview .print-table {
+  font-size: 12px;
+}
+
+.print-preview .print-table th {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.print-preview .status-scheduled {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.print-preview .status-confirmed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.print-preview .status-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.print-preview .status-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}

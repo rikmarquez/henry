@@ -1,5 +1,8 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Clock, User, Car, Phone, Plus, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, User, Car, Phone, Plus, CheckCircle, AlertTriangle, Printer, FileSpreadsheet } from 'lucide-react';
+import usePrintAgenda from '../../hooks/usePrintAgenda';
+import useExcelExport from '../../hooks/useExcelExport';
+import toast from 'react-hot-toast';
 
 interface Appointment {
   id: number;
@@ -37,6 +40,8 @@ const DailyCalendar = ({
   onCreateAppointment
 }: DailyCalendarProps) => {
   const [currentDate, setCurrentDate] = useState(selectedDate);
+  const { printDailyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
+  const { exportDailyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 
   // Get appointments for the current day
   const dayAppointments = useMemo(() => {
@@ -143,6 +148,26 @@ const DailyCalendar = ({
     return { total, confirmed, completed, cancelled, pending };
   }, [dayAppointments]);
 
+  const handlePrint = async () => {
+    try {
+      await printDailyAgenda(dayAppointments, currentDate);
+      toast.success('Iniciando impresión de la agenda diaria...');
+    } catch (error) {
+      console.error('Error al imprimir:', error);
+      toast.error('Error al imprimir la agenda. Por favor, inténtelo de nuevo.');
+    }
+  };
+
+  const handleExcelExport = async () => {
+    try {
+      const result = await exportDailyAgenda(dayAppointments, currentDate);
+      toast.success(`Agenda exportada: ${result.appointmentsCount} citas`);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      toast.error('Error al exportar la agenda. Por favor, inténtelo de nuevo.');
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header */}
@@ -157,6 +182,23 @@ const DailyCalendar = ({
             </p>
           </div>
           <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrint}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              title="Imprimir agenda diaria"
+            >
+              <Printer className="h-4 w-4 mr-1" />
+              Imprimir
+            </button>
+            <button
+              onClick={handleExcelExport}
+              className="flex items-center px-3 py-2 text-sm text-green-700 hover:text-green-900 border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+              title="Exportar agenda diaria a Excel"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-1" />
+              Excel
+            </button>
+            <div className="w-px h-6 bg-gray-300"></div>
             <button
               onClick={goToToday}
               className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-md hover:bg-blue-50"

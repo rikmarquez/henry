@@ -1,5 +1,8 @@
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Clock, User, Car, Phone, Plus, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, User, Car, Phone, Plus, Eye, Printer, FileSpreadsheet } from 'lucide-react';
+import usePrintAgenda from '../../hooks/usePrintAgenda';
+import useExcelExport from '../../hooks/useExcelExport';
+import toast from 'react-hot-toast';
 
 interface Appointment {
   id: number;
@@ -37,6 +40,8 @@ const WeeklyCalendar = ({
   onCreateAppointment
 }: WeeklyCalendarProps) => {
   const [currentWeek, setCurrentWeek] = useState(selectedDate);
+  const { printWeeklyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
+  const { exportWeeklyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 
   // Get start of week (Monday)
   const getWeekStart = (date: Date) => {
@@ -113,14 +118,49 @@ const WeeklyCalendar = ({
   const formatWeekRange = () => {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
-    
+
     const startMonth = weekStart.toLocaleDateString('es-ES', { month: 'long' });
     const endMonth = weekEnd.toLocaleDateString('es-ES', { month: 'long' });
-    
+
     if (startMonth === endMonth) {
       return `${startMonth} ${weekStart.getFullYear()}`;
     } else {
       return `${startMonth} - ${endMonth} ${weekEnd.getFullYear()}`;
+    }
+  };
+
+  // Obtener citas de la semana actual
+  const weekAppointments = useMemo(() => {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekStartWithTime = new Date(weekStart);
+    weekStartWithTime.setHours(0, 0, 0, 0);
+
+    return appointments.filter(appointment => {
+      const appointmentDate = new Date(appointment.scheduledDate);
+      return appointmentDate >= weekStartWithTime && appointmentDate <= weekEnd;
+    });
+  }, [appointments, weekStart]);
+
+  const handlePrint = async () => {
+    try {
+      await printWeeklyAgenda(weekAppointments, currentWeek);
+      toast.success('Iniciando impresión de la agenda semanal...');
+    } catch (error) {
+      console.error('Error al imprimir:', error);
+      toast.error('Error al imprimir la agenda. Por favor, inténtelo de nuevo.');
+    }
+  };
+
+  const handleExcelExport = async () => {
+    try {
+      const result = await exportWeeklyAgenda(weekAppointments, currentWeek);
+      toast.success(`Agenda exportada: ${result.appointmentsCount} citas`);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      toast.error('Error al exportar la agenda. Por favor, inténtelo de nuevo.');
     }
   };
 
@@ -138,6 +178,23 @@ const WeeklyCalendar = ({
             <p className="text-sm text-gray-600">Semana del {weekStart.toLocaleDateString('es-ES')} al {new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')}</p>
           </div>
           <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrint}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              title="Imprimir agenda semanal"
+            >
+              <Printer className="h-4 w-4 mr-1" />
+              Imprimir
+            </button>
+            <button
+              onClick={handleExcelExport}
+              className="flex items-center px-3 py-2 text-sm text-green-700 hover:text-green-900 border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+              title="Exportar agenda semanal a Excel"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-1" />
+              Excel
+            </button>
+            <div className="w-px h-6 bg-gray-300"></div>
             <button
               onClick={goToThisWeek}
               className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-md hover:bg-blue-50"
