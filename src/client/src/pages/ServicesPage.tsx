@@ -354,33 +354,27 @@ export default function ServicesPage() {
 
     const subscription = createForm.watch((value, { name }) => {
       // Calculate if pricing fields OR mechanic changed
-      if (['laborPrice', 'partsPrice', 'partsCost', 'mechanicId'].includes(name)) {
+      if (['laborPrice', 'partsPrice', 'mechanicId'].includes(name)) {
         const laborPrice = Number(value.laborPrice) || 0;
         const partsPrice = Number(value.partsPrice) || 0;
-        const partsCost = Number(value.partsCost) || 0;
         const mechanicId = Number(value.mechanicId) || 0;
-        
+
         // Calculate total amount
         const totalAmount = laborPrice + partsPrice;
-        
-        // Calculate truput (profit = total revenue - parts cost)
-        const truput = totalAmount - partsCost;
-        
+
         // Get mechanic commission percentage from the selected mechanic
         const selectedMechanic = mechanics.find(m => m.id === mechanicId);
         const mechanicCommissionPercentage = selectedMechanic?.commissionPercentage || 0;
         const mechanicCommission = (laborPrice * mechanicCommissionPercentage) / 100;
-        
+
         // Update the calculated fields
         createForm.setValue('totalAmount', totalAmount);
-        createForm.setValue('truput', truput);
         createForm.setValue('mechanicCommission', mechanicCommission);
-        
+
         // Update selectedService to reflect new values for the readonly inputs
         setSelectedService(prev => prev ? {
           ...prev,
           totalAmount,
-          truput,
           mechanicCommission
         } : null);
       }
@@ -797,9 +791,9 @@ export default function ServicesPage() {
           quotationDetails: service.quotationDetails || '',
           laborPrice: service.laborPrice || 0,
           partsPrice: service.partsPrice || 0,
-          partsCost: service.partsCost || 0,
+          // partsCost: service.partsCost || 0, // HIDDEN FIELD
           totalAmount: service.totalAmount || 0,
-          truput: service.truput || 0,
+          // truput: service.truput || 0, // HIDDEN FIELD
           mechanicCommission: service.mechanicCommission || 0,
         });
         
@@ -1877,13 +1871,13 @@ export default function ServicesPage() {
                   />
                 </div>
 
-                {/* Parts Cost */}
+                {/* Parts Cost - HIDDEN PER REQUEST
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Costo Refacciones
                   </label>
                   <input
-                    {...createForm.register('partsCost', { 
+                    {...createForm.register('partsCost', {
                       valueAsNumber: true,
                       value: selectedService.partsCost || 0
                     })}
@@ -1893,6 +1887,7 @@ export default function ServicesPage() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                */}
 
                 {/* Total Amount (Read-only) */}
                 <div>
@@ -1908,7 +1903,7 @@ export default function ServicesPage() {
                   />
                 </div>
 
-                {/* Truput (Read-only) */}
+                {/* Truput (Read-only) - HIDDEN PER REQUEST
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Truput (Ganancia) <span className="text-gray-500 text-xs">(Calculado automáticamente)</span>
@@ -1921,6 +1916,7 @@ export default function ServicesPage() {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
                   />
                 </div>
+                */}
 
                 {/* Mechanic Commission */}
                 <div>
