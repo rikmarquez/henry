@@ -13,6 +13,46 @@ import { idParamSchema } from '../../../shared/schemas/common.schema';
 const router = Router();
 const prisma = new PrismaClient();
 
+// Helper function to auto-complete appointment when all services are terminated
+async function autoCompleteAppointmentIfAllServicesTerminated(serviceId: number, tx = prisma) {
+  try {
+    // Get the service with appointment info
+    const service = await tx.service.findUnique({
+      where: { id: serviceId },
+      select: {
+        appointmentId: true,
+        statusId: true
+      }
+    });
+
+    // Only proceed if service has an appointment and service is terminated (statusId: 5)
+    if (!service?.appointmentId || service.statusId !== 5) {
+      return;
+    }
+
+    // Check if ALL services for this appointment are terminated
+    const appointmentServices = await tx.service.findMany({
+      where: { appointmentId: service.appointmentId },
+      select: { statusId: true }
+    });
+
+    const allServicesTerminated = appointmentServices.every(s => s.statusId === 5 || s.statusId === 6); // TERMINADO or PERDIDO
+
+    if (allServicesTerminated) {
+      // Auto-complete the appointment
+      await tx.appointment.update({
+        where: { id: service.appointmentId },
+        data: { status: 'completed' }
+      });
+
+      console.log(`🎯 Auto-completed appointment ${service.appointmentId} - all services terminated`);
+    }
+  } catch (error) {
+    console.error('Error auto-completing appointment:', error);
+    // Don't throw - we don't want to break the service update if this fails
+  }
+}
+
 
 // GET /api/services - List services with pagination and filters
 router.get(
@@ -607,6 +647,11 @@ router.put(
           },
         });
 
+        // Auto-complete appointment if service is terminated
+        if (newStatus.name === 'Terminado') {
+          await autoCompleteAppointmentIfAllServicesTerminated(parseInt(id), tx);
+        }
+
         return updatedService;
       });
 
@@ -826,6 +871,9 @@ router.post(
           status: { select: { id: true, name: true, color: true } },
         },
       });
+
+      // Auto-complete appointment if all services are terminated
+      await autoCompleteAppointmentIfAllServicesTerminated(parseInt(id));
 
       res.json({
         success: true,
