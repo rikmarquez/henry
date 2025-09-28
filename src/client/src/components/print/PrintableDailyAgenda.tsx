@@ -32,20 +32,7 @@ const PrintableDailyAgenda: React.FC<PrintableDailyAgendaProps> = ({
   selectedDate,
   branchName = "Henry Diagnostics"
 }) => {
-  // Generar slots de tiempo de 8 AM a 7 PM (cada 30 minutos)
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 8; hour < 19; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = new Date();
-        time.setHours(hour, minute, 0, 0);
-        slots.push(time);
-      }
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
+  // Ya no necesitamos generar slots, trabajaremos directamente con las citas
 
   // Filtrar citas del día seleccionado
   const dayAppointments = appointments.filter(appointment => {
@@ -56,19 +43,7 @@ const PrintableDailyAgenda: React.FC<PrintableDailyAgendaProps> = ({
     selectedDateEnd.setHours(23, 59, 59, 999);
 
     return appointmentDate >= selectedDateStart && appointmentDate <= selectedDateEnd;
-  });
-
-  // Encontrar cita para un slot de tiempo específico
-  const getAppointmentForTimeSlot = (timeSlot: Date) => {
-    return dayAppointments.find(appointment => {
-      const appointmentTime = new Date(appointment.scheduledDate);
-      const slotStart = new Date(timeSlot);
-      const slotEnd = new Date(timeSlot);
-      slotEnd.setMinutes(slotEnd.getMinutes() + 30);
-
-      return appointmentTime >= slotStart && appointmentTime < slotEnd;
-    });
-  };
+  }).sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('es-MX', {
@@ -114,65 +89,60 @@ const PrintableDailyAgenda: React.FC<PrintableDailyAgendaProps> = ({
         </div>
       </div>
 
-      {/* Agenda diaria */}
+      {/* Lista de citas del día */}
       <div className="print-daily-schedule">
-        {timeSlots.map((timeSlot, index) => {
-          const appointment = getAppointmentForTimeSlot(timeSlot);
-          const nextSlot = timeSlots[index + 1];
-          const timeRange = nextSlot
-            ? `${formatTime(timeSlot)} - ${formatTime(nextSlot)}`
-            : `${formatTime(timeSlot)} - ${formatTime(new Date(timeSlot.getTime() + 30 * 60000))}`;
-
-          return (
-            <div key={index} className="print-time-slot print-no-break">
+        {dayAppointments.length > 0 ? (
+          dayAppointments.map((appointment, index) => (
+            <div key={appointment.id} className="print-time-slot print-no-break">
               <div className="print-time-label">
-                {timeRange}
+                {formatTime(new Date(appointment.scheduledDate))}
               </div>
               <div className="print-appointment-details">
-                {appointment ? (
-                  <div>
-                    <div className="print-client-name">
-                      {appointment.client.name}
-                    </div>
-                    <div className="print-vehicle-info">
-                      🚗 {appointment.vehicle.brand} {appointment.vehicle.model}
-                      {appointment.vehicle.year && ` (${appointment.vehicle.year})`} - {appointment.vehicle.plate}
-                    </div>
-                    <div className="print-phone">
-                      📞 {appointment.client.phone}
-                    </div>
-                    <div style={{ marginTop: '4px' }}>
-                      <span className={getStatusClass(appointment.status)}>
-                        {getStatusDisplay(appointment.status)}
-                      </span>
-                      {appointment.isFromOpportunity && (
-                        <span style={{
-                          marginLeft: '8px',
-                          fontSize: '9px',
-                          color: '#059669',
-                          backgroundColor: '#d1fae5',
-                          padding: '1px 4px',
-                          borderRadius: '2px'
-                        }}>
-                          📋 Seguimiento
-                        </span>
-                      )}
-                    </div>
-                    {appointment.notes && (
-                      <div className="print-notes">
-                        💭 {appointment.notes}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '11px' }}>
-                    Horario disponible
+                <div className="print-client-name">
+                  {appointment.client.name}
+                </div>
+                <div className="print-vehicle-info">
+                  🚗 {appointment.vehicle.brand} {appointment.vehicle.model}
+                  {appointment.vehicle.year && ` (${appointment.vehicle.year})`} - {appointment.vehicle.plate}
+                </div>
+                <div className="print-phone">
+                  📞 {appointment.client.phone}
+                </div>
+                <div style={{ marginTop: '4px' }}>
+                  <span className={getStatusClass(appointment.status)}>
+                    {getStatusDisplay(appointment.status)}
+                  </span>
+                  {appointment.isFromOpportunity && (
+                    <span style={{
+                      marginLeft: '8px',
+                      fontSize: '9px',
+                      color: '#059669',
+                      backgroundColor: '#d1fae5',
+                      padding: '1px 4px',
+                      borderRadius: '2px'
+                    }}>
+                      📋 Seguimiento
+                    </span>
+                  )}
+                </div>
+                {appointment.notes && (
+                  <div className="print-notes">
+                    💭 {appointment.notes}
                   </div>
                 )}
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          <div className="print-no-appointments">
+            <h3 style={{ margin: '0 0 10px 0', color: '#6b7280' }}>
+              📅 No hay citas programadas para este día
+            </h3>
+            <p style={{ margin: '0', fontSize: '12px' }}>
+              Día libre para mantenimiento o atención de emergencias
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Resumen del día */}
@@ -222,17 +192,6 @@ const PrintableDailyAgenda: React.FC<PrintableDailyAgendaProps> = ({
         </div>
       </div>
 
-      {/* Mensaje si no hay citas */}
-      {dayAppointments.length === 0 && (
-        <div className="print-no-appointments" style={{ marginTop: '40px' }}>
-          <h3 style={{ margin: '0 0 10px 0', color: '#6b7280' }}>
-            📅 No hay citas programadas para este día
-          </h3>
-          <p style={{ margin: '0', fontSize: '12px' }}>
-            Día libre para mantenimiento o atención de emergencias
-          </p>
-        </div>
-      )}
     </div>
   );
 };

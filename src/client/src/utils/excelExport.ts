@@ -167,15 +167,6 @@ export const exportDailyAgendaToExcel = async (
       return appointmentDate >= dayStart && appointmentDate <= dayEnd;
     });
 
-    // Generar horarios de 8 AM a 7 PM
-    const timeSlots = [];
-    for (let hour = 8; hour < 19; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        timeSlots.push(time);
-      }
-    }
-
     // Crear datos para la hoja principal
     const worksheetData = [];
 
@@ -193,7 +184,7 @@ export const exportDailyAgendaToExcel = async (
 
     // Headers de la tabla
     worksheetData.push([
-      'Horario',
+      'Hora',
       'Cliente',
       'Teléfono',
       'Vehículo',
@@ -203,43 +194,29 @@ export const exportDailyAgendaToExcel = async (
       'Notas'
     ]);
 
-    // Datos de horarios
-    timeSlots.forEach(timeSlot => {
-      const [hour, minute] = timeSlot.split(':').map(Number);
-      const appointment = dayAppointments.find(appointment => {
-        const appointmentTime = new Date(appointment.scheduledDate);
-        const appointmentHour = appointmentTime.getHours();
-        const appointmentMinute = appointmentTime.getMinutes();
+    // Datos solo de las citas programadas (ordenadas por hora)
+    const sortedAppointments = dayAppointments.sort((a, b) =>
+      new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
+    );
 
-        const slotStart = hour * 60 + minute;
-        const appointmentSlot = appointmentHour * 60 + appointmentMinute;
-
-        return appointmentSlot >= slotStart && appointmentSlot < slotStart + 30;
+    sortedAppointments.forEach(appointment => {
+      const appointmentTime = new Date(appointment.scheduledDate);
+      const timeString = appointmentTime.toLocaleTimeString('es-MX', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
       });
 
-      if (appointment) {
-        worksheetData.push([
-          timeSlot,
-          appointment.client.name,
-          appointment.client.phone,
-          `${appointment.vehicle.brand} ${appointment.vehicle.model}`,
-          appointment.vehicle.plate,
-          STATUS_MAP[appointment.status] || appointment.status,
-          appointment.isFromOpportunity ? 'Seguimiento' : 'Nueva',
-          appointment.notes || ''
-        ]);
-      } else {
-        worksheetData.push([
-          timeSlot,
-          'Horario disponible',
-          '',
-          '',
-          '',
-          '',
-          '',
-          ''
-        ]);
-      }
+      worksheetData.push([
+        timeString,
+        appointment.client.name,
+        appointment.client.phone,
+        `${appointment.vehicle.brand} ${appointment.vehicle.model}`,
+        appointment.vehicle.plate,
+        STATUS_MAP[appointment.status] || appointment.status,
+        appointment.isFromOpportunity ? 'Seguimiento' : 'Nueva',
+        appointment.notes || ''
+      ]);
     });
 
     // Agregar estadísticas si se solicita
@@ -258,7 +235,7 @@ export const exportDailyAgendaToExcel = async (
 
     // Configurar anchos de columna
     worksheet['!cols'] = [
-      { width: 12 }, // Horario
+      { width: 10 }, // Hora
       { width: 25 }, // Cliente
       { width: 15 }, // Teléfono
       { width: 20 }, // Vehículo
