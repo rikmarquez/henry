@@ -425,15 +425,6 @@ export default function ServicesPage() {
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
         
-        // DEBUG: Logging temporal para verificar fechas
-        console.log('📅 DEBUG SEMANA LUNES-DOMINGO:');
-        console.log('- Now original:', now.toISOString());
-        console.log('- Day of week original:', dayOfWeek);
-        console.log('- Days to Monday:', daysToMonday);
-        console.log('- WeekStart (lunes):', weekStart.toISOString());
-        console.log('- WeekEnd (domingo):', weekEnd.toISOString());
-        console.log('- Inicio semana ISO:', toStartOfDay(weekStart));
-        console.log('- Fin semana ISO:', toEndOfDay(weekEnd));
         
         return {
           dateFrom: toStartOfDay(weekStart),
@@ -743,10 +734,6 @@ export default function ServicesPage() {
   };
 
   const handleCreateService = async (data: CreateServiceData) => {
-    console.log('🚨 DEBUG: handleCreateService ejecutado!');
-    console.log('🚨 DEBUG: Datos recibidos:', data);
-    console.log('🚨 DEBUG: preloadedAppointment:', preloadedAppointment);
-    console.trace('🚨 DEBUG: Stack trace de handleCreateService');
     try {
       // Include appointment ID if creating from appointment and branch ID
       const serviceData = {

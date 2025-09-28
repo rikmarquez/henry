@@ -184,21 +184,9 @@ const AppointmentsPage = () => {
   };
 
   const handleReceiveCarComplete = (appointment: Appointment) => {
-    // Usar la mutación con onSuccess callback para garantizar el timing correcto
-    updateStatusMutation.mutate(
-      { id: appointment.id, action: 'complete' },
-      {
-        onSuccess: () => {
-          // Solo navegar después de que se actualice el status exitosamente
-          navigate(`/services?appointmentId=${appointment.id}`);
-        },
-        onError: (error) => {
-          console.error('Error updating appointment status:', error);
-          // Aún así navegar para no interrumpir el flujo del usuario
-          navigate(`/services?appointmentId=${appointment.id}`);
-        }
-      }
-    );
+    // Navegar directamente al formulario de servicios sin completar la cita
+    // La cita se completará automáticamente cuando todos los servicios estén terminados
+    navigate(`/services?appointmentId=${appointment.id}`);
   };
 
   return (

@@ -653,59 +653,11 @@ router.post(
       const userId = (req as any).user.userId;
       const branchId = (req as any).user.branchId;
 
-      // If no services exist, create one automatically
+      // If no services exist, cannot complete the appointment
       if (existingAppointment.services.length === 0) {
-        const result = await prisma.$transaction(async (tx) => {
-          // Update appointment status
-          const appointment = await tx.appointment.update({
-            where: { id: parseInt(id) },
-            data: { status: 'completed' },
-            include: {
-              client: {
-                select: { id: true, name: true, phone: true },
-              },
-              vehicle: {
-                select: { id: true, plate: true, brand: true, model: true },
-              },
-            },
-          });
-
-          // Create associated service with RECIBIDO status (id: 1)
-          const service = await tx.service.create({
-            data: {
-              appointmentId: parseInt(id),
-              clientId: existingAppointment.clientId,
-              vehicleId: existingAppointment.vehicleId,
-              statusId: 1, // RECIBIDO
-              problemDescription: existingAppointment.notes || 'Servicio generado desde cita completada',
-              totalAmount: 0,
-              mechanicCommission: 0,
-              createdBy: userId,
-              branchId: branchId,
-            },
-            include: {
-              client: {
-                select: { id: true, name: true, phone: true },
-              },
-              vehicle: {
-                select: { id: true, plate: true, brand: true, model: true },
-              },
-              status: {
-                select: { id: true, name: true, color: true },
-              },
-            },
-          });
-
-          return { appointment, service };
-        });
-
-        return res.json({
-          success: true,
-          data: {
-            appointment: result.appointment,
-            service: result.service,
-          },
-          message: 'Cita completada y servicio creado exitosamente',
+        return res.status(400).json({
+          success: false,
+          message: 'No se puede completar una cita sin servicios asociados',
         });
       }
 

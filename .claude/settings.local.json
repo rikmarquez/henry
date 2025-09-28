@@ -53,7 +53,9 @@
       "Bash(del auth.json dashboard.json)",
       "Bash(del:*)",
       "Bash(npm run dev:server:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(npm run dev:client:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
