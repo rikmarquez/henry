@@ -103,12 +103,20 @@ const AppointmentDetails = ({
   };
 
   const canConfirm = appointment.status === 'scheduled';
-  const canComplete = appointment.status === 'confirmed';
+  const canReceiveCar = appointment.status === 'confirmed' && appointment._count.services === 0;
   const canCancel = appointment.status === 'scheduled' || appointment.status === 'confirmed';
-  const canCreateService = appointment.status === 'confirmed' && appointment._count.services === 0;
 
   const handleStatusAction = (action: 'confirm' | 'complete' | 'cancel') => {
     onConfirmAction(appointment.id, action);
+  };
+
+  const handleReceiveCar = () => {
+    // Primero actualizar status a completed
+    handleStatusAction('complete');
+    // Luego navegar a crear servicio
+    if (onCreateService) {
+      onCreateService(appointment);
+    }
   };
 
 
@@ -319,24 +327,14 @@ const AppointmentDetails = ({
                 </button>
               )}
               
-              {canComplete && (
+              {canReceiveCar && onCreateService && (
                 <button
-                  onClick={() => handleStatusAction('complete')}
+                  onClick={handleReceiveCar}
                   disabled={isUpdating}
                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Recibir Auto
-                </button>
-              )}
-
-              {canCreateService && onCreateService && (
-                <button
-                  onClick={() => onCreateService(appointment)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                >
-                  <Wrench className="h-4 w-4 mr-2" />
-                  Crear Servicio
                 </button>
               )}
 
