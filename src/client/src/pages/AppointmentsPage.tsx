@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Clock, User, Car, Phone, CalendarDays, Search, Filter, AlertTriangle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../services/api';
 import { useCurrentBranchId } from '../contexts/BranchContext';
@@ -57,6 +57,7 @@ interface AppointmentFilters {
 const AppointmentsPage = () => {
   const currentBranchId = useCurrentBranchId();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<AppointmentFilters>({
     page: 1,
     limit: 20
@@ -64,6 +65,14 @@ const AppointmentsPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [preselectedDateForModal, setPreselectedDateForModal] = useState<Date | undefined>(undefined);
+  const [preselectedClient, setPreselectedClient] = useState<{
+    clientId?: number;
+    clientName?: string;
+    vehicleId?: number;
+    vehiclePlate?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+  } | undefined>(undefined);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month' | 'list'>('week');
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -73,6 +82,41 @@ const AppointmentsPage = () => {
   }>({ show: false, appointmentId: null, action: null });
 
   const queryClient = useQueryClient();
+
+  // Manejar parámetros de URL para preselección de cliente
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    const clientId = searchParams.get('clientId');
+    const clientName = searchParams.get('clientName');
+    const vehicleId = searchParams.get('vehicleId');
+    const vehiclePlate = searchParams.get('vehiclePlate');
+    const vehicleBrand = searchParams.get('vehicleBrand');
+    const vehicleModel = searchParams.get('vehicleModel');
+
+    if (mode === 'create') {
+      if (clientId && clientName) {
+        setPreselectedClient({
+          clientId: parseInt(clientId),
+          clientName,
+          ...(vehicleId && { vehicleId: parseInt(vehicleId) }),
+          ...(vehiclePlate && { vehiclePlate }),
+          ...(vehicleBrand && { vehicleBrand }),
+          ...(vehicleModel && { vehicleModel })
+        });
+      }
+      setShowCreateModal(true);
+      // Limpiar parámetros de URL después de procesar
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('mode');
+      newSearchParams.delete('clientId');
+      newSearchParams.delete('clientName');
+      newSearchParams.delete('vehicleId');
+      newSearchParams.delete('vehiclePlate');
+      newSearchParams.delete('vehicleBrand');
+      newSearchParams.delete('vehicleModel');
+      setSearchParams(newSearchParams);
+    }
+  }, [searchParams, setSearchParams]);
 
   // Fetch appointments
   const { data: appointmentsData, isLoading, error } = useQuery({
@@ -139,6 +183,7 @@ const AppointmentsPage = () => {
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
     setPreselectedDateForModal(undefined);
+    setPreselectedClient(undefined);
   };
 
   const getStatusColor = (status: string) => {
@@ -485,6 +530,7 @@ const AppointmentsPage = () => {
           isOpen={showCreateModal}
           onClose={handleCloseCreateModal}
           preselectedDate={preselectedDateForModal}
+          preselectedClient={preselectedClient}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['appointments'] });
             handleCloseCreateModal();

@@ -16,6 +16,34 @@
 
 ## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-09-28
 
+### ✅ COMPLETADO: Sistema de Búsqueda Inteligente de Clientes en Dashboard
+- **Feature**: Búsqueda prominente de clientes desde el dashboard principal para evitar duplicados
+- **Ubicación**: Sección azul destacada en la parte superior del dashboard
+- **Funcionalidades implementadas**:
+  - 🔍 **Búsqueda en tiempo real**: Por nombre, teléfono, WhatsApp, placa, marca o modelo de vehículo
+  - 📋 **Información completa del cliente**:
+    - Datos personales (nombre, teléfono, WhatsApp, email, dirección)
+    - Listado completo de vehículos con detalles (placa, marca, modelo, año, color)
+    - Historial de servicios recientes (últimos 3) con estado y monto
+  - ⚡ **Navegación directa**: Botón "Crear Cita" para cada vehículo del cliente
+  - 🆕 **Cliente nuevo**: Botón prominente si no se encuentra el cliente
+- **Integración técnica**:
+  - ✅ **Dashboard → AppointmentsPage**: Navegación con parámetros URL preseleccionados
+  - ✅ **CreateAppointmentModal**: Soporte para cliente/vehículo preseleccionado
+  - ✅ **Frontend-only filtering**: Búsqueda instantánea sin pérdida de foco
+  - ✅ **API optimization**: Servicios recientes via endpoint `/services/client/{id}`
+- **UX mejorada**:
+  - 📱 **Responsive**: Adaptable a todas las pantallas
+  - 🎨 **Visual distintivo**: Iconos y colores por categoría de información
+  - 👆 **Clic fuera para cerrar**: Interacción intuitiva
+  - 🧹 **Auto-limpieza**: Búsqueda se resetea al seleccionar cliente
+- **Beneficios operativos**:
+  - 🚫 **Prevención duplicados**: Verificación obligatoria antes de crear cliente
+  - ⚡ **Flujo optimizado**: De búsqueda a cita en 2 clics
+  - 📊 **Contexto completo**: Historial visible para mejores decisiones
+  - 💼 **Eficiencia taller**: Menos tiempo en gestión administrativa
+- **Commit**: Sistema completo de búsqueda inteligente en dashboard
+
 ### ✅ COMPLETADO: Funcionalidad de Reagendamiento de Citas
 - **Feature**: Capacidad completa de reagendar citas existentes (fecha y hora)
 - **Ubicación**: Modal de detalles de citas con botón "Reagendar"

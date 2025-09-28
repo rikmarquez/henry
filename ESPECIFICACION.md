@@ -1026,7 +1026,12 @@ model StatusLog {
 - ✅ **Colores identificativos:** Cada estado con color distintivo
 - ⏳ **Pendiente:** Notificaciones automáticas a propietarios
 
-### 6.3 Dashboard Principal ✅ IMPLEMENTADO
+### 6.3 Dashboard Principal ✅ COMPLETAMENTE IMPLEMENTADO
+- ✅ **Búsqueda Inteligente de Clientes:** Sección prominente azul para prevenir duplicados
+  - Búsqueda por nombre, teléfono, WhatsApp, placa, marca, modelo
+  - Información completa: datos cliente + vehículos + servicios recientes
+  - Navegación directa a citas con preselección automática
+  - Botón "Crear Cliente Nuevo" si no se encuentra
 - ✅ **Resumen del día:** Citas, trabajos en proceso, servicios completados
 - ✅ **KPIs con Chart.js:** Ingresos, servicios por estado, productividad mecánicos
 - ✅ **Vista Kanban:** Servicios organizados por estado con drag & drop
@@ -1034,13 +1039,20 @@ model StatusLog {
 - ✅ **Filtrado por sucursal:** Datos segregados automáticamente
 - ✅ **Gráficos interactivos:** Estadísticas visuales en tiempo real
 
-### 6.4 Sistema de Búsqueda Unificada ✅ IMPLEMENTADO
-- ✅ **Frontend-Only Filtering:** Búsqueda instantánea sin pérdida de foco
+### 6.4 Sistema de Búsqueda Inteligente ✅ COMPLETAMENTE IMPLEMENTADO
+**Estado:** Sistema avanzado de búsqueda con preselección implementado
+- ✅ **Búsqueda Dashboard Principal**: Sección prominente para búsqueda de clientes antes de crear citas
+- ✅ **Búsqueda en tiempo real**: Por nombre, teléfono, WhatsApp, placa, marca, modelo de vehículo
+- ✅ **Información enriquecida**: Cliente completo con vehículos y servicios recientes
+- ✅ **Prevención duplicados**: Verificación obligatoria antes de crear nuevos clientes
+- ✅ **Navegación inteligente**: Dashboard → Citas con datos preseleccionados via URL params
+- ✅ **Frontend-Only Filtering:** Búsqueda instantánea sin pérdida de foco en módulos
 - ✅ **Búsqueda global:** Clientes por nombre/teléfono, vehículos por placa/marca
 - ✅ **Autocompletado inteligente:** Para grandes bases de datos
 - ✅ **Filtros por módulo:** Cada lista con búsqueda independiente
 - ✅ **Reset automático:** Página 1 al cambiar filtros
 - ✅ **Paginación local:** Sin llamadas API durante búsqueda
+- ✅ **Integración CreateAppointmentModal**: Soporte preselección cliente/vehículo
 
 ### 6.5 Gestión de Oportunidades ✅ IMPLEMENTADO
 - ✅ **Creación manual:** Por usuarios autorizados después de servicios

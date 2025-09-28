@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../services/api';
-import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight } from 'lucide-react';
+import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight, Search, Plus, UserPlus } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardData {
   overview: {
@@ -41,8 +43,57 @@ interface DashboardData {
   }>;
 }
 
+interface Client {
+  id: number;
+  name: string;
+  phone: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  vehicles: Array<{
+    id: number;
+    plate: string;
+    brand: string;
+    model: string;
+    year?: number;
+    color?: string;
+  }>;
+  services?: Array<{
+    id: number;
+    createdAt: string;
+    totalAmount: number;
+    status: {
+      name: string;
+      color: string;
+    };
+    vehicle: {
+      plate: string;
+      brand: string;
+      model: string;
+    };
+  }>;
+}
+
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar resultados al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
@@ -52,6 +103,75 @@ export default function DashboardPage() {
     },
     refetchInterval: 30000, // Refrescar cada 30 segundos
   });
+
+  // Query para búsqueda de clientes
+  const { data: searchResults, isLoading: isSearching } = useQuery({
+    queryKey: ['clients-search', searchTerm],
+    queryFn: async (): Promise<Client[]> => {
+      if (!searchTerm.trim() || searchTerm.length < 2) return [];
+      const response = await api.get(`/clients?limit=1000`);
+      const allClients = response.data.data.clients || [];
+
+      // Filtrar en el frontend
+      const filteredClients = allClients.filter((client: Client) =>
+        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.phone.includes(searchTerm) ||
+        (client.whatsapp && client.whatsapp.includes(searchTerm)) ||
+        client.vehicles.some(v =>
+          v.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          v.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          v.model.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+
+      // Para cada cliente encontrado, obtener sus servicios recientes
+      const clientsWithServices = await Promise.all(
+        filteredClients.map(async (client) => {
+          try {
+            const servicesResponse = await api.get(`/services/client/${client.id}?limit=3`);
+            return {
+              ...client,
+              services: servicesResponse.data.data.services || []
+            };
+          } catch (error) {
+            return {
+              ...client,
+              services: []
+            };
+          }
+        })
+      );
+
+      return clientsWithServices;
+    },
+    enabled: searchTerm.length >= 2,
+  });
+
+  const handleCreateAppointmentWithClient = (client: Client, vehicle?: any) => {
+    // Limpiar búsqueda
+    setSearchTerm('');
+    setShowResults(false);
+
+    // Navegar a la página de citas con parámetros de cliente preseleccionado
+    const params = new URLSearchParams({
+      clientId: client.id.toString(),
+      clientName: client.name,
+      ...(vehicle && {
+        vehicleId: vehicle.id.toString(),
+        vehiclePlate: vehicle.plate,
+        vehicleBrand: vehicle.brand,
+        vehicleModel: vehicle.model
+      })
+    });
+    navigate(`/appointments?${params.toString()}&mode=create`);
+  };
+
+  const handleCreateNewClient = () => {
+    // Limpiar búsqueda
+    setSearchTerm('');
+    setShowResults(false);
+    navigate('/clients?mode=create');
+  };
 
   if (isLoading) {
     return (
@@ -103,6 +223,195 @@ export default function DashboardPage() {
             <div className="text-sm text-gray-500">
               Última actualización: {new Date().toLocaleTimeString('es-MX')}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sección de Búsqueda de Clientes */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white mb-2">¿Crear una cita?</h2>
+            <p className="text-blue-100">Busca primero si el cliente ya existe para evitar duplicados</p>
+          </div>
+
+          <div className="max-w-2xl mx-auto" ref={searchRef}>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar cliente por nombre, teléfono, placa de vehículo..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowResults(e.target.value.length >= 2);
+                }}
+                onFocus={() => setShowResults(searchTerm.length >= 2)}
+                className="block w-full pl-10 pr-3 py-4 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+              />
+              {isSearching && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                </div>
+              )}
+            </div>
+
+            {/* Resultados de búsqueda */}
+            {showResults && (
+              <div className="absolute z-50 mt-2 w-full max-w-2xl bg-white rounded-lg shadow-xl border border-gray-200 max-h-[32rem] overflow-y-auto">
+                {searchResults && searchResults.length > 0 ? (
+                  <div className="divide-y divide-gray-200">
+                    {searchResults.slice(0, 6).map((client) => (
+                      <div key={client.id} className="p-6 hover:bg-gray-50">
+                        <div className="space-y-4">
+                          {/* Información del Cliente */}
+                          <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <Users className="h-6 w-6 text-blue-600" />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-xl font-semibold text-gray-900">{client.name}</h4>
+                              <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {client.phone}
+                                </span>
+                                {client.whatsapp && (
+                                  <span className="text-green-600">
+                                    WhatsApp: {client.whatsapp}
+                                  </span>
+                                )}
+                                {client.email && (
+                                  <span>
+                                    {client.email}
+                                  </span>
+                                )}
+                              </div>
+                              {client.address && (
+                                <p className="text-sm text-gray-500 mt-1">{client.address}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Vehículos */}
+                          {client.vehicles && client.vehicles.length > 0 && (
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <Car className="h-4 w-4" />
+                                Vehículos registrados ({client.vehicles.length})
+                              </h5>
+                              <div className="grid grid-cols-1 gap-2">
+                                {client.vehicles.map((vehicle) => (
+                                  <div key={vehicle.id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
+                                    <div className="flex items-center gap-3">
+                                      <div className="text-sm">
+                                        <span className="font-medium text-gray-900 block">{vehicle.plate}</span>
+                                        <span className="text-gray-600">
+                                          {vehicle.brand} {vehicle.model}
+                                          {vehicle.year && ` (${vehicle.year})`}
+                                          {vehicle.color && ` - ${vehicle.color}`}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => handleCreateAppointmentWithClient(client, vehicle)}
+                                      className="inline-flex items-center gap-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors"
+                                    >
+                                      <Calendar className="h-4 w-4" />
+                                      Crear Cita
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Servicios Recientes */}
+                          {client.services && client.services.length > 0 && (
+                            <div className="bg-orange-50 rounded-lg p-4">
+                              <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <Wrench className="h-4 w-4" />
+                                Servicios recientes
+                              </h5>
+                              <div className="space-y-2">
+                                {client.services.map((service) => (
+                                  <div key={service.id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
+                                    <div className="flex items-center gap-3">
+                                      <div className="text-sm">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-medium text-gray-900">
+                                            {service.vehicle.plate} - {service.vehicle.brand} {service.vehicle.model}
+                                          </span>
+                                          <span
+                                            className="inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white"
+                                            style={{ backgroundColor: service.status.color }}
+                                          >
+                                            {service.status.name}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-gray-600">
+                                          <span>{new Date(service.createdAt).toLocaleDateString('es-MX')}</span>
+                                          <span className="font-semibold">
+                                            {new Intl.NumberFormat('es-MX', {
+                                              style: 'currency',
+                                              currency: 'MXN',
+                                            }).format(service.totalAmount)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Botón para cliente sin vehículos */}
+                          {(!client.vehicles || client.vehicles.length === 0) && (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-gray-500 mb-3">Cliente sin vehículos registrados</p>
+                              <button
+                                onClick={() => handleCreateAppointmentWithClient(client)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Crear cita + registrar vehículo
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : searchTerm.length >= 2 ? (
+                  <div className="p-6 text-center">
+                    <div className="mb-4">
+                      <UserPlus className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontró el cliente</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        No existe ningún cliente con "{searchTerm}". ¿Es un cliente nuevo?
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleCreateNewClient}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Crear Cliente Nuevo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-gray-500">
+                    <Search className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm">Escribe al menos 2 caracteres para buscar</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

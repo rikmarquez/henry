@@ -42,6 +42,14 @@ interface CreateAppointmentModalProps {
     vehicleId: number;
     description: string;
   };
+  preselectedClient?: {
+    clientId: number;
+    clientName: string;
+    vehicleId?: number;
+    vehiclePlate?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+  };
 }
 
 interface Client {
@@ -76,15 +84,16 @@ interface Opportunity {
   };
 }
 
-const CreateAppointmentModal = ({ 
-  isOpen, 
-  onClose, 
+const CreateAppointmentModal = ({
+  isOpen,
+  onClose,
   onSuccess,
   preselectedDate,
-  preselectedOpportunity 
+  preselectedOpportunity,
+  preselectedClient
 }: CreateAppointmentModalProps) => {
   const [appointmentType, setAppointmentType] = useState<'phone' | 'opportunity'>(
-    preselectedOpportunity ? 'opportunity' : 'phone'
+    preselectedOpportunity ? 'opportunity' : preselectedClient ? 'opportunity' : 'phone'
   );
   const [clientSearch, setClientSearch] = useState('');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -208,6 +217,34 @@ const CreateAppointmentModal = ({
       opportunityForm.setValue('scheduledDate', newDateTime);
     }
   }, [preselectedDate, phoneForm, opportunityForm]);
+
+  // Handle preselected client from dashboard
+  useEffect(() => {
+    if (preselectedClient && appointmentType === 'opportunity') {
+      // Set client data
+      const clientData = {
+        id: preselectedClient.clientId,
+        name: preselectedClient.clientName,
+        phone: '', // We'll need to fetch this
+        email: ''
+      };
+      setSelectedClient(clientData);
+      opportunityForm.setValue('clientId', preselectedClient.clientId);
+
+      // If vehicle is also preselected, set vehicle data
+      if (preselectedClient.vehicleId && preselectedClient.vehiclePlate) {
+        const vehicleData = {
+          id: preselectedClient.vehicleId,
+          plate: preselectedClient.vehiclePlate,
+          brand: preselectedClient.vehicleBrand || '',
+          model: preselectedClient.vehicleModel || '',
+          clientId: preselectedClient.clientId
+        };
+        setSelectedVehicle(vehicleData);
+        opportunityForm.setValue('vehicleId', preselectedClient.vehicleId);
+      }
+    }
+  }, [preselectedClient, appointmentType, opportunityForm]);
 
   // Create appointment mutation
   const createMutation = useMutation({
