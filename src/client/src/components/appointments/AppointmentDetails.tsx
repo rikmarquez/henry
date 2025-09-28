@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { api } from '../../services/api';
 import { 
   X, 
   User, 
@@ -14,7 +17,10 @@ import {
   AlertTriangle,
   Settings,
   ArrowRight,
-  Wrench
+  Wrench,
+  Edit,
+  Save,
+  CalendarX
 } from 'lucide-react';
 
 interface Appointment {
@@ -71,6 +77,55 @@ const AppointmentDetails = ({
   onCreateService,
   onReceiveCarComplete
 }: AppointmentDetailsProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const queryClient = useQueryClient();
+
+  // Initialize edit values when entering edit mode
+  const initializeEditMode = () => {
+    const scheduledDate = new Date(appointment.scheduledDate);
+    const date = scheduledDate.toISOString().split('T')[0];
+    const time = scheduledDate.toTimeString().slice(0, 5);
+    setEditDate(date);
+    setEditTime(time);
+    setIsEditing(true);
+  };
+
+  // Mutation for updating appointment
+  const updateAppointmentMutation = useMutation({
+    mutationFn: async ({ scheduledDate }: { scheduledDate: string }) => {
+      const response = await api.put(`/appointments/${appointment.id}`, {
+        scheduledDate
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Cita reagendada exitosamente');
+      setIsEditing(false);
+      onClose(); // Close modal after successful update
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Error al reagendar la cita');
+    }
+  });
+
+  const handleSaveEdit = () => {
+    if (!editDate || !editTime) {
+      toast.error('Por favor selecciona fecha y hora');
+      return;
+    }
+
+    const newScheduledDate = `${editDate}T${editTime}:00.000Z`;
+    updateAppointmentMutation.mutate({ scheduledDate: newScheduledDate });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditDate('');
+    setEditTime('');
+  };
 
   if (!isOpen) return null;
 
@@ -161,25 +216,82 @@ const AppointmentDetails = ({
             {/* Date and Time */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 flex-1">
                   <Calendar className="h-5 w-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {new Date(appointment.scheduledDate).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(appointment.scheduledDate).toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
+                  {isEditing ? (
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                        <input
+                          type="time"
+                          value={editTime}
+                          onChange={(e) => setEditTime(e.target.value)}
+                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {new Date(appointment.scheduledDate).toLocaleDateString('es-ES', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(appointment.scheduledDate).toLocaleTimeString('es-ES', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Edit Controls */}
+                {appointment.status !== 'completed' && appointment.status !== 'cancelled' && (
+                  <div className="flex items-center space-x-2 ml-3">
+                    {isEditing ? (
+                      <>
+                        <button
+                          onClick={handleSaveEdit}
+                          disabled={updateAppointmentMutation.isPending}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          {updateAppointmentMutation.isPending ? 'Guardando...' : 'Guardar'}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={updateAppointmentMutation.isPending}
+                          className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                        >
+                          <CalendarX className="h-4 w-4 mr-1" />
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={initializeEditMode}
+                        className="inline-flex items-center px-3 py-1 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Reagendar
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -303,7 +415,8 @@ const AppointmentDetails = ({
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Hide when editing */}
+            {!isEditing && (
             <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
               {canCancel && (
                 <button
@@ -371,6 +484,7 @@ const AppointmentDetails = ({
                 Cerrar
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>
