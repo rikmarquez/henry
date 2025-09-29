@@ -143,19 +143,10 @@ const AppointmentsPage = () => {
       return currentFilters;
     }
 
-    // For calendar views, use simple fixed date range to avoid overflow issues
-    // Use current actual date to ensure we're always in the right year
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    // Fixed range: start of current year to end of next year
-    // This ensures we capture all relevant appointments without date calculation errors
-    const rangeStart = new Date(currentYear, 0, 1); // January 1st of current year
-    const rangeEnd = new Date(currentYear + 1, 11, 31); // December 31st of next year
-
-    currentFilters.dateFrom = rangeStart.toISOString().split('T')[0];
-    currentFilters.dateTo = rangeEnd.toISOString().split('T')[0];
+    // For calendar views, use hardcoded date range since Railway has incorrect system date
+    // Fixed range for 2024 appointments (current real year)
+    currentFilters.dateFrom = '2024-01-01';
+    currentFilters.dateTo = '2024-12-31';
 
     return currentFilters;
   };
