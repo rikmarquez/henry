@@ -161,14 +161,17 @@ export default function ServicesKanban({
     { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
   ];
 
-  // Mapear servicios directamente por statusId (excluyendo PERDIDO del Kanban)
+  // Mapear servicios directamente por statusId (excluyendo PERDIDO y RECHAZADO del Kanban)
   const mapServiceToColumn = (statusId: number) => {
     switch (statusId) {
       case 1: return 1; // RECIBIDO
-      case 2: return 2; // COTIZADO  
+      case 2: return 2; // COTIZADO (legacy)
       case 4: return 4; // EN PROCESO
-      case 5: return 5; // TERMINADO
+      case 5: return 5; // TERMINADO (legacy)
       case 6: return null; // PERDIDO - no mostrar en Kanban
+      case 7: return null; // RECHAZADO - NO mostrar en Kanban
+      case 8: return 2; // COTIZADO (nuevo estado)
+      case 9: return 5; // TERMINADO (nuevo estado)
       default: return 1; // default to RECIBIDO
     }
   };

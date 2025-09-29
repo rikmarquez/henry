@@ -77,6 +77,13 @@ router.get(
 
       const where: any = {};
 
+      // ALWAYS exclude rejected services unless specifically searching for them
+      if (!statusId || statusId !== 7) {
+        where.status = {
+          NOT: { name: 'Rechazado' }
+        };
+      }
+
       // Search filter (by client name, vehicle plate, problem description, or diagnosis)
       if (search) {
         where.OR = [
