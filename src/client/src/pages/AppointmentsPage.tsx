@@ -140,8 +140,9 @@ const AppointmentsPage = () => {
 
     // For calendar views, increase limit to ensure we get all appointments
     // List view uses pagination (page 1, 2, etc.) but calendar views need all data
+    // With 15 citas/day * 30 days = 450 citas/month, use generous limit
     if (viewMode !== 'list') {
-      currentFilters.limit = 100; // Increase limit for calendar views
+      currentFilters.limit = 500; // Generous limit for calendar views
     }
 
     return currentFilters;
