@@ -134,20 +134,9 @@ const WeeklyCalendar = ({
     }
   };
 
-  // Obtener citas de la semana actual
-  const weekAppointments = useMemo(() => {
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-
-    const weekStartWithTime = new Date(weekStart);
-    weekStartWithTime.setHours(0, 0, 0, 0);
-
-    return appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.scheduledDate);
-      return appointmentDate >= weekStartWithTime && appointmentDate <= weekEnd;
-    });
-  }, [appointments, weekStart]);
+  // Use all appointments from backend (backend already filters by date range)
+  // Let the UI components handle date-specific display
+  const weekAppointments = appointments;
 
   const handlePrint = async () => {
     try {

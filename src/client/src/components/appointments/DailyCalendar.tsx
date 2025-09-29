@@ -49,20 +49,11 @@ const DailyCalendar = ({
   const { printDailyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
   const { exportDailyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 
-  // Get appointments for the current day
+  // Use all appointments from backend (backend already filters by date range)
+  // Let the UI components handle date-specific display
   const dayAppointments = useMemo(() => {
-    const dayStart = new Date(currentDate);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(currentDate);
-    dayEnd.setHours(23, 59, 59, 999);
-
-    return appointments
-      .filter(appointment => {
-        const appointmentDate = new Date(appointment.scheduledDate);
-        return appointmentDate >= dayStart && appointmentDate <= dayEnd;
-      })
-      .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
-  }, [appointments, currentDate]);
+    return appointments.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
+  }, [appointments]);
 
   const navigateDay = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
