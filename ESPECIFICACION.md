@@ -139,7 +139,34 @@
 - ✅ **Dependencias:** xlsx v0.18+ para exportación nativa
 - ⚡ **Benefit:** Un clic para imprimir/exportar exactamente lo que está en pantalla
 
-### 3.11 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
+### 3.11 Sistema de Comunicaciones WhatsApp ✅ COMPLETAMENTE IMPLEMENTADO
+**Estado:** Sistema completo de mensajería automatizada implementado
+- ✅ **Arquitectura:** Enlaces wa.me con plantillas personalizadas (sin APIs complejas)
+- ✅ **Integración modular:** Botones integrados en todos los módulos principales
+- ✅ **Tipos de mensajes implementados:**
+  - 📅 **Recordatorio de citas:** Fecha, hora, vehículo, solicitud de confirmación
+  - 💰 **Cotización lista:** Monto, diagnóstico, solicitud de autorización
+  - ✅ **Vehículo listo:** Notificación de trabajo completado
+  - 🔄 **Seguimiento oportunidades:** Recordatorios de mantenimiento
+  - 📞 **Contacto general:** Comunicación flexible personalizada
+- ✅ **Componentes técnicos:**
+  - `WhatsAppButton.tsx`: Componente base reutilizable con variantes
+  - `whatsapp.ts`: Utilidades de formateo y validación de números
+  - Componentes especializados por tipo (Reminder, Quotation, Ready, FollowUp)
+- ✅ **Características avanzadas:**
+  - Validación automática números México (+52)
+  - Plantillas con marca "Henry's Diagnostics"
+  - Condicionales inteligentes por estado de servicio/cita
+  - Variantes visuales (outline, primary, secondary)
+  - Tooltips descriptivos y responsive design
+- ✅ **Ubicación de botones:**
+  - **Módulo Citas:** Modal detalles (recordatorios)
+  - **Módulo Servicios:** Modal detalles (cotización/vehículo listo)
+  - **Módulo Oportunidades:** Modal detalles (seguimiento)
+- ✅ **Formato profesional:** Emojis, estructura clara, calls-to-action definidos
+- ⚡ **Beneficio:** Un clic abre WhatsApp con mensaje profesional pre-escrito
+
+### 3.12 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
 **Estado:** Fase futura de desarrollo
 - ⏳ **Pendiente:** API móvil específica
 - ⏳ **Pendiente:** Autenticación por teléfono
@@ -177,6 +204,8 @@
 - **Validación:** Zod (compartido frontend/backend)
 - **Testing:** Vitest + React Testing Library
 - **Linting:** ESLint + Prettier
+- **WhatsApp Integration:** wa.me enlaces + plantillas personalizadas
+- **Date Formatting:** date-fns con locales español México
 
 **Deployment:**
 - **Plataforma:** Railway
@@ -1090,6 +1119,32 @@ model StatusLog {
 - ✅ **GLOBALES:** Disponibles en todas las sucursales
 - ⏳ **Pendiente:** Merge de duplicados automático
 
+### 6.9 Sistema de Comunicaciones WhatsApp ✅ COMPLETAMENTE IMPLEMENTADO
+**Estado:** Sistema completo de mensajería profesional implementado
+- ✅ **Integración sin APIs:** Basado en enlaces wa.me (sin costos adicionales)
+- ✅ **Plantillas dinámicas:** 5 tipos de mensajes con personalización automática
+- ✅ **Componentes reutilizables:** Arquitectura modular y escalable
+- ✅ **Tipos de comunicación:**
+  - **Recordatorios de citas:** Con fecha, hora, vehículo y solicitud de confirmación
+  - **Cotizaciones listas:** Con monto, diagnóstico y solicitud de autorización
+  - **Vehículos listos:** Con detalles de trabajo completado y horarios de recolección
+  - **Seguimiento oportunidades:** Recordatorios de mantenimientos recomendados
+  - **Contacto general:** Comunicación flexible personalizada
+- ✅ **Características técnicas:**
+  - Formateo automático de números México (+52)
+  - Encoding correcto de caracteres especiales y emojis
+  - Validación condicional por estado de servicio/cita
+  - Integración responsive con tooltips descriptivos
+- ✅ **Ubicaciones estratégicas:**
+  - Modal detalles de citas (recordatorios)
+  - Modal detalles de servicios (cotización/vehículo listo)
+  - Modal detalles de oportunidades (seguimiento)
+- ✅ **Experiencia de usuario:**
+  - Un clic abre WhatsApp con mensaje profesional pre-escrito
+  - Variantes visuales distintivas por tipo de mensaje
+  - Aparición condicional basada en datos disponibles
+- ⚡ **Beneficio:** Comunicación eficiente y profesional con clientes sin costos adicionales
+
 ## 7. Interfaces de Usuario
 
 ### 7.1 Desktop/Tablet (Operación Principal)
@@ -1167,16 +1222,24 @@ model StatusLog {
 ---
 ## ✅ ESTADO FINAL: SISTEMA 100% FUNCIONAL
 
-**Henry Diagnostics v1.0 - COMPLETAMENTE IMPLEMENTADO**
+**Henry Diagnostics v1.0 - COMPLETAMENTE IMPLEMENTADO + COMUNICACIONES WHATSAPP**
 - ✅ **Deployment:** Monolítico en Railway + PostgreSQL ACTIVO
 - ✅ **Stack:** React + Node.js + TypeScript + Prisma COMPLETO
 - ✅ **Multi-taller:** Arquitectura enterprise implementada
 - ✅ **Permisos:** Sistema granular user-friendly
 - ✅ **UX avanzado:** Frontend-Only Filtering, Kanban, Chart.js
+- ✅ **WhatsApp:** Sistema completo de comunicaciones automatizadas
 - ✅ **Database:** Limpia con usuario ADMIN único
 
-**Última actualización:** 2025-09-27
+**Nuevas funcionalidades 2025-09-29:**
+- 📱 **Comunicaciones WhatsApp:** 5 tipos de mensajes profesionales automatizados
+- 🔧 **Fix creación clientes:** Formulario unificado solo WhatsApp
+- 📋 **Plantillas personalizadas:** Marca Henry's Diagnostics con calls-to-action
+- ⚡ **Integración modular:** Botones en citas, servicios y oportunidades
+
+**Última actualización:** 2025-09-29
 **Credenciales:** rik@rikmarquez.com / Acceso979971
 **URLs:** Frontend y Backend deployados en Railway
+**Commits recientes:** 9159413 (fix clientes) + e111f0a (WhatsApp completo)
 
-**🎉 SISTEMA LISTO PARA PRODUCCIÓN**
+**🎉 SISTEMA COMPLETAMENTE LISTO PARA PRODUCCIÓN CON COMUNICACIONES WHATSAPP**
