@@ -143,10 +143,11 @@ const AppointmentsPage = () => {
       return currentFilters;
     }
 
-    // For calendar views, use hardcoded date range since Railway has incorrect system date
-    // Fixed range for 2024 appointments (current real year)
-    currentFilters.dateFrom = '2024-01-01';
-    currentFilters.dateTo = '2024-12-31';
+    // For calendar views, use appropriate date range for current year (2025)
+    // Fixed range to include previous year data and current year
+    // Use ISO datetime format as required by backend validation
+    currentFilters.dateFrom = '2024-01-01T00:00:00.000Z';
+    currentFilters.dateTo = '2025-12-31T23:59:59.999Z';
 
     return currentFilters;
   };
