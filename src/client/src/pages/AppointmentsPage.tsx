@@ -150,7 +150,15 @@ const AppointmentsPage = () => {
 
     // Set generous date range: 2 months before to 4 months after current date
     const rangeStart = new Date(currentYear, currentMonth - 2, 1);
-    const rangeEnd = new Date(currentYear, currentMonth + 4, 0); // Last day of month+4
+
+    // Handle year overflow when adding months
+    let endYear = currentYear;
+    let endMonth = currentMonth + 4;
+    if (endMonth > 11) {
+      endYear += Math.floor(endMonth / 12);
+      endMonth = endMonth % 12;
+    }
+    const rangeEnd = new Date(endYear, endMonth + 1, 0); // Last day of target month
 
     currentFilters.dateFrom = rangeStart.toISOString().split('T')[0];
     currentFilters.dateTo = rangeEnd.toISOString().split('T')[0];
