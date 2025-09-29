@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Clock, User, Car, Phone, Plus, Eye, Printer, FileSpreadsheet } from 'lucide-react';
 import usePrintAgenda from '../../hooks/usePrintAgenda';
 import useExcelExport from '../../hooks/useExcelExport';
@@ -32,14 +32,19 @@ interface WeeklyCalendarProps {
   onCreateAppointment: (preselectedDate?: Date) => void;
 }
 
-const WeeklyCalendar = ({ 
-  appointments, 
-  selectedDate, 
-  onDateSelect, 
+const WeeklyCalendar = ({
+  appointments,
+  selectedDate,
+  onDateSelect,
   onAppointmentSelect,
   onCreateAppointment
 }: WeeklyCalendarProps) => {
   const [currentWeek, setCurrentWeek] = useState(selectedDate);
+
+  // Sync currentWeek with selectedDate when it changes from parent
+  useEffect(() => {
+    setCurrentWeek(selectedDate);
+  }, [selectedDate]);
   const { printWeeklyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
   const { exportWeeklyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 

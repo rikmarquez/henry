@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Clock, User, Car } from 'lucide-react';
 
 interface Appointment {
@@ -28,13 +28,20 @@ interface AppointmentCalendarProps {
   onAppointmentSelect: (appointment: Appointment) => void;
 }
 
-const AppointmentCalendar = ({ 
-  appointments, 
-  selectedDate, 
-  onDateSelect, 
-  onAppointmentSelect 
+const AppointmentCalendar = ({
+  appointments,
+  selectedDate,
+  onDateSelect,
+  onAppointmentSelect
 }: AppointmentCalendarProps) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
+
+  // Sync currentMonth with selectedDate when it changes from parent
+  useEffect(() => {
+    if (selectedDate) {
+      setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+    }
+  }, [selectedDate]);
 
   // Get appointments grouped by date
   const appointmentsByDate = useMemo(() => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, User, Car, Phone, Plus, CheckCircle, AlertTriangle, Printer, FileSpreadsheet } from 'lucide-react';
 import usePrintAgenda from '../../hooks/usePrintAgenda';
 import useExcelExport from '../../hooks/useExcelExport';
@@ -32,14 +32,20 @@ interface DailyCalendarProps {
   onCreateAppointment: (preselectedDate?: Date) => void;
 }
 
-const DailyCalendar = ({ 
-  appointments, 
-  selectedDate, 
-  onDateSelect, 
+const DailyCalendar = ({
+  appointments,
+  selectedDate,
+  onDateSelect,
   onAppointmentSelect,
   onCreateAppointment
 }: DailyCalendarProps) => {
   const [currentDate, setCurrentDate] = useState(selectedDate);
+
+  // Sync currentDate with selectedDate when it changes from parent
+  useEffect(() => {
+    setCurrentDate(selectedDate);
+  }, [selectedDate]);
+
   const { printDailyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
   const { exportDailyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 
