@@ -138,16 +138,9 @@ const AppointmentsPage = () => {
       return currentFilters;
     }
 
-    // For list view, don't apply any automatic filters - show all appointments
-    if (viewMode === 'list') {
-      return currentFilters;
-    }
-
-    // For calendar views, use appropriate date range for current year (2025)
-    // Fixed range to include previous year data and current year
-    // Use ISO datetime format as required by backend validation
-    currentFilters.dateFrom = '2024-01-01T00:00:00.000Z';
-    currentFilters.dateTo = '2025-12-31T23:59:59.999Z';
+    // Don't apply any automatic filters - let backend return all appointments
+    // The UI components will handle filtering and display appropriately
+    // This matches the working behavior of list view
 
     return currentFilters;
   };
