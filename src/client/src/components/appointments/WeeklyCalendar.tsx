@@ -67,6 +67,13 @@ const WeeklyCalendar = ({
   const appointmentsByDate = useMemo(() => {
     const grouped: { [key: string]: Appointment[] } = {};
 
+    console.log('🗓️ WeeklyCalendar received appointments:', appointments.length);
+    console.log('📋 Appointments data:', appointments.map(a => ({
+      id: a.id,
+      scheduledDate: a.scheduledDate,
+      clientName: a.client.name
+    })));
+
     appointments.forEach(appointment => {
       // Use a more consistent date key format
       const appointmentDate = new Date(appointment.scheduledDate);
@@ -75,11 +82,15 @@ const WeeklyCalendar = ({
       const day = appointmentDate.getDate().toString().padStart(2, '0');
       const dateKey = `${year}-${month}-${day}`;
 
+      console.log(`📅 Appointment ${appointment.id}: ${appointment.scheduledDate} -> ${dateKey}`);
+
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
       grouped[dateKey].push(appointment);
     });
+
+    console.log('🗂️ Grouped appointments by date:', grouped);
 
     // Sort appointments by time within each day
     Object.keys(grouped).forEach(date => {

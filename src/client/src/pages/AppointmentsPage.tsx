@@ -138,9 +138,11 @@ const AppointmentsPage = () => {
       return currentFilters;
     }
 
-    // Don't apply any automatic filters - let backend return all appointments
-    // The UI components will handle filtering and display appropriately
-    // This matches the working behavior of list view
+    // For calendar views, increase limit to ensure we get all appointments
+    // List view uses pagination (page 1, 2, etc.) but calendar views need all data
+    if (viewMode !== 'list') {
+      currentFilters.limit = 100; // Increase limit for calendar views
+    }
 
     return currentFilters;
   };
