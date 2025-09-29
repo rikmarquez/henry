@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../services/api';
+// import { createClientSchema } from '../../../shared/schemas';
 import { useCurrentBranchId } from '../contexts/BranchContext';
 import PermissionGate from '../components/PermissionGate';
 import toast from 'react-hot-toast';
@@ -147,14 +148,15 @@ const createServiceSchema = z.object({
 
 type CreateServiceData = z.infer<typeof createServiceSchema>;
 
+// Schema temporal para creación de clientes (debe coincidir con el backend)
+const phoneSchema = z.string()
+  .min(10, 'El teléfono debe tener al menos 10 dígitos')
+  .regex(/^[+]?[\d\s-()]+$/, 'Formato de teléfono inválido');
+
 const createClientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  phone: z.string().optional(),
-  whatsapp: z.string().optional(),
+  whatsapp: phoneSchema, // Solo WhatsApp es requerido
   address: z.string().nullable().optional(),
-}).refine((data) => data.whatsapp || data.phone, {
-  message: 'Al menos WhatsApp o teléfono es requerido',
-  path: ['phone'],
 });
 
 type CreateClientData = z.infer<typeof createClientSchema>;
@@ -607,7 +609,7 @@ export default function ServicesPage() {
     try {
       const payload = {
         ...data,
-        whatsapp: data.whatsapp || data.phone, // Use whatsapp if provided, otherwise use phone
+        phone: data.whatsapp, // Copiar WhatsApp a phone también como acordamos
       };
       
       console.log('👥 Datos de cliente a enviar:', payload);
@@ -2183,19 +2185,22 @@ export default function ServicesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono *
+                  WhatsApp *
                 </label>
                 <input
-                  {...createClientForm.register('phone')}
+                  {...createClientForm.register('whatsapp')}
                   type="tel"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Número de teléfono"
+                  placeholder="Número de WhatsApp (ej: 5551234567)"
                 />
-                {createClientForm.formState.errors.phone && (
+                {createClientForm.formState.errors.whatsapp && (
                   <p className="text-red-600 text-sm mt-1">
-                    {createClientForm.formState.errors.phone.message}
+                    {createClientForm.formState.errors.whatsapp.message}
                   </p>
                 )}
+                <p className="text-gray-500 text-xs mt-1">
+                  * Este número se usará tanto para WhatsApp como para llamadas
+                </p>
               </div>
 
 
