@@ -227,10 +227,13 @@ router.get(
 
         // Active counts (clients don't have isActive field, so using total)
         prisma.client.count(),
-        prisma.service.count({ 
-          where: { 
+        prisma.service.count({
+          where: {
             branchId,
-            completedAt: { not: null },
+            // Only count terminated services
+            status: {
+              name: 'Terminado'
+            },
             ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
           }
         }),
@@ -256,12 +259,12 @@ router.get(
           }
         }),
 
-        // Revenue calculation - check if new pricing fields exist
+        // Revenue calculation - check if new pricing fields exist (EXCLUDE REJECTED SERVICES)
         (async () => {
           try {
             // Try with new pricing fields first
             return await prisma.service.aggregate({
-              _sum: { 
+              _sum: {
                 totalAmount: true,
                 laborPrice: true,
                 partsPrice: true,
@@ -270,22 +273,28 @@ router.get(
               },
               where: {
                 branchId,
-                completedAt: { not: null },
+                // Only include terminated services (generate revenue)
+                status: {
+                  name: 'Terminado'
+                },
                 ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
               },
             });
           } catch (error) {
             console.log('⚠️ New pricing fields not available, using fallback');
-            // Fallback to basic totalAmount only
+            // Fallback to basic totalAmount only (only revenue-generating states)
             const result = await prisma.service.aggregate({
               _sum: { totalAmount: true },
               where: {
                 branchId,
-                completedAt: { not: null },
+                // Only include terminated services
+                status: {
+                  name: 'Terminado'
+                },
                 ...(dateFilter.gte || dateFilter.lte ? { createdAt: dateFilter } : {}),
               },
             });
-            
+
             return {
               _sum: {
                 totalAmount: result._sum.totalAmount,

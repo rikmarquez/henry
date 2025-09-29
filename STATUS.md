@@ -97,6 +97,41 @@
   - 🎯 **Conversiones**: Calls-to-action claros mejoran respuesta de clientes
 - **Commits**: `9159413` (fix creación clientes) + `e111f0a` (sistema WhatsApp completo)
 
+### ✅ COMPLETADO: Estado Rechazado para Cotizaciones y Validación de Transiciones
+- **Feature**: Implementación completa del estado "Rechazado" para cotizaciones no aprobadas con flujo de trabajo simplificado
+- **Problema resuelto**: Cotizaciones rechazadas no tenían estado específico y se incluían incorrectamente en estadísticas de ingresos
+- **Flujo implementado**:
+  ```
+  1. Recibido → Cotizado
+  2. Cotizado → {En Proceso, Rechazado}
+  3. En Proceso → Terminado
+  4. Terminado (final, genera ingresos)
+  5. Rechazado (final, NO genera ingresos)
+  ```
+- **Cambios en Base de Datos**:
+  - ✅ **Estados simplificados**: Eliminados estados innecesarios (En Diagnóstico, Esperando Aprobación, Completado, Entregado)
+  - ✅ **Estado "Cotizado"**: Creado como paso intermedio (ID: 8, #F59E0B)
+  - ✅ **Estado "Terminado"**: Creado como estado final exitoso (ID: 9, #10B981)
+  - ✅ **Estado "Rechazado"**: Estado final para cotizaciones no aprobadas (ID: 7, #DC2626)
+- **Validación de Transiciones en Dropdown**:
+  - ✅ **Lógica inteligente**: Dropdown muestra solo transiciones válidas según estado actual
+  - ✅ **Prevención de saltos**: Evita cambios ilógicos (ej: Recibido → Terminado directamente)
+  - ✅ **UX mejorada**: Usuario ve solo opciones permitidas en cada estado
+- **Impacto en Reportes y Estadísticas**:
+  - ✅ **Solo "Terminado" genera ingresos**: Reportes actualizados para excluir todos los demás estados
+  - ✅ **"Rechazado" excluido**: No aparece en estadísticas de ingresos ni servicios completados
+  - ✅ **Precisión financiera**: Métricas reflejan solo trabajos realmente completados y cobrados
+- **Frontend actualizado**:
+  - ✅ **Colores distintivos**: Cada estado con color apropiado (azul→amarillo→púrpura→verde/rojo)
+  - ✅ **Iconos claros**: Clock, FileText, Play, CheckCircle, XCircle
+  - ✅ **Compatibilidad legacy**: Mantiene soporte temporal para estados anteriores
+- **Beneficios operativos**:
+  - 📊 **Estadísticas reales**: Solo servicios terminados aparecen en reportes de ingresos
+  - 🎯 **Flujo realista**: Refleja operación real del taller con cotizaciones rechazadas
+  - ⚡ **UX intuitiva**: Dropdown inteligente previene errores de usuario
+  - 📈 **Precisión de KPIs**: Métricas financieras más exactas sin cotizaciones rechazadas
+- **Commit**: Implementación completa de estado Rechazado con validación de transiciones
+
 ### ✅ COMPLETADO: Fix Creación de Clientes desde Servicios
 - **Issue resuelto**: Error 400 "Datos de entrada inválidos" al crear clientes desde módulo servicios
 - **Root Cause**: Schema de validación inconsistente entre frontend y backend

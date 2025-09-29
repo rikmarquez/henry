@@ -111,9 +111,9 @@ async function main() {
   const workStatuses = [
     { name: 'Recibido', orderIndex: 1, color: '#EF4444' },
     { name: 'Cotizado', orderIndex: 2, color: '#F59E0B' },
-    { name: 'Autorizado', orderIndex: 3, color: '#3B82F6' },
-    { name: 'En Proceso', orderIndex: 4, color: '#8B5CF6' },
-    { name: 'Terminado', orderIndex: 5, color: '#10B981' },
+    { name: 'En Proceso', orderIndex: 3, color: '#8B5CF6' },
+    { name: 'Terminado', orderIndex: 4, color: '#10B981' },
+    { name: 'Rechazado', orderIndex: 5, color: '#DC2626' },
   ];
 
   for (const status of workStatuses) {

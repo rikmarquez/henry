@@ -176,14 +176,22 @@ const createVehicleSchema = z.object({
 type CreateVehicleData = z.infer<typeof createVehicleSchema>;
 
 const statusColors: Record<string, string> = {
-  'Recibido': 'bg-blue-100 text-blue-800',
+  // Flujo simplificado (5 estados principales)
+  'Recibido': 'bg-blue-100 text-blue-800',           // #3B82F6 -> azul
+  'Cotizado': 'bg-yellow-100 text-yellow-800',       // #F59E0B -> amarillo
+  'En Proceso': 'bg-purple-100 text-purple-800',     // #10B981 -> púrpura
+  'Terminado': 'bg-green-100 text-green-800',        // #10B981 -> verde
+  'Rechazado': 'bg-red-100 text-red-800',            // #DC2626 -> rojo
+
+  // Estados legacy (por compatibilidad temporal)
+  'En Diagnóstico': 'bg-yellow-100 text-yellow-800',
+  'Esperando Aprobación': 'bg-purple-100 text-purple-800',
+  'Completado': 'bg-green-100 text-green-800',
+  'Entregado': 'bg-gray-100 text-gray-800',
   'Diagnosticando': 'bg-yellow-100 text-yellow-800',
-  'Cotizado': 'bg-purple-100 text-purple-800',
   'Autorizado': 'bg-indigo-100 text-indigo-800',
   'En Progreso': 'bg-orange-100 text-orange-800',
-  'Completado': 'bg-green-100 text-green-800',
   'Cancelado': 'bg-red-100 text-red-800',
-  'Entregado': 'bg-gray-100 text-gray-800',
 };
 
 // Period options for historical filtering
@@ -910,14 +918,22 @@ export default function ServicesPage() {
 
   const getStatusIcon = (statusName: string) => {
     switch (statusName) {
+      // Flujo simplificado (5 estados principales)
       case 'Recibido': return <Clock className="h-4 w-4" />;
-      case 'Diagnosticando': return <Search className="h-4 w-4" />;
       case 'Cotizado': return <FileText className="h-4 w-4" />;
+      case 'En Proceso': return <Play className="h-4 w-4" />;
+      case 'Terminado': return <CheckCircle className="h-4 w-4" />;
+      case 'Rechazado': return <XCircle className="h-4 w-4" />;
+
+      // Estados legacy (por compatibilidad temporal)
+      case 'En Diagnóstico': return <Search className="h-4 w-4" />;
+      case 'Esperando Aprobación': return <FileText className="h-4 w-4" />;
+      case 'Completado': return <CheckCircle className="h-4 w-4" />;
+      case 'Entregado': return <CheckCircle className="h-4 w-4" />;
+      case 'Diagnosticando': return <Search className="h-4 w-4" />;
       case 'Autorizado': return <CheckCircle className="h-4 w-4" />;
       case 'En Progreso': return <Play className="h-4 w-4" />;
-      case 'Completado': return <CheckCircle className="h-4 w-4" />;
       case 'Cancelado': return <XCircle className="h-4 w-4" />;
-      case 'Entregado': return <CheckCircle className="h-4 w-4" />;
       default: return <AlertCircle className="h-4 w-4" />;
     }
   };
@@ -927,6 +943,40 @@ export default function ServicesPage() {
       style: 'currency',
       currency: 'MXN',
     }).format(amount);
+  };
+
+  // Función para obtener transiciones válidas según el estado actual
+  const getValidTransitions = (currentStatusName: string): string[] => {
+    const transitionRules: { [key: string]: string[] } = {
+      // Flujo simplificado (5 estados)
+      'Recibido': ['Cotizado'],
+      'Cotizado': ['En Proceso', 'Rechazado'],
+      'En Proceso': ['Terminado'],
+      'Terminado': [], // Estado final - GENERA INGRESOS
+      'Rechazado': [], // Estado final - NO genera ingresos
+
+      // Estados legacy (por compatibilidad temporal)
+      'En Diagnóstico': ['Cotizado'],
+      'Esperando Aprobación': ['En Proceso', 'Rechazado'],
+      'Completado': ['Terminado'],
+      'Entregado': ['Terminado'],
+      'Autorizado': ['En Proceso', 'Rechazado'],
+      'Diagnosticando': ['Cotizado'],
+    };
+
+    return transitionRules[currentStatusName] || [];
+  };
+
+  // Función para filtrar estados disponibles en dropdown
+  const getAvailableStatuses = (currentStatusName: string, allStatuses: WorkStatus[]): WorkStatus[] => {
+    const validTransitions = getValidTransitions(currentStatusName);
+
+    // Siempre incluir el estado actual
+    const availableStatuses = allStatuses.filter(status =>
+      status.name === currentStatusName || validTransitions.includes(status.name)
+    );
+
+    return availableStatuses;
   };
 
   const formatDate = (dateString: string) => {
@@ -1240,7 +1290,7 @@ export default function ServicesPage() {
                             statusColors[service.status.name] || 'bg-gray-100 text-gray-800'
                           }`}
                         >
-                          {ensureArray<WorkStatus>(workStatuses).map((status) => (
+                          {getAvailableStatuses(service.status.name, ensureArray<WorkStatus>(workStatuses)).map((status) => (
                             <option key={status.id} value={status.id}>
                               {status.name}
                             </option>
