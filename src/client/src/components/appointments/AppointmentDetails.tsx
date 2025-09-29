@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { api } from '../../services/api';
-import { 
-  X, 
-  User, 
-  Car, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  FileText, 
-  CheckCircle, 
-  XCircle, 
+import {
+  X,
+  User,
+  Car,
+  Phone,
+  Mail,
+  Calendar,
+  Clock,
+  MapPin,
+  FileText,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   Settings,
   ArrowRight,
@@ -22,6 +22,7 @@ import {
   Save,
   CalendarX
 } from 'lucide-react';
+import { WhatsAppReminderButton } from '../WhatsAppButton';
 
 interface Appointment {
   id: number;
@@ -420,6 +421,25 @@ const AppointmentDetails = ({
             {/* Action Buttons - Hide when editing */}
             {!isEditing && (
             <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
+              {/* WhatsApp Reminder Button */}
+              {appointment.client.phone && (
+                <WhatsAppReminderButton
+                  clientName={appointment.client.name}
+                  clientPhone={appointment.client.phone}
+                  vehicleBrand={appointment.vehicle.brand}
+                  vehicleModel={appointment.vehicle.model}
+                  vehiclePlate={appointment.vehicle.plate}
+                  appointmentDate={new Date(appointment.scheduledDate)}
+                  appointmentTime={new Date(appointment.scheduledDate).toLocaleTimeString('es-MX', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                  size="md"
+                  variant="outline"
+                />
+              )}
+
               {canCancel && (
                 <button
                   onClick={() => handleStatusAction('cancel')}

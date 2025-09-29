@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { api } from '../services/api';
 // import { createClientSchema } from '../../../shared/schemas';
 import { useCurrentBranchId } from '../contexts/BranchContext';
+import { WhatsAppQuotationButton, WhatsAppVehicleReadyButton } from '../components/WhatsAppButton';
 import PermissionGate from '../components/PermissionGate';
 import toast from 'react-hot-toast';
 import {
@@ -1851,6 +1852,39 @@ export default function ServicesPage() {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                {/* WhatsApp Buttons */}
+                {selectedService.client?.phone && (
+                  <>
+                    {/* Cotización Button - Show if service has quotation but not completed */}
+                    {selectedService.quotationDetails && selectedService.status?.name !== 'Terminado' && (
+                      <WhatsAppQuotationButton
+                        clientName={selectedService.client.name}
+                        clientPhone={selectedService.client.phone}
+                        vehicleBrand={selectedService.vehicle?.brand}
+                        vehicleModel={selectedService.vehicle?.model}
+                        amount={selectedService.totalAmount}
+                        diagnosticResult={selectedService.diagnosis}
+                        size="md"
+                        variant="outline"
+                      />
+                    )}
+
+                    {/* Vehicle Ready Button - Show if service is completed */}
+                    {selectedService.status?.name === 'Terminado' && (
+                      <WhatsAppVehicleReadyButton
+                        clientName={selectedService.client.name}
+                        clientPhone={selectedService.client.phone}
+                        vehicleBrand={selectedService.vehicle?.brand}
+                        vehicleModel={selectedService.vehicle?.model}
+                        vehiclePlate={selectedService.vehicle?.plate}
+                        amount={selectedService.totalAmount}
+                        size="md"
+                        variant="outline"
+                      />
+                    )}
+                  </>
+                )}
+
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);

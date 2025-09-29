@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { api } from '../services/api';
 import PermissionGate from '../components/PermissionGate';
+import { WhatsAppFollowUpButton } from '../components/WhatsAppButton';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -1139,7 +1140,20 @@ export default function OpportunitiesPage() {
 
               {/* Actions */}
               {selectedOpportunity.status !== 'converted' && selectedOpportunity.status !== 'declined' && (
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center gap-3 pt-4">
+                  {/* WhatsApp Follow-up Button */}
+                  {selectedOpportunity.client?.phone && (
+                    <WhatsAppFollowUpButton
+                      clientName={selectedOpportunity.client.name}
+                      clientPhone={selectedOpportunity.client.phone}
+                      vehicleBrand={selectedOpportunity.vehicle?.brand}
+                      vehicleModel={selectedOpportunity.vehicle?.model}
+                      followUpService={selectedOpportunity.description}
+                      size="md"
+                      variant="outline"
+                    />
+                  )}
+
                   <button
                     onClick={() => {
                       setIsDetailModalOpen(false);
