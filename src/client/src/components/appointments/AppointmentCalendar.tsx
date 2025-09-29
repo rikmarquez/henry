@@ -43,23 +43,33 @@ const AppointmentCalendar = ({
     }
   }, [selectedDate]);
 
-  // Get appointments grouped by date
+  // Get appointments grouped by date - using consistent date format
   const appointmentsByDate = useMemo(() => {
     const grouped: { [key: string]: Appointment[] } = {};
-    
+
     appointments.forEach(appointment => {
-      const date = new Date(appointment.scheduledDate).toDateString();
-      if (!grouped[date]) {
-        grouped[date] = [];
+      // Use consistent date key format
+      const appointmentDate = new Date(appointment.scheduledDate);
+      const year = appointmentDate.getFullYear();
+      const month = (appointmentDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = appointmentDate.getDate().toString().padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
       }
-      grouped[date].push(appointment);
+      grouped[dateKey].push(appointment);
     });
-    
+
     return grouped;
   }, [appointments]);
 
   // Get appointments for selected date
-  const selectedDateAppointments = appointmentsByDate[selectedDate.toDateString()] || [];
+  const year = selectedDate.getFullYear();
+  const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+  const day = selectedDate.getDate().toString().padStart(2, '0');
+  const selectedDateKey = `${year}-${month}-${day}`;
+  const selectedDateAppointments = appointmentsByDate[selectedDateKey] || [];
 
   // Calendar helpers
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
@@ -183,7 +193,13 @@ const AppointmentCalendar = ({
           {/* Calendar Days */}
           <div className="grid grid-cols-7 gap-px bg-gray-200">
             {calendarDays.map((calendarDay, index) => {
-              const dayAppointments = appointmentsByDate[calendarDay.date.toDateString()] || [];
+              // Use consistent date key format
+              const dayDate = calendarDay.date;
+              const year = dayDate.getFullYear();
+              const month = (dayDate.getMonth() + 1).toString().padStart(2, '0');
+              const day = dayDate.getDate().toString().padStart(2, '0');
+              const dayKey = `${year}-${month}-${day}`;
+              const dayAppointments = appointmentsByDate[dayKey] || [];
               const hasAppointments = dayAppointments.length > 0;
               
               return (

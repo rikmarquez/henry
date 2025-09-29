@@ -63,25 +63,31 @@ const WeeklyCalendar = ({
     return day;
   });
 
-  // Group appointments by date
+  // Group appointments by date - using more robust date handling
   const appointmentsByDate = useMemo(() => {
     const grouped: { [key: string]: Appointment[] } = {};
-    
+
     appointments.forEach(appointment => {
-      const date = new Date(appointment.scheduledDate).toDateString();
-      if (!grouped[date]) {
-        grouped[date] = [];
+      // Use a more consistent date key format
+      const appointmentDate = new Date(appointment.scheduledDate);
+      const year = appointmentDate.getFullYear();
+      const month = (appointmentDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = appointmentDate.getDate().toString().padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
       }
-      grouped[date].push(appointment);
+      grouped[dateKey].push(appointment);
     });
-    
+
     // Sort appointments by time within each day
     Object.keys(grouped).forEach(date => {
-      grouped[date].sort((a, b) => 
+      grouped[date].sort((a, b) =>
         new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
       );
     });
-    
+
     return grouped;
   }, [appointments]);
 
@@ -214,7 +220,12 @@ const WeeklyCalendar = ({
       {/* Weekly Grid - Simplified */}
       <div className="grid grid-cols-7 gap-4 p-6">
         {weekDays.map((day, index) => {
-          const dayAppointments = appointmentsByDate[day.toDateString()] || [];
+          // Use same date key format as in appointmentsByDate
+          const year = day.getFullYear();
+          const month = (day.getMonth() + 1).toString().padStart(2, '0');
+          const dayNum = day.getDate().toString().padStart(2, '0');
+          const dayKey = `${year}-${month}-${dayNum}`;
+          const dayAppointments = appointmentsByDate[dayKey] || [];
           
           return (
             <div
