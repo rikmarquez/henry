@@ -92,6 +92,19 @@ const AppointmentsPage = () => {
     setViewMode(isMobile ? 'list' : 'week');
   }, [isMobile]);
 
+  // Clear manual date filters when changing view mode or date (to allow automatic filters)
+  useEffect(() => {
+    // Only clear manual filters if they were set and we're not in list view
+    if (viewMode !== 'list' && (filters.dateFrom || filters.dateTo)) {
+      setFilters(prev => ({
+        ...prev,
+        dateFrom: undefined,
+        dateTo: undefined,
+        page: 1
+      }));
+    }
+  }, [viewMode, selectedDate]);
+
   // Manejar parámetros de URL para preselección de cliente
   useEffect(() => {
     const mode = searchParams.get('mode');
@@ -127,17 +140,64 @@ const AppointmentsPage = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  // Generate automatic date filters based on view mode and selected date
+  const getViewDateFilters = () => {
+    const currentFilters = { ...filters };
+
+    // Don't override manual date filters
+    if (filters.dateFrom || filters.dateTo) {
+      return currentFilters;
+    }
+
+    // Apply automatic filters based on view mode
+    if (viewMode === 'day') {
+      // For daily view: filter by selected day
+      const dayStart = new Date(selectedDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(selectedDate);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      currentFilters.dateFrom = dayStart.toISOString().split('T')[0];
+      currentFilters.dateTo = dayEnd.toISOString().split('T')[0];
+    } else if (viewMode === 'week') {
+      // For weekly view: filter by selected week
+      const weekStart = new Date(selectedDate);
+      const day = weekStart.getDay();
+      const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+      weekStart.setDate(diff);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      currentFilters.dateFrom = weekStart.toISOString().split('T')[0];
+      currentFilters.dateTo = weekEnd.toISOString().split('T')[0];
+    } else if (viewMode === 'month') {
+      // For monthly view: filter by selected month
+      const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+      monthEnd.setHours(23, 59, 59, 999);
+
+      currentFilters.dateFrom = monthStart.toISOString().split('T')[0];
+      currentFilters.dateTo = monthEnd.toISOString().split('T')[0];
+    }
+
+    return currentFilters;
+  };
+
   // Fetch appointments
   const { data: appointmentsData, isLoading, error } = useQuery({
-    queryKey: ['appointments', filters],
+    queryKey: ['appointments', filters, viewMode, selectedDate.toDateString()],
     queryFn: async () => {
+      const finalFilters = getViewDateFilters();
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
+      Object.entries(finalFilters).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {
           params.append(key, value.toString());
         }
       });
-      
+
       const response = await api.get(`/appointments?${params.toString()}`);
       return response.data;
     }
