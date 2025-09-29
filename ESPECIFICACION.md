@@ -41,7 +41,7 @@
 - **Sistema de permisos granular:** Implementado con PermissionGate
 - **Multi-sucursal:** Segregación automática por branchId en JWT
 
-### 3.2 Módulo de Citas ✅ IMPLEMENTADO
+### 3.2 Módulo de Citas ✅ IMPLEMENTADO + OPTIMIZACIÓN MÓVIL COMPLETA
 **Funcionalidades implementadas:**
 - ✅ Citas nuevas (telefónicas) con información básica
 - ✅ Citas desde oportunidades con datos pre-cargados
@@ -49,6 +49,27 @@
 - ✅ Creación de vehículos inline desde modal de citas
 - ✅ Vista mensual muestra vehículo (marca+modelo) en lugar de cliente
 - ✅ Integración completa con workflow de servicios
+- ✅ **NUEVO: Interfaz móvil adaptativa completa**
+
+**Optimización Móvil (2025-09-28):**
+- ✅ **Auto-detección dispositivo**: Hook `useIsMobile()` detecta automáticamente móviles (< 768px)
+- ✅ **Vista por defecto adaptativa**: Lista en móvil vs Semana en desktop
+- ✅ **Componentes móviles específicos**:
+  - `MobileAppointmentCard.tsx`: Cards expandibles con información jerárquizada
+  - `MobileNavigation.tsx`: Navegación simplificada (Lista/Hoy/Mes)
+  - `MobileAppointmentsList.tsx`: Lista optimizada con pull-to-refresh
+- ✅ **Funcionalidades táctiles**:
+  - Pull-to-refresh nativo para actualizar datos
+  - Cards expandibles con tap (información esencial + detalles)
+  - Enlaces directos para llamadas telefónicas (tel:)
+  - Botones grandes optimizados para dedos
+- ✅ **Acciones rápidas móviles**:
+  - Confirmar/Cancelar/Recibir Auto directamente desde cards
+  - WhatsApp integrado con recordatorios en cada card
+  - Paginación táctil con botones grandes
+- ✅ **Experiencia unificada**: Misma funcionalidad adaptada por dispositivo
+- ✅ **Performance optimizada**: Componentes ligeros específicos para móvil
+- ✅ **Integración WhatsApp móvil**: Acceso rápido a recordatorios desde cards
 
 ### 3.3 Módulo de Clientes ✅ IMPLEMENTADO
 **Funcionalidades implementadas:**
@@ -224,9 +245,18 @@ henry/ ✅ ESTRUCTURA ACTUAL
 │   ├── client/                 # ✅ Frontend React completo
 │   │   ├── public/
 │   │   ├── src/
-│   │   │   ├── components/     # ✅ Componentes UI (shadcn/ui)
+│   │   │   ├── components/     # ✅ Componentes UI (shadcn/ui + móviles)
+│   │   │   │   ├── appointments/
+│   │   │   │   │   ├── AppointmentCalendar.tsx
+│   │   │   │   │   ├── WeeklyCalendar.tsx
+│   │   │   │   │   ├── DailyCalendar.tsx
+│   │   │   │   │   ├── CreateAppointmentModal.tsx
+│   │   │   │   │   ├── AppointmentDetails.tsx
+│   │   │   │   │   ├── MobileAppointmentCard.tsx      # ✅ NUEVO: Cards móviles
+│   │   │   │   │   ├── MobileNavigation.tsx           # ✅ NUEVO: Navegación móvil
+│   │   │   │   │   └── MobileAppointmentsList.tsx     # ✅ NUEVO: Lista móvil
 │   │   │   ├── pages/          # ✅ Todas las páginas implementadas
-│   │   │   ├── hooks/          # ✅ Custom hooks (usePermissions, etc.)
+│   │   │   ├── hooks/          # ✅ Custom hooks (usePermissions, useIsMobile, etc.)
 │   │   │   ├── context/        # ✅ Context API (BranchContext)
 │   │   │   ├── utils/          # ✅ Utilidades y helpers
 │   │   │   ├── types/          # ✅ Tipos TypeScript
