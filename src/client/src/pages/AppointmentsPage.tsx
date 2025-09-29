@@ -143,22 +143,16 @@ const AppointmentsPage = () => {
       return currentFilters;
     }
 
-    // For calendar views, apply generous date ranges to ensure we don't miss appointments
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
+    // For calendar views, use simple fixed date range to avoid overflow issues
+    // Use current actual date to ensure we're always in the right year
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
 
-    // Set generous date range: 2 months before to 4 months after current date
-    const rangeStart = new Date(currentYear, currentMonth - 2, 1);
-
-    // Handle year overflow when adding months
-    let endYear = currentYear;
-    let endMonth = currentMonth + 4;
-    if (endMonth > 11) {
-      endYear += Math.floor(endMonth / 12);
-      endMonth = endMonth % 12;
-    }
-    const rangeEnd = new Date(endYear, endMonth + 1, 0); // Last day of target month
+    // Fixed range: start of current year to end of next year
+    // This ensures we capture all relevant appointments without date calculation errors
+    const rangeStart = new Date(currentYear, 0, 1); // January 1st of current year
+    const rangeEnd = new Date(currentYear + 1, 11, 31); // December 31st of next year
 
     currentFilters.dateFrom = rangeStart.toISOString().split('T')[0];
     currentFilters.dateTo = rangeEnd.toISOString().split('T')[0];
