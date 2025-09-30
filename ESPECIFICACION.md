@@ -1091,6 +1091,12 @@ model StatusLog {
   - Información completa: datos cliente + vehículos + servicios recientes
   - Navegación directa a citas con preselección automática
   - Botón "Crear Cliente Nuevo" si no se encuentra
+  - ✅ **NUEVO (2025-09-30): Agregar vehículos inline**
+    - Botón "Agregar Otro" en sección de vehículos de cada cliente
+    - Modal inline con VehicleForm reutilizable
+    - Cliente preseleccionado automáticamente
+    - Actualización automática de resultados tras crear
+    - Flujo continuo: Buscar → Agregar vehículo → Crear cita (sin salir del dashboard)
 - ✅ **Resumen del día:** Citas, trabajos en proceso, servicios completados
 - ✅ **KPIs con Chart.js:** Ingresos, servicios por estado, productividad mecánicos
 - ✅ **Vista Kanban:** Servicios organizados por estado con drag & drop

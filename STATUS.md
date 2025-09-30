@@ -14,6 +14,35 @@
 - **Dashboard**: Error 403 solucionado, funcionando correctamente
 - **Deploy**: Cambios deployados automáticamente en Railway
 
+## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-09-30
+
+### ✅ COMPLETADO: Agregar Vehículos Inline desde Dashboard
+- **Feature**: Funcionalidad para agregar nuevos vehículos sin salir del dashboard durante búsqueda de clientes
+- **Problema resuelto**: Al buscar un cliente para crear cita, si el vehículo no estaba registrado, había que salir a otro módulo
+- **Implementación**:
+  - ✅ **Botón "Agregar Otro"** en sección de vehículos de cada cliente en resultados de búsqueda
+  - ✅ **Modal inline reutilizable** usando componente VehicleForm existente
+  - ✅ **Cliente preseleccionado** automáticamente al abrir el modal
+  - ✅ **Actualización automática** de resultados tras crear vehículo
+  - ✅ **Flujo continuo** sin interrupciones ni navegación a otros módulos
+- **Experiencia mejorada**:
+  - 🔍 **Búsqueda → Cliente encontrado → Vehículo no está → "Agregar Otro"**
+  - ➕ **Modal se abre con cliente ya seleccionado**
+  - 📝 **Usuario llena datos del vehículo (placa, marca, modelo, año, etc.)**
+  - ✅ **Guardar → Lista se actualiza → "Crear Cita" con nuevo vehículo**
+- **Beneficios operativos**:
+  - ⚡ **Flujo ininterrumpido**: Todo desde el dashboard sin cambiar de página
+  - 🎯 **Menos clics**: De 5+ pasos a 3 pasos (buscar → agregar → crear cita)
+  - 💼 **Productividad**: Recepcionistas crean citas más rápido
+  - 🚫 **Prevención de errores**: Mantiene contexto del cliente durante todo el flujo
+- **Integración técnica**:
+  - ✅ Componente VehicleForm reutilizado (no duplicación de código)
+  - ✅ QueryClient invalidation para refresh automático
+  - ✅ Estado local para control de modal
+  - ✅ Props de preselección de cliente funcionando correctamente
+- **Archivo modificado**: `src/client/src/pages/DashboardPage.tsx`
+- **Commit**: Agregar funcionalidad crear vehículos inline desde dashboard
+
 ## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-09-28
 
 ### ✅ COMPLETADO: Optimización Móvil Completa del Módulo de Citas
@@ -52,6 +81,86 @@
   - 💼 **Productividad**: Personal puede gestionar citas desde smartphones/tablets
 - **Arquitectura progresiva**: Mantiene 100% compatibilidad con desktop existente
 - **Deployment**: Listo para producción con detección automática de dispositivo
+
+## 🎯 FUNCIONALIDADES SESIÓN 2025-09-29
+
+### ✅ COMPLETADO: Vista Semanal - Citas de Octubre Issue RESUELTO
+
+#### 🎯 ISSUE RESUELTO
+- **Problema**: Vista semanal mostraba citas de septiembre (29-30) pero no de octubre (1-5)
+- **Status Final**: ✅ **FUNCIONANDO PERFECTAMENTE** - Usuario confirmó: "ya funciono perfecto"
+- **Tiempo de resolución**: ~3 horas de debugging sistemático
+
+#### 🔍 ROOT CAUSE ANALYSIS COMPLETO
+**1. Error 400 Backend - RESUELTO ✅**
+- **Causa identificada**: Filtros automáticos de fecha enviaban formato incorrecto al backend
+- **Evolución del problema**:
+  - Primer intento: `dateFrom=2025-01-01&dateTo=2026-12-31` (años incorrectos, asumí 2024)
+  - User feedback crítico: **"Estamos en el 2025"** - corrección de contexto temporal
+  - Problema formato: Zod backend esperaba ISO datetime, frontend enviaba fecha simple
+  - **Solución final exitosa**: Eliminación completa de filtros automáticos de fecha
+- **Fix aplicado**: Vista semanal ahora usa mismo enfoque que vista lista (sin filtros automáticos)
+
+**2. Límite de Paginación - RESUELTO ✅**
+- **Problema identificado**: Vista lista mostraba 2 páginas (40+ citas), vista semanal solo página 1 (20 citas)
+- **User feedback**: "cada día podemos hacer hasta 15 citas" → Sugerencia límite 200+
+- **Cálculo implementado**: 15 citas/día × 30 días = 450 citas/mes
+- **Solución aplicada**: `limit: 500` para vistas calendario vs `limit: 20` para vista lista
+
+**3. Formato de Fechas Local - IMPLEMENTADO ✅**
+- **Problema detectado**: `toDateString()` causaba inconsistencias por timezone/locale
+- **Solución implementada**: Formato `YYYY-MM-DD` consistente en agrupación `appointmentsByDate`
+- **Archivos corregidos**: `WeeklyCalendar.tsx`, `AppointmentCalendar.tsx`, `DailyCalendar.tsx`
+
+#### 🧪 DEBUGGING PROCESS APLICADO
+**Estrategia sistemática exitosa**:
+1. ✅ Logs temporales agregados a `WeeklyCalendar.tsx` para rastrear flujo de datos
+2. ✅ Console.log de cantidad de citas recibidas del backend
+3. ✅ Console.log detallado de cada cita con fecha original y formateo aplicado
+4. ✅ Console.log de agrupación final por fecha clave
+5. ✅ Verificación que backend envía limit 500 para vistas calendario
+6. ✅ Confirmación user: datos de octubre aparecían en logs pero no en UI
+
+#### 🔄 COMMITS APLICADOS (Sesión completa)
+- `47ac10d`: Filtros automáticos iniciales (causó Error 400)
+- `58faaf5`: Enfoque conservador con filtros de fecha
+- `7f5912d`: Sincronización selectedDate en todos los componentes
+- `02714be`: Eliminación filtrado local redundante
+- `2770b4f`: Formato fecha consistente YYYY-MM-DD
+- `323bf7c`: Corrección overflow de años en filtros
+- `c9f97cf`: Fechas absolutas 2024 (incorrecto por contexto temporal)
+- `0c16627`: Formato ISO datetime (innecesario complejidad)
+- `0894522`: **ENFOQUE GANADOR** - Eliminación total de filtros automáticos
+- `a8ef0d0`: Debugging temporal + aumento limit a 500
+- `5829dc5`: Confirmación limit 500 funcionando
+
+#### 🏆 PROGRESO FINAL ALCANZADO
+- ✅ **Error 400 eliminado**: Vista semanal no falla más con Bad Request
+- ✅ **Todas las citas visibles**: Septiembre (29-30) + Octubre (1-5) aparecen
+- ✅ **Backend optimizado**: Limit 500 para vistas calendario, 20 para lista
+- ✅ **UX consistente**: Misma lógica de filtrado entre vistas lista y semanal
+- ✅ **User confirmation**: "ya funciono perfecto" - issue completamente resuelto
+
+#### 🔬 APRENDIZAJES TÉCNICOS CLAVE
+1. **Debugging sistemático**: Error 400 → Formato fechas → Paginación → Filtrado local
+2. **Vista lista como referencia**: Replicar lo que funciona vs crear nueva lógica
+3. **Evitar over-engineering**: Filtros automáticos "inteligentes" causaron más problemas
+4. **User feedback crucial**: Contexto temporal (2025 vs 2024) era crítico
+5. **Límites realistas**: Considerar volumen operativo real (15 citas/día)
+6. **Console debugging**: Logs temporales fueron esenciales para identificar issue exacto
+7. **Frontend-only approach**: Eliminar filtros automáticos simplificó arquitectura
+
+#### 📊 MÉTRICAS DE LA SESIÓN
+- **Tiempo total debugging**: ~3 horas
+- **Commits realizados**: 11 iteraciones hasta solución
+- **Archivos modificados**: 3 componentes de calendario
+- **User interactions**: 8 mensajes de feedback crucial
+- **Status final**: ✅ COMPLETADO con confirmación de user
+
+#### 🧹 CLEANUP PENDIENTE
+- ⏳ **Remover logs temporales**: Limpiar console.log de debugging en `WeeklyCalendar.tsx`
+- ✅ **Mantener limit 500**: Confirmed working para vistas calendario
+- ✅ **Arquitectura final**: Sin filtros automáticos, consistente con vista lista
 
 ## 🎯 FUNCIONALIDADES SESIÓN 2025-09-29
 

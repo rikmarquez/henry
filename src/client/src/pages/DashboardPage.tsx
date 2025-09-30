@@ -1,9 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
 import { api } from '../services/api';
 import { Loader2, Users, Car, Calendar, Wrench, TrendingUp, AlertCircle, Target, Clock, ArrowRight, Search, Plus, UserPlus, Phone, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import VehicleForm from '../components/VehicleForm';
 
 interface DashboardData {
   overview: {
@@ -77,9 +78,12 @@ interface Client {
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  const [selectedClientForVehicle, setSelectedClientForVehicle] = useState<number | undefined>(undefined);
 
   // Cerrar resultados al hacer clic fuera
   useEffect(() => {
@@ -176,6 +180,21 @@ export default function DashboardPage() {
   const handleClearSearch = () => {
     setSearchTerm('');
     setShowResults(false);
+  };
+
+  const handleOpenVehicleModal = (clientId: number) => {
+    setSelectedClientForVehicle(clientId);
+    setIsVehicleModalOpen(true);
+  };
+
+  const handleCloseVehicleModal = () => {
+    setIsVehicleModalOpen(false);
+    setSelectedClientForVehicle(undefined);
+  };
+
+  const handleVehicleCreated = () => {
+    // Invalidar la query de búsqueda para refrescar los resultados
+    queryClient.invalidateQueries({ queryKey: ['clients-search', searchTerm] });
   };
 
   if (isLoading) {
@@ -320,10 +339,20 @@ export default function DashboardPage() {
                           {/* Vehículos */}
                           {client.vehicles && client.vehicles.length > 0 && (
                             <div className="bg-gray-50 rounded-lg p-4">
-                              <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                <Car className="h-4 w-4" />
-                                Vehículos registrados ({client.vehicles.length})
-                              </h5>
+                              <div className="flex items-center justify-between mb-3">
+                                <h5 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                  <Car className="h-4 w-4" />
+                                  Vehículos registrados ({client.vehicles.length})
+                                </h5>
+                                <button
+                                  onClick={() => handleOpenVehicleModal(client.id)}
+                                  className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded transition-colors"
+                                  title="Agregar otro vehículo para este cliente"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                  Agregar Otro
+                                </button>
+                              </div>
                               <div className="grid grid-cols-1 gap-2">
                                 {client.vehicles.map((vehicle) => (
                                   <div key={vehicle.id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
@@ -666,6 +695,14 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal para agregar vehículo */}
+      <VehicleForm
+        isOpen={isVehicleModalOpen}
+        onClose={handleCloseVehicleModal}
+        preselectedClientId={selectedClientForVehicle}
+        onSuccess={handleVehicleCreated}
+      />
     </div>
   );
 }
