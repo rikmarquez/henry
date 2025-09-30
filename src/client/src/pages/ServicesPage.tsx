@@ -196,6 +196,7 @@ const statusColors: Record<string, string> = {
 
 // Period options for historical filtering
 const periodOptions = [
+  { value: 'active', label: 'Trabajo Activo', isHistorical: false },
   { value: 'today', label: 'Hoy', isHistorical: false },
   { value: 'week', label: 'Esta semana', isHistorical: false },
   { value: 'month', label: 'Este mes', isHistorical: false },
@@ -226,7 +227,7 @@ export default function ServicesPage() {
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   
   // Historical period filters
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('today');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('active');
   const [customDateFrom, setCustomDateFrom] = useState<string>('');
   const [customDateTo, setCustomDateTo] = useState<string>('');
   
@@ -415,6 +416,9 @@ export default function ServicesPage() {
     };
     
     switch (selectedPeriod) {
+      case 'active':
+        // NO enviar filtros de fecha - el backend mostrará servicios activos + terminados de hoy
+        return {};
       case 'today':
         return {
           dateFrom: toStartOfDay(today),

@@ -36,7 +36,7 @@ async function autoCompleteAppointmentIfAllServicesTerminated(serviceId: number,
       select: { statusId: true }
     });
 
-    const allServicesTerminated = appointmentServices.every(s => s.statusId === 5 || s.statusId === 6); // TERMINADO or PERDIDO
+    const allServicesTerminated = appointmentServices.every(s => s.statusId === 4 || s.statusId === 5); // TERMINADO or RECHAZADO
 
     if (allServicesTerminated) {
       // Auto-complete the appointment
@@ -159,16 +159,16 @@ router.get(
         const today = new Date();
         const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0);
         const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-        
+
         const originalOR = where.OR || [];
         where.OR = [
           ...originalOR,
-          // Show all non-completed services
-          { statusId: { notIn: [5, 6] } }, // Not TERMINADO or PERDIDO
+          // Show all non-completed services (not Terminado or Rechazado)
+          { statusId: { notIn: [4, 5] } }, // Not TERMINADO (4) or RECHAZADO (5)
           // Show only today's TERMINADO services
           {
             AND: [
-              { statusId: 5 }, // TERMINADO
+              { statusId: 4 }, // TERMINADO
               {
                 OR: [
                   { completedAt: { gte: startOfToday, lte: endOfToday } },
@@ -177,10 +177,10 @@ router.get(
               },
             ],
           },
-          // Show only today's PERDIDO services  
+          // Show only today's RECHAZADO services
           {
             AND: [
-              { statusId: 6 }, // PERDIDO
+              { statusId: 5 }, // RECHAZADO
               {
                 OR: [
                   { completedAt: { gte: startOfToday, lte: endOfToday } },
