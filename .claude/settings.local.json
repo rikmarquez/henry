@@ -56,7 +56,8 @@
       "Bash(netstat:*)",
       "Bash(npm run dev:client:*)",
       "Bash(findstr:*)",
-      "Bash(start http://localhost:5173/appointments)"
+      "Bash(start http://localhost:5173/appointments)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []

@@ -14,6 +14,33 @@
 - **Dashboard**: Error 403 solucionado, funcionando correctamente
 - **Deploy**: Cambios deployados automáticamente en Railway
 
+## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-10-01
+
+### ✅ COMPLETADO: Botón de Impresión Diaria en Vista Semanal
+- **Feature**: Botón adicional en vista semanal para imprimir agenda del día actual sin cambiar de vista
+- **Problema resuelto**: Usuarios tenían que cambiar de vista semanal a vista diaria para imprimir el reporte del día
+- **Implementación**:
+  - ✅ **Botón "Hoy"** agregado a la izquierda del botón de impresión semanal
+  - ✅ **Color distintivo azul** para diferenciarlo del botón de impresión semanal (gris)
+  - ✅ **Función `handlePrintToday()`** que filtra y imprime solo citas del día actual
+  - ✅ **Siempre imprime hoy** independientemente de qué semana se esté visualizando
+  - ✅ **Reutiliza componente existente** `PrintableDailyAgenda` sin duplicación de código
+- **Experiencia mejorada**:
+  - 🖨️ **Reporte diario rápido**: Imprimir agenda del día sin cambiar de vista
+  - 🎯 **Workflow optimizado**: Útil para imprimir al inicio del día mientras se revisa la semana
+  - 🔵 **UI clara**: Tres botones con propósitos distintos (Hoy/Semana/Excel)
+- **Beneficios operativos**:
+  - ⚡ **Ahorro de tiempo**: Un clic para imprimir el día actual desde cualquier vista semanal
+  - 📅 **Contexto preservado**: No pierde la vista semanal al imprimir el día
+  - 💼 **Flujo diario**: Facilita rutina de imprimir agenda al inicio de cada jornada
+- **Integración técnica**:
+  - ✅ Hook `usePrintAgenda` con función `printDailyAgenda` existente
+  - ✅ Filtrado automático de citas por fecha actual
+  - ✅ Notificaciones toast de éxito/error
+  - ✅ Orden de botones: Hoy (azul) → Semana (gris) → Excel (verde)
+- **Archivo modificado**: `src/client/src/components/appointments/WeeklyCalendar.tsx`
+- **Commit**: feat: agregar botón impresión diaria en vista semanal de citas
+
 ## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-09-30
 
 ### ✅ COMPLETADO: Agregar Vehículos Inline desde Dashboard

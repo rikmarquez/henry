@@ -45,7 +45,7 @@ const WeeklyCalendar = ({
   useEffect(() => {
     setCurrentWeek(selectedDate);
   }, [selectedDate]);
-  const { printWeeklyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
+  const { printDailyAgenda, printWeeklyAgenda } = usePrintAgenda({ branchName: 'Henry Diagnostics' });
   const { exportWeeklyAgenda } = useExcelExport({ branchName: 'Henry Diagnostics' });
 
   // Get start of week (Monday)
@@ -175,6 +175,23 @@ const WeeklyCalendar = ({
     }
   };
 
+  const handlePrintToday = async () => {
+    try {
+      const today = new Date();
+      // Filter appointments for today only
+      const todayAppointments = appointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.scheduledDate);
+        return appointmentDate.toDateString() === today.toDateString();
+      });
+
+      await printDailyAgenda(todayAppointments, today);
+      toast.success('Iniciando impresión de la agenda del día de hoy...');
+    } catch (error) {
+      console.error('Error al imprimir:', error);
+      toast.error('Error al imprimir la agenda del día. Por favor, inténtelo de nuevo.');
+    }
+  };
+
   // No need for time slots - just show appointments per day
 
   return (
@@ -190,12 +207,20 @@ const WeeklyCalendar = ({
           </div>
           <div className="flex items-center space-x-2">
             <button
+              onClick={handlePrintToday}
+              className="flex items-center px-3 py-2 text-sm text-blue-700 hover:text-blue-900 border border-blue-300 rounded-md hover:bg-blue-50 transition-colors"
+              title="Imprimir agenda del día de hoy"
+            >
+              <Printer className="h-4 w-4 mr-1" />
+              Hoy
+            </button>
+            <button
               onClick={handlePrint}
               className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               title="Imprimir agenda semanal"
             >
               <Printer className="h-4 w-4 mr-1" />
-              Imprimir
+              Semana
             </button>
             <button
               onClick={handleExcelExport}
