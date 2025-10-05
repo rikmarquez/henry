@@ -51,9 +51,44 @@ Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web co
 - Seguir la especificación detallada en ESPECIFICACION.md como referencia técnica
 - Mantener la estructura monolítica para simplicidad en Railway
 - Priorizar funcionalidades basadas en el estado actual documentado
-- **⚠️ CRÍTICO RAILWAY:** Siempre compilar TypeScript antes del deploy (`npm run build`)
-  - Ver DEPLOYMENT.md para guía completa de deployment
-  - Railway NO compila TypeScript automáticamente
+
+## ⚠️ REGLAS CRÍTICAS RAILWAY DEPLOYMENT
+
+### 🚨 Arquitectura Shared - Imports en Frontend
+- **REGLA DE ORO**: Frontend NO puede importar runtime values de `shared/` durante build
+- **✅ PERMITIDO**: `import type { TypeName } from '../../../shared/schemas/...'`
+- **❌ PROHIBIDO**: `import { schemaName } from '../../../shared/schemas/...'`
+- **Razón**: Vite no puede resolver imports de módulos TypeScript compilados
+- **Solución**: Duplicar schemas de validación Zod en componentes de formulario
+- **Patrón del proyecto**: Ver `ClientForm.tsx`, `VehicleForm.tsx` - schemas locales
+
+### 🎨 CSS Rules
+- **@import SIEMPRE primero**: Antes de @tailwind, @layer, cualquier CSS
+- **Orden correcto** en `index.css`:
+  1. @import statements
+  2. @tailwind directives
+  3. @layer definitions
+  4. Resto de CSS
+
+### 📦 Dependencias y Convenciones
+- **Verificar package.json** antes de agregar imports
+- **Usar Grep** para encontrar patrones del proyecto
+- **Toast library**: `react-hot-toast` (NO sonner)
+- **API imports**: `../services/api` (NO ../lib/api)
+- **Form validation**: Schemas Zod locales en componentes
+
+### 🔍 Debugging Railway Sistemático
+1. Leer log completo de error
+2. Identificar archivo y línea exacta
+3. Grep proyecto para encontrar patrón correcto
+4. Aplicar fix incremental
+5. Commit → Push → Verificar próximo error
+6. **Un error a la vez** - no múltiples cambios simultáneos
+
+### 📚 Aprendizajes Documentados
+- **STATUS.md** contiene sección completa "DEPLOYMENT ERRORS RESUELTOS"
+- **Leer antes de deployment** para evitar errores conocidos
+- **Actualizar STATUS.md** con nuevos aprendizajes de deployment
 
 ---
 *Archivo creado: 2025-08-20*

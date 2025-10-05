@@ -97,41 +97,45 @@
 - `react-signature-canvas` - Componente de firma digital
 - `@types/react-signature-canvas` - Tipos TypeScript
 
-#### 🔄 FRONTEND PENDIENTE
+#### ✅ FRONTEND COMPLETADO (100%)
 
-**Próximos pasos de implementación**:
+**Componentes Implementados**:
 
-1. **Componente SignatureCanvas** (30 min)
+1. **Componente SignatureCanvas** ✅
    - Wrapper de react-signature-canvas
-   - Botones: Limpiar, Firmar
+   - Botones: Limpiar (con estado disabled)
    - Validación de firma no vacía
-   - Export a base64
+   - Export a base64 (PNG)
+   - Indicador visual "Firmado" cuando se completa
 
-2. **Página ReceptionPage** (1 hora)
-   - Vista principal optimizada para tablet (landscape)
+2. **Página ReceptionPage** ✅
+   - Vista principal optimizada para tablet
    - Búsqueda rápida por placa/marca/modelo/cliente
    - Listado de citas del día con cards grandes
-   - Navegación a formulario de recepción
+   - Auto-refresh cada 60 segundos
+   - Filtros en tiempo real sin pérdida de foco
 
-3. **Formulario VehicleReceptionForm** (1.5 horas)
-   - Información del cliente/vehículo (solo lectura)
-   - Input kilometraje (numérico)
-   - Selector visual nivel combustible (4 botones)
-   - Checklist inspección (4 checkboxes grandes)
-   - Textarea observaciones
-   - Canvas de firma digital
-   - Botón "Completar Recepción" (grande, táctil)
+3. **Formulario VehicleReceptionForm** ✅
+   - Información del cliente/vehículo (solo lectura) con estilos distintivos
+   - Input kilometraje (numérico con validación)
+   - Selector visual nivel combustible (4 botones grandes táctiles)
+   - Checklist inspección (4 checkboxes grandes con iconos)
+   - Textarea observaciones con placeholder descriptivo
+   - Canvas de firma digital (400x200px)
+   - Botón "Completar Recepción" (grande, verde, táctil)
+   - **IMPORTANTE**: Usa HTML nativo + Tailwind (NO ShadCN UI)
 
-4. **Integración de Rutas** (15 min)
-   - Agregar `/recepcion` a React Router
-   - Agregar al menú lateral con PermissionGate
-   - Icono: ClipboardCheck
+4. **Integración de Rutas** ✅
+   - `/recepcion` agregado a React Router
+   - Menú lateral con icono ClipboardCheck
+   - ProtectedRoute aplicado
+   - Disponible para rol RECEPCIONISTA_TALLER
 
-5. **Hook useReception** (30 min)
-   - Query: citas del día
+5. **Hook useReception** ✅
+   - Query: citas del día con auto-refresh
    - Mutation: recibir vehículo
-   - Invalidación de queries
-   - Toast notifications
+   - Invalidación de queries (reception, services, appointments)
+   - Toast notifications con react-hot-toast
 
 #### 🎯 Flujo Operativo Diseñado
 
@@ -196,22 +200,24 @@ Service (estado: Terminado)
 - ✅ `src/server/src/routes/reception.ts` - Nuevo archivo
 - ✅ `src/server/src/routes/index.ts` - Registro de rutas
 
-**Frontend** (pendientes):
-- ⏳ `src/client/src/components/reception/SignatureCanvas.tsx`
-- ⏳ `src/client/src/components/reception/VehicleReceptionForm.tsx`
-- ⏳ `src/client/src/pages/ReceptionPage.tsx`
-- ⏳ `src/client/src/hooks/useReception.ts`
-- ⏳ `src/client/src/App.tsx` - Agregar ruta
-- ⏳ `src/client/src/components/Layout.tsx` - Agregar menú
+**Frontend**:
+- ✅ `src/client/src/components/reception/SignatureCanvas.tsx` - CREADO
+- ✅ `src/client/src/components/reception/VehicleReceptionForm.tsx` - CREADO
+- ✅ `src/client/src/pages/ReceptionPage.tsx` - CREADO
+- ✅ `src/client/src/hooks/useReception.ts` - CREADO
+- ✅ `src/client/src/App.tsx` - Ruta agregada
+- ✅ `src/client/src/components/Layout.tsx` - Menú agregado
 
-#### ⏱️ Tiempo Estimado Restante
-- **Frontend completo**: ~3-4 horas
-- **Testing y ajustes**: ~1 hora
-- **Total restante**: 4-5 horas
+#### ⏱️ Tiempo de Desarrollo
+- **Backend completo**: ~2 horas
+- **Frontend completo**: ~2.5 horas
+- **Debugging deployment**: ~1.5 horas
+- **Total sesión**: ~6 horas
 
 #### 🚀 Estado Actual
 - **Backend**: ✅ 100% completado y compilado
 - **Frontend**: ✅ 100% completado
+- **Deployment**: 🔄 EN PROCESO (Railway building)
 - **Progreso general**: ✅ 100% MÓDULO FUNCIONAL
 
 #### ✅ FIX: Permitir Recibir Cualquier Cita No Cancelada
@@ -220,6 +226,109 @@ Service (estado: Terminado)
 - **Resultado**: Citas con estados 'scheduled', 'confirmed', 'received', etc. son elegibles
 - **Solo se excluyen**: Citas con status = 'cancelled'
 - **Commit**: fix: permitir recibir cualquier cita no cancelada
+
+#### 🚨 DEPLOYMENT ERRORS RESUELTOS - Railway Build Issues
+
+**Error 1: CSS @import Order** ✅
+- **Problema**: `@import must precede all other statements (besides @charset or empty @layer)`
+- **Root Cause**: `@import './styles/print.css'` estaba DESPUÉS de `@tailwind` directives
+- **Solución**: Mover `@import` al INICIO del archivo `index.css` antes de cualquier otro statement
+- **Lección**: CSS @import SIEMPRE debe ir primero (antes de @tailwind, @layer, etc.)
+- **Archivo**: `src/client/src/index.css`
+- **Commit**: `e59c2bb` - fix: corregir imports CSS y toast para Railway
+
+**Error 2: Library Import Mismatch** ✅
+- **Problema**: `Could not resolve import "sonner" from "src/hooks/useReception.ts"`
+- **Root Cause**: Hook usaba `sonner` pero proyecto tiene `react-hot-toast` instalado
+- **Debugging**: Verificar package.json y comparar con otros componentes
+- **Solución**: Cambiar `import { toast } from 'sonner'` → `import toast from 'react-hot-toast'`
+- **Lección**: Verificar dependencias instaladas ANTES de importar bibliotecas
+- **Archivo**: `src/client/src/hooks/useReception.ts`
+- **Commit**: `e59c2bb` - fix: corregir imports CSS y toast para Railway
+
+**Error 3: API Service Path** ✅
+- **Problema**: `Could not resolve "../lib/api" from "src/hooks/useReception.ts"`
+- **Root Cause**: Path incorrecto (usé `../lib/api` cuando debía ser `../services/api`)
+- **Debugging**: Grep de todos los imports de `api` en el proyecto para encontrar patrón correcto
+- **Patrón correcto**: Todos los hooks/componentes usan `'../services/api'`
+- **Solución**: Corregir import a la ruta real del proyecto
+- **Lección**: Seguir convenciones existentes del proyecto, usar Grep para encontrar patrones
+- **Archivo**: `src/client/src/hooks/useReception.ts`
+- **Commit**: `bab88b3` - fix: corregir ruta de import de api en useReception
+
+**Error 4: Shared Schema Import - CRÍTICO** ✅
+- **Problema**: `"vehicleReceptionSchema" is not exported by "../shared/schemas/service.schema.js"`
+- **Root Cause FUNDAMENTAL**: Frontend NO PUEDE importar schemas de Zod desde carpeta `shared` durante build
+  - Build de Vite intenta resolver imports de TypeScript
+  - `shared/schemas` se compila a JavaScript solo en backend
+  - Frontend no tiene acceso a archivos compilados .js de shared durante build
+- **Anti-patrón identificado**: `import { vehicleReceptionSchema } from '../../../../shared/schemas/service.schema'`
+- **Patrón correcto del proyecto**: Schemas Zod locales en cada componente de formulario
+- **Ejemplos encontrados**:
+  - `ClientForm.tsx`: Define `clientSchema` localmente (líneas 9-18)
+  - `VehicleForm.tsx`: Define schemas localmente
+  - `CreateAppointmentModal.tsx`: Define schemas localmente
+- **Solución aplicada**:
+  - Definir `vehicleReceptionSchema` localmente en `VehicleReceptionForm.tsx`
+  - Duplicar validaciones (es el patrón aceptado del proyecto)
+  - Solo importar TYPES desde shared: `import type { VehicleReceptionInput }`
+- **Lección CRÍTICA**:
+  - ✅ Frontend puede importar TYPES de shared: `import type { ... } from '../../../shared/...'`
+  - ❌ Frontend NO puede importar SCHEMAS/VALUES de shared durante build
+  - ✅ Schemas de validación deben duplicarse: backend (shared) + frontend (local)
+- **Archivo**: `src/client/src/components/reception/VehicleReceptionForm.tsx`
+- **Commit**: `cdf0e34` - fix: mover schema de recepción a validación local en frontend
+
+#### 🎓 APRENDIZAJES DEPLOYMENT RAILWAY (Sesión 2025-10-04)
+
+**1. Arquitectura Shared en Monorepo**
+- **Regla de Oro**: `shared/` es para TypeScript TYPES, no para runtime values
+- **Frontend build**: Solo puede importar tipos estáticos
+- **Backend build**: Compila shared/ a dist/ para runtime
+- **Patrón correcto**:
+  ```typescript
+  // ✅ CORRECTO - Solo tipos
+  import type { VehicleReceptionInput } from '../../../shared/schemas/service.schema';
+
+  // ❌ INCORRECTO - Runtime values
+  import { vehicleReceptionSchema } from '../../../shared/schemas/service.schema';
+  ```
+
+**2. Duplicación de Schemas es Necesaria**
+- **Backend**: `src/shared/schemas/service.schema.ts` - Schema completo de Zod
+- **Frontend**: Define schema local en componente - Validación UI
+- **Razón**: Vite no puede resolver imports de módulos compilados durante build
+- **Trade-off aceptado**: Mantenibilidad vs compilación exitosa
+
+**3. CSS Order Matters**
+- **@import SIEMPRE primero**: Antes de @tailwind, @layer, cualquier CSS
+- **Razón**: Especificación CSS requiere @import al inicio
+- **Error común**: Agregar imports después de otras declaraciones
+
+**4. Verificar Dependencias Instaladas**
+- **Método**: Revisar `package.json` ANTES de agregar imports
+- **Herramienta**: `Grep` para encontrar patrones de uso en proyecto existente
+- **Patrón proyecto**: Este proyecto usa `react-hot-toast`, no `sonner`
+
+**5. Seguir Convenciones del Proyecto**
+- **API imports**: Todos usan `../services/api` no `../lib/api`
+- **Form schemas**: Todos definen schemas localmente
+- **Toast library**: Proyecto estandarizado en `react-hot-toast`
+- **Método**: Buscar ejemplos existentes antes de crear nuevos patrones
+
+**6. Debugging Sistemático Railway**
+- **Paso 1**: Leer COMPLETO el log de error
+- **Paso 2**: Identificar archivo y línea exacta
+- **Paso 3**: Grep del proyecto para encontrar patrón correcto
+- **Paso 4**: Aplicar fix incremental
+- **Paso 5**: Commit + push + verificar próximo error
+- **Iteración**: Resolver un error a la vez
+
+**7. Railway Build Process**
+- **npm install** → **vite build** → **tsc compile**
+- Errores en cualquier paso detienen deployment
+- Frontend se compila ANTES que backend
+- Imports incorrectos fallan en fase de bundling (Vite/Rollup)
 
 ---
 
