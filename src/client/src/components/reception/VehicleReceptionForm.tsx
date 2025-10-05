@@ -239,7 +239,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
           </div>
           <div className="p-4 space-y-4">
             {/* Indicador de placa temporal */}
-            {appointment.vehicle.plate.startsWith('TEMP') && (
+            {appointment?.vehicle?.plate?.startsWith('TEMP') && (
               <div className="p-3 bg-orange-100 border-l-4 border-orange-500 rounded flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-orange-600" />
                 <p className="text-sm font-medium text-orange-800">
@@ -257,7 +257,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                 <input
                   type="text"
                   id="plate"
-                  defaultValue={appointment.vehicle.plate}
+                  defaultValue={appointment?.vehicle?.plate || ''}
                   {...register('vehicleUpdates.plate')}
                   className="h-12 text-lg font-bold uppercase w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="ABC-1234"
@@ -275,7 +275,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                 <input
                   type="text"
                   id="brand"
-                  defaultValue={appointment.vehicle.brand}
+                  defaultValue={appointment?.vehicle?.brand || ''}
                   {...register('vehicleUpdates.brand')}
                   className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="Toyota, Ford, etc."
@@ -290,7 +290,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                 <input
                   type="text"
                   id="model"
-                  defaultValue={appointment.vehicle.model}
+                  defaultValue={appointment?.vehicle?.model || ''}
                   {...register('vehicleUpdates.model')}
                   className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="Corolla, F-150, etc."
@@ -340,7 +340,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                   <User className="h-4 w-4" />
                   Cliente
                 </label>
-                <p className="text-lg font-medium text-gray-900 mt-1">{appointment.client.name}</p>
+                <p className="text-lg font-medium text-gray-900 mt-1">{appointment?.client?.name || ''}</p>
               </div>
 
               <div>
@@ -348,7 +348,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                   <Phone className="h-4 w-4" />
                   Teléfono
                 </label>
-                <p className="text-lg text-gray-900 mt-1">{appointment.client.phone}</p>
+                <p className="text-lg text-gray-900 mt-1">{appointment?.client?.phone || ''}</p>
               </div>
             </div>
           </div>
@@ -586,10 +586,10 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                     Vehículo Temporal (Se eliminará)
                   </h4>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Placa:</span> {appointment.vehicle.plate}</p>
-                    <p><span className="font-medium">Marca:</span> {appointment.vehicle.brand}</p>
-                    <p><span className="font-medium">Modelo:</span> {appointment.vehicle.model}</p>
-                    {appointment.vehicle.year && (
+                    <p><span className="font-medium">Placa:</span> {appointment?.vehicle?.plate || ''}</p>
+                    <p><span className="font-medium">Marca:</span> {appointment?.vehicle?.brand || ''}</p>
+                    <p><span className="font-medium">Modelo:</span> {appointment?.vehicle?.model || ''}</p>
+                    {appointment?.vehicle?.year && (
                       <p><span className="font-medium">Año:</span> {appointment.vehicle.year}</p>
                     )}
                   </div>
