@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useReception } from '../hooks/useReception';
 import { VehicleReceptionForm } from '../components/reception/VehicleReceptionForm';
+import { WalkInReceptionForm } from '../components/reception/WalkInReceptionForm';
 import {
   ClipboardCheck,
   Search,
@@ -11,6 +12,7 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
+  UserPlus,
 } from 'lucide-react';
 
 export const ReceptionPage: React.FC = () => {
@@ -18,6 +20,7 @@ export const ReceptionPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showReceptionForm, setShowReceptionForm] = useState(false);
+  const [showWalkInForm, setShowWalkInForm] = useState(false);
 
   // Filtrar citas por búsqueda
   const filteredAppointments = todayAppointments.filter((appointment) => {
@@ -47,7 +50,26 @@ export const ReceptionPage: React.FC = () => {
     setSelectedAppointment(null);
   };
 
-  // Si se está mostrando el formulario de recepción
+  const handleWalkInComplete = () => {
+    setShowWalkInForm(false);
+    refetchAppointments();
+  };
+
+  const handleCancelWalkIn = () => {
+    setShowWalkInForm(false);
+  };
+
+  // Si se está mostrando el formulario de walk-in
+  if (showWalkInForm) {
+    return (
+      <WalkInReceptionForm
+        onComplete={handleWalkInComplete}
+        onCancel={handleCancelWalkIn}
+      />
+    );
+  }
+
+  // Si se está mostrando el formulario de recepción con cita
   if (showReceptionForm && selectedAppointment) {
     return (
       <VehicleReceptionForm
@@ -81,13 +103,23 @@ export const ReceptionPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => refetchAppointments()}
-            className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-2 h-14"
-          >
-            <RefreshCw className="h-5 w-5" />
-            Actualizar
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowWalkInForm(true)}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center gap-2 h-14 font-semibold"
+            >
+              <UserPlus className="h-5 w-5" />
+              Recibir Auto SIN Cita
+            </button>
+
+            <button
+              onClick={() => refetchAppointments()}
+              className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-2 h-14"
+            >
+              <RefreshCw className="h-5 w-5" />
+              Actualizar
+            </button>
+          </div>
         </div>
 
         {/* Búsqueda */}

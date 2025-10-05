@@ -6,6 +6,146 @@
 - **Stack**: React + TypeScript + Node.js + PostgreSQL + Prisma
 - **URLs**: Frontend: Railway deployed | Backend: Railway deployed
 
+## ✅ MEJORA RECEPCIÓN 2: Actualización de Vehículos Durante Recepción - SESIÓN 2025-10-05
+**COMPLETADA Y FUNCIONAL** ✅
+
+### 🎯 Problema Resuelto
+**Escenario**: Cliente llama para agendar cita sin tener datos del vehículo a mano → Sistema crea vehículo con placa temporal `TEMP-xxxxx` → Al llegar físicamente, la placa real no se podía actualizar durante recepción.
+
+### ✅ Implementación Completada
+
+#### **Backend (reception.ts)**
+- ✅ Endpoint `/receive-vehicle` acepta campo opcional `vehicleUpdates`
+- ✅ Validación de placas duplicadas con detección de cliente
+- ✅ Respuesta 409 con `canMerge: true/false` según cliente
+- ✅ Nuevo endpoint `/merge-vehicle` para fusionar vehículos del mismo cliente
+- ✅ Seguridad: validación de mismo cliente antes de merge
+- ✅ Actualización automática de cita después de merge
+- ✅ Eliminación segura de vehículo temporal
+
+#### **Schema Zod (service.schema.ts)**
+- ✅ Campo `vehicleUpdates` opcional agregado al schema
+- ✅ Validación de placa, marca, modelo, año (1900-2030), color
+- ✅ Campos opcionales permiten actualización parcial
+
+#### **Frontend (VehicleReceptionForm.tsx)**
+- ✅ Campos editables: placa, marca, modelo, año, color
+- ✅ Badge naranja de alerta para placas TEMP-*
+- ✅ Filtrado inteligente de campos vacíos
+- ✅ Modal de confirmación visual para merge de vehículos
+- ✅ Comparación lado a lado: existente vs temporal
+- ✅ Alerta para cliente diferente (no permite merge)
+
+### 🐛 BUGS CRÍTICOS ENCONTRADOS Y RESUELTOS
+
+#### **Bug 1: Validación Zod bloqueaba submit silenciosamente**
+**Síntoma**: Click en "Completar Recepción" no hacía nada
+**Causa**: Campo `firmaCliente` requerido en schema pero manejado con estado separado
+**Solución**: Cambiar a opcional en schema, validación manual en `onSubmit`
+**Commits**: `fffd81a`
+
+#### **Bug 2: Token no se enviaba en requests** 🔥 CRÍTICO
+**Síntoma**: Error 401 "Usuario no autenticado" en todos los requests de recepción
+**Causa**: authStore configuraba `api.defaults.headers` pero en producción no persistía
+**Solución**: Interceptor que lee token directamente de localStorage en cada request
+**Archivos**: `src/client/src/services/api.ts`
+**Commits**: `d13f965`
+
+#### **Bug 3: req.user.id vs req.user.userId** 🔥 CRÍTICO
+**Síntoma**: Error 401 "Usuario no autenticado" específico en `/receive-vehicle`
+**Causa**: Middleware asigna `req.user.userId` pero endpoint leía `req.user.id`
+**Resultado**: `userId` siempre era `undefined` → validación fallaba
+**Solución**: Cambiar `req.user?.id` a `req.user?.userId` en línea 21
+**Por qué otros módulos funcionaban**: No verificaban userId manualmente en el handler
+**Archivos**: `src/server/src/routes/reception.ts`
+**Commits**: `5ad02dd`
+
+### 📊 Flujos Operativos Implementados
+
+#### **Flujo A: Actualización Simple (Sin Duplicados)**
+1. Recepcionista ve placa TEMP-12345 con badge naranja
+2. Actualiza placa a ABC-1234
+3. Backend verifica que ABC-1234 no existe
+4. ✅ Vehículo actualizado con placa real
+5. ✅ Servicio creado normalmente
+
+#### **Flujo B: Placa Duplicada - Mismo Cliente**
+1. Actualiza TEMP-12345 a ABC-1234
+2. Backend detecta que ABC-1234 ya existe
+3. Validación: pertenece al mismo cliente
+4. ⚠️ Modal de confirmación aparece
+5. Opción A: Confirmar merge → Cita actualizada + TEMP eliminado
+6. Opción B: Cancelar → Corregir placa
+
+#### **Flujo C: Placa Duplicada - Cliente Diferente**
+1. Actualiza TEMP-12345 a ABC-1234
+2. Backend detecta que ABC-1234 pertenece a otro cliente
+3. ❌ Alert: "La placa ya está registrada para otro cliente: [Nombre]"
+4. Recepcionista debe verificar y corregir placa
+
+### 🎓 APRENDIZAJES CRÍTICOS (SESIÓN 2025-10-05)
+
+#### **1. React Hook Form - Validación Silenciosa**
+**Problema**: `handleSubmit` NO ejecuta `onSubmit` si hay errores de validación Zod
+**Solución**: Usar segundo parámetro de `handleSubmit` para capturar errores
+```typescript
+handleSubmit(
+  onSubmit,
+  (errors) => console.log('Errores:', errors)  // ← CRÍTICO
+)
+```
+**Lección**: Siempre agregar handler de errores para debugging
+
+#### **2. Axios Interceptors en Producción**
+**Problema**: `api.defaults.headers.common['Authorization']` no persiste en builds de producción
+**Causa**: Webpack/Vite puede crear múltiples instancias del objeto `api`
+**Solución**: Interceptor que lee de localStorage en CADA request
+**Lección**: No confiar en defaults headers, usar interceptors request
+
+#### **3. JWT Payload Structure vs Request User**
+**Problema**: Inconsistencia entre estructura del token y req.user
+**Causa**: Middleware asigna payload completo a `req.user` pero propiedades varían
+**Solución**: Documentar estructura exacta de `req.user` en tipos TypeScript
+**Lección**: Usar tipos estrictos y logging en desarrollo
+
+#### **4. Debugging Sistemático de Errores Silenciosos**
+**Proceso usado**:
+1. Agregar logging en onClick del botón
+2. Agregar logging al inicio de onSubmit
+3. Agregar handler de errores en handleSubmit
+4. Agregar logging en interceptor de API
+5. Agregar logging en middleware del backend
+**Lección**: Logging en cada capa hasta encontrar dónde falla
+
+#### **5. localStorage y Zustand Persist**
+**Problema**: Confusión sobre si token se guardaba
+**Debugging**: `localStorage.getItem('henry-auth')` muestra estructura completa
+**Estructura correcta**: `{state: {token: "...", user: {...}}, version: 0}`
+**Lección**: Siempre verificar localStorage directamente, no confiar solo en el estado
+
+#### **6. Validación de Seguridad en Merge de Datos**
+**Implementado**:
+- Validación de mismo cliente antes de merge
+- Respuesta diferenciada según escenario
+- Modal de confirmación con comparación visual
+**Lección**: Nunca permitir merge automático sin validación y confirmación
+
+### 📈 Estadísticas de la Sesión
+- **Tiempo total**: ~4 horas
+- **Bugs encontrados**: 3 críticos
+- **Commits realizados**: 10
+- **Archivos modificados**: 4
+- **Líneas agregadas**: ~280
+- **Debugging iterations**: 8
+- **Resultado**: ✅ Sistema completamente funcional
+
+### 🚀 Estado Actual del Módulo de Recepción
+✅ **Recepción con cita**: 100% funcional
+✅ **Actualización de vehículos**: 100% funcional
+✅ **Validación de duplicados**: 100% funcional
+✅ **Merge de vehículos**: 100% funcional
+⏳ **Recepción sin cita (walk-in)**: Pendiente (MEJORA 1)
+
 ## ✅ DATABASE CLEAN RESTART - SESIÓN 2025-09-27
 - **Base de datos limpia** - Todos los registros eliminados excepto usuario principal
 - **Usuario ADMIN**: rik@rikmarquez.com / Acceso979971

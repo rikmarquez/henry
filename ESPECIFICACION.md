@@ -188,9 +188,10 @@
 - ⚡ **Beneficio:** Un clic abre WhatsApp con mensaje profesional pre-escrito
 
 ### 3.12 Módulo de Recepción de Vehículos ✅ COMPLETAMENTE IMPLEMENTADO
-**Estado:** Sistema completo de recepción para tablet/desktop (Sesión 2025-10-04)
+**Estado:** Sistema completo de recepción para tablet/desktop (Sesión 2025-10-04 + Mejora 2025-10-05)
 - ✅ **Backend API completo:**
   - POST `/api/reception/receive-vehicle` - Recibir vehículo con inspección digital
+  - POST `/api/reception/merge-vehicle` - Fusionar vehículo temporal con existente
   - GET `/api/reception/today` - Citas del día (zona horaria México UTC-6)
   - GET `/api/reception/service/:id` - Detalles completos de servicio recibido
 - ✅ **Schema de Base de Datos:**
@@ -215,13 +216,23 @@
   - Observaciones especiales de recepción
   - Creación automática de servicio en estado "Recibido"
   - Actualización de cita a status "received"
+- ✅ **MEJORA RECEPCIÓN 2 - Actualización de Vehículos (2025-10-05):**
+  - ✅ **Campos editables:** Placa, marca, modelo, año, color modificables durante recepción
+  - ✅ **Indicador visual:** Badge naranja para placas temporales (TEMP-xxxxx)
+  - ✅ **Detección de duplicados:** Validación automática al actualizar placa
+  - ✅ **3 Flujos operativos:**
+    1. **Actualización simple:** Si no hay conflicto, actualiza el vehículo directamente
+    2. **Merge mismo cliente:** Modal de confirmación con comparación visual lado a lado
+    3. **Bloqueo cliente diferente:** Error si la placa ya existe en otro cliente
+  - ✅ **Modal de merge:** Comparación vehículo existente vs temporal con opción confirmar/cancelar
+  - ✅ **Endpoint merge:** Fusiona registros, actualiza cita, elimina vehículo temporal
 - ✅ **Integración Completa:**
   - Citas → Recepción → Servicio (flujo continuo)
   - Datos de recepción disponibles en historial del servicio
   - Compatible con citas telefónicas y walk-ins
+  - Actualización de vehículos con validación inteligente
 - ⏳ **Pendientes Próximos:**
-  - Walk-in (recibir auto SIN cita previa)
-  - Actualización de datos de vehículo durante recepción (placas temporales)
+  - Walk-in (recibir auto SIN cita previa) - MEJORA RECEPCIÓN 1
   - Generación de PDF de recepción con firma
 
 ### 3.13 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
@@ -811,14 +822,21 @@ GET    /api/services/vehicle/:vehicleId   # ✅ Historial servicios de un vehíc
 GET    /api/services/client/:clientId     # ✅ Historial servicios de un cliente
 ```
 
-#### Recepción de Vehículos ✅ NUEVO (POR SUCURSAL)
+#### Recepción de Vehículos ✅ COMPLETO (POR SUCURSAL)
 ```
 POST   /api/reception/receive-vehicle     # ✅ Recibir vehículo con inspección completa
+POST   /api/reception/merge-vehicle       # ✅ Fusionar vehículo temporal con existente
 GET    /api/reception/today               # ✅ Citas del día para recepción (zona horaria MX)
 GET    /api/reception/service/:id         # ✅ Detalles completos de servicio recibido
 ```
 **Permisos requeridos**: `reception.create` y `reception.read`
 **Campos de recepción**: kilometraje, nivel combustible, checklist inspección, firma digital, fotos
+**Actualización de vehículos**: Campo `vehicleUpdates` para modificar placa/marca/modelo/año/color durante recepción
+**Detección de duplicados**: Validación automática de placa duplicada con 3 flujos operativos:
+  1. **Actualización simple**: Si no hay conflicto, actualiza el vehículo directamente
+  2. **Merge mismo cliente**: Si existe placa y es del mismo cliente, modal confirma fusión
+  3. **Error cliente diferente**: Si existe placa de otro cliente, bloquea y muestra alerta
+**Merge endpoint**: Fusiona vehículo temporal con existente (mismo cliente), actualiza cita, elimina temporal
 
 #### Oportunidades ✅ (POR SUCURSAL - filtrado por branchId)
 ```
@@ -1427,24 +1445,32 @@ model StatusLog {
 ---
 ## ✅ ESTADO FINAL: SISTEMA 100% FUNCIONAL
 
-**Henry Diagnostics v1.0 - COMPLETAMENTE IMPLEMENTADO + COMUNICACIONES WHATSAPP**
+**Henry Diagnostics v1.0 - COMPLETAMENTE IMPLEMENTADO + RECEPCIÓN AVANZADA**
 - ✅ **Deployment:** Monolítico en Railway + PostgreSQL ACTIVO
 - ✅ **Stack:** React + Node.js + TypeScript + Prisma COMPLETO
 - ✅ **Multi-taller:** Arquitectura enterprise implementada
 - ✅ **Permisos:** Sistema granular user-friendly
 - ✅ **UX avanzado:** Frontend-Only Filtering, Kanban, Chart.js
 - ✅ **WhatsApp:** Sistema completo de comunicaciones automatizadas
+- ✅ **Recepción:** Sistema avanzado con actualización de vehículos y merge inteligente
 - ✅ **Database:** Limpia con usuario ADMIN único
 
-**Nuevas funcionalidades 2025-09-29:**
+**Nuevas funcionalidades 2025-10-05:**
+- 🚗 **MEJORA RECEPCIÓN 2:** Actualización de vehículos durante recepción
+- 🏷️ **Detección duplicados:** Validación automática de placas con 3 flujos operativos
+- 🔄 **Merge inteligente:** Fusión de vehículos temporales con existentes (mismo cliente)
+- 🎨 **Indicadores visuales:** Badge naranja para placas TEMP-xxxxx
+- ⚙️ **Campos editables:** Placa/marca/modelo/año/color modificables en recepción
+
+**Funcionalidades previas 2025-09-29:**
 - 📱 **Comunicaciones WhatsApp:** 5 tipos de mensajes profesionales automatizados
 - 🔧 **Fix creación clientes:** Formulario unificado solo WhatsApp
 - 📋 **Plantillas personalizadas:** Marca Henry's Diagnostics con calls-to-action
 - ⚡ **Integración modular:** Botones en citas, servicios y oportunidades
 
-**Última actualización:** 2025-09-29
+**Última actualización:** 2025-10-05
 **Credenciales:** rik@rikmarquez.com / Acceso979971
 **URLs:** Frontend y Backend deployados en Railway
-**Commits recientes:** 9159413 (fix clientes) + e111f0a (WhatsApp completo)
+**Commits recientes:** fffd81a, d13f965, 5ad02dd (fixes recepción) + documentación actualizada
 
-**🎉 SISTEMA COMPLETAMENTE LISTO PARA PRODUCCIÓN CON COMUNICACIONES WHATSAPP**
+**🎉 SISTEMA COMPLETAMENTE LISTO PARA PRODUCCIÓN CON RECEPCIÓN AVANZADA**
