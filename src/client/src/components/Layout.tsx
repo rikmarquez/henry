@@ -33,6 +33,19 @@ export default function Layout({ children }: LayoutProps) {
 
   // Create navigation array dynamically based on permissions
   const getNavigation = () => {
+    const userRole = user?.role.name;
+
+    // Menú limitado para RECEPCIONISTA_TALLER
+    if (userRole === 'RECEPCIONISTA_TALLER') {
+      return [
+        { name: 'Dashboard', href: '/dashboard', icon: Home },
+        { name: 'Recepción', href: '/recepcion', icon: ClipboardCheck },
+        { name: 'Citas', href: '/appointments', icon: Calendar },
+        { name: 'Servicios', href: '/services', icon: Wrench },
+      ];
+    }
+
+    // Menú completo para otros roles
     const baseNavigation = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
       { name: 'Recepción', href: '/recepcion', icon: ClipboardCheck },
