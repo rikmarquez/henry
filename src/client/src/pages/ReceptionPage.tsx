@@ -21,9 +21,21 @@ export const ReceptionPage: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showReceptionForm, setShowReceptionForm] = useState(false);
   const [showWalkInForm, setShowWalkInForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'pending' | 'received'>('pending');
 
-  // Filtrar citas por búsqueda
-  const filteredAppointments = todayAppointments.filter((appointment) => {
+  // Separar citas pendientes vs recibidas
+  const pendingAppointments = todayAppointments.filter(
+    (apt) => apt.status !== 'received' && apt.status !== 'cancelled'
+  );
+
+  const receivedAppointments = todayAppointments.filter(
+    (apt) => apt.status === 'received'
+  );
+
+  // Filtrar según tab activo
+  const appointmentsToShow = activeTab === 'pending' ? pendingAppointments : receivedAppointments;
+
+  const filteredAppointments = appointmentsToShow.filter((appointment) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
@@ -133,6 +145,42 @@ export const ReceptionPage: React.FC = () => {
             className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
           />
         </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mt-6 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => {
+              setActiveTab('pending');
+              setSearchTerm('');
+            }}
+            className={`flex-1 px-6 py-3 rounded-md font-semibold transition-all ${
+              activeTab === 'pending'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Clock className="h-5 w-5" />
+              <span>Pendientes ({pendingAppointments.length})</span>
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('received');
+              setSearchTerm('');
+            }}
+            className={`flex-1 px-6 py-3 rounded-md font-semibold transition-all ${
+              activeTab === 'received'
+                ? 'bg-white text-green-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle className="h-5 w-5" />
+              <span>Recibidos ({receivedAppointments.length})</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Loading State */}
@@ -148,9 +196,14 @@ export const ReceptionPage: React.FC = () => {
         <>
           {/* Contador */}
           <div className="mb-4 flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-500" />
+            {activeTab === 'pending' ? (
+              <Clock className="h-5 w-5 text-blue-600" />
+            ) : (
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            )}
             <span className="text-lg font-medium text-gray-700">
-              {filteredAppointments.length} cita{filteredAppointments.length !== 1 ? 's' : ''} para hoy
+              {filteredAppointments.length} {activeTab === 'pending' ? 'pendiente' : 'recibido'}
+              {filteredAppointments.length !== 1 ? 's' : ''}
             </span>
           </div>
 
@@ -159,12 +212,18 @@ export const ReceptionPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
               <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                {searchTerm ? 'No se encontraron resultados' : 'No hay citas para hoy'}
+                {searchTerm
+                  ? 'No se encontraron resultados'
+                  : activeTab === 'pending'
+                  ? 'No hay citas pendientes'
+                  : 'No hay autos recibidos'}
               </h3>
               <p className="text-gray-500">
                 {searchTerm
                   ? 'Intenta con otro término de búsqueda'
-                  : 'Las citas del día aparecerán aquí'}
+                  : activeTab === 'pending'
+                  ? 'Las citas pendientes aparecerán aquí'
+                  : 'Los autos recibidos (con o sin cita) aparecerán aquí'}
               </p>
             </div>
           ) : (

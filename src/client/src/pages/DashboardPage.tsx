@@ -465,6 +465,20 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Botón RECEPCIÓN DE AUTOS */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <button
+            onClick={() => navigate('/recepcion')}
+            className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-xl font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            <Car className="h-7 w-7" />
+            <span>RECEPCIÓN DE AUTOS</span>
+            <ArrowRight className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Primera línea - CITAS, SERVICIOS Y OPORTUNIDADES */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
