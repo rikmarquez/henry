@@ -52,20 +52,36 @@ export const useAuthStore = create<AuthStore>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
+          console.log('[AuthStore] Iniciando login...');
           const response = await api.post('/auth/login', { email, password });
+          console.log('[AuthStore] Respuesta completa:', response.data);
+
           const { user, tokens } = response.data.data;
           const accessToken = tokens.accessToken;
+
+          console.log('[AuthStore] User:', user);
+          console.log('[AuthStore] Access Token:', accessToken ? '✓ Existe' : '✗ NO existe');
 
           // Configurar el token para futuras peticiones
           api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-          set({
+          const newState = {
             user,
             token: accessToken,
             isAuthenticated: true,
             isLoading: false,
-          });
+          };
+
+          console.log('[AuthStore] Nuevo estado a guardar:', newState);
+          set(newState);
+
+          // Verificar que se guardó
+          setTimeout(() => {
+            const savedData = localStorage.getItem('henry-auth');
+            console.log('[AuthStore] Datos guardados en localStorage:', savedData);
+          }, 100);
         } catch (error: any) {
+          console.error('[AuthStore] Error en login:', error);
           set({ isLoading: false });
           throw new Error(
             error.response?.data?.message || 'Error al iniciar sesión'
