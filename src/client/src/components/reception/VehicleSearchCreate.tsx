@@ -42,6 +42,9 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
   onBack,
   onCancel,
 }) => {
+  console.log('[VehicleSearchCreate] Recibido clientId:', clientId);
+  console.log('[VehicleSearchCreate] Recibido clientName:', clientName);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -50,9 +53,11 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
   const { data: clientVehicles = [], isLoading: isLoadingVehicles } = useQuery({
     queryKey: ['client-vehicles', clientId],
     queryFn: async () => {
+      console.log('[VehicleSearchCreate] Buscando vehículos para clientId:', clientId);
       const { data } = await api.get(`/vehicles/by-client/${clientId}`);
       return data.data?.vehicles || data.vehicles || [];
     },
+    enabled: !!clientId, // Solo ejecutar si clientId existe
   });
 
   // Query para buscar vehículos por placa
