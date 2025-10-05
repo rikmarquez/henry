@@ -143,6 +143,9 @@ router.get(
             gte: today,
             lt: tomorrow,
           },
+          status: {
+            not: 'cancelled', // Excluir solo las citas canceladas
+          },
         },
         include: {
           client: true,
