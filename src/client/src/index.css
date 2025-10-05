@@ -1,9 +1,9 @@
+/* Estilos de impresión */
+@import './styles/print.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Estilos de impresión */
-@import './styles/print.css';
 
 @layer base {
   :root {

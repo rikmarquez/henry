@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import type { VehicleReceptionInput } from '../../../shared/schemas/service.schema';
 
 interface Appointment {
