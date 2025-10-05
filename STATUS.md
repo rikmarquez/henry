@@ -16,7 +16,7 @@
 
 ## 🎯 MÓDULO DE RECEPCIÓN DE VEHÍCULOS - SESIÓN 2025-10-04
 
-### 🚧 EN PROGRESO: Sistema de Recepción de Vehículos para Tablet
+### ✅ COMPLETADO: Sistema de Recepción de Vehículos para Tablet
 - **Feature**: Módulo especializado para recepcionistas de taller con tablet
 - **Objetivo**: Registrar la recepción física de vehículos con inspección digital y firma del cliente
 - **Rol nuevo**: `RECEPCIONISTA_TALLER` con permisos limitados para solo recepción
@@ -211,8 +211,15 @@ Service (estado: Terminado)
 
 #### 🚀 Estado Actual
 - **Backend**: ✅ 100% completado y compilado
-- **Frontend**: ⏳ 0% (dependencias instaladas)
-- **Progreso general**: ~40% del módulo completo
+- **Frontend**: ✅ 100% completado
+- **Progreso general**: ✅ 100% MÓDULO FUNCIONAL
+
+#### ✅ FIX: Permitir Recibir Cualquier Cita No Cancelada
+- **Issue**: Verificar que cualquier cita no cancelada se pueda recibir directamente
+- **Solución**: Filtro `status.not = 'cancelled'` en endpoint `/api/reception/today`
+- **Resultado**: Citas con estados 'scheduled', 'confirmed', 'received', etc. son elegibles
+- **Solo se excluyen**: Citas con status = 'cancelled'
+- **Commit**: fix: permitir recibir cualquier cita no cancelada
 
 ---
 
