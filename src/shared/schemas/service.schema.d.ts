@@ -15,6 +15,25 @@ export declare const createServiceSchema: z.ZodObject<{
     truput: z.ZodDefault<z.ZodNumber>;
     mechanicCommission: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strip>;
+export declare const vehicleReceptionSchema: z.ZodObject<{
+    appointmentId: z.ZodOptional<z.ZodNumber>;
+    clientId: z.ZodNumber;
+    vehicleId: z.ZodNumber;
+    kilometraje: z.ZodNumber;
+    nivelCombustible: z.ZodEnum<{
+        "1/4": "1/4";
+        "1/2": "1/2";
+        "3/4": "3/4";
+        FULL: "FULL";
+    }>;
+    lucesOk: z.ZodDefault<z.ZodBoolean>;
+    llantasOk: z.ZodDefault<z.ZodBoolean>;
+    cristalesOk: z.ZodDefault<z.ZodBoolean>;
+    carroceriaOk: z.ZodDefault<z.ZodBoolean>;
+    observacionesRecepcion: z.ZodOptional<z.ZodString>;
+    firmaCliente: z.ZodString;
+    fotosRecepcion: z.ZodOptional<z.ZodArray<z.ZodString>>;
+}, z.core.$strip>;
 export declare const updateServiceSchema: z.ZodObject<{
     appointmentId: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;
     clientId: z.ZodOptional<z.ZodNumber>;
@@ -56,3 +75,4 @@ export type CreateServiceInput = z.infer<typeof createServiceSchema>;
 export type UpdateServiceInput = z.infer<typeof updateServiceSchema>;
 export type ServiceStatusUpdateInput = z.infer<typeof serviceStatusUpdateSchema>;
 export type ServiceFilterInput = z.infer<typeof serviceFilterSchema>;
+export type VehicleReceptionInput = z.infer<typeof vehicleReceptionSchema>;

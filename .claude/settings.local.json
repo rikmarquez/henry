@@ -57,7 +57,8 @@
       "Bash(npm run dev:client:*)",
       "Bash(findstr:*)",
       "Bash(start http://localhost:5173/appointments)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

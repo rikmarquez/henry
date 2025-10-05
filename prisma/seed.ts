@@ -80,6 +80,29 @@ async function main() {
     },
   });
 
+  const receptionistTallerRole = await prisma.role.upsert({
+    where: { name: 'RECEPCIONISTA_TALLER' },
+    update: {
+      permissions: {
+        clients: ['create', 'read'],
+        vehicles: ['create', 'read', 'update'],
+        appointments: ['read'],
+        services: ['create', 'read', 'update'],
+        reception: ['create', 'read']
+      },
+    },
+    create: {
+      name: 'RECEPCIONISTA_TALLER',
+      permissions: {
+        clients: ['create', 'read'],
+        vehicles: ['create', 'read', 'update'],
+        appointments: ['read'],
+        services: ['create', 'read', 'update'],
+        reception: ['create', 'read']
+      },
+    },
+  });
+
   const managerRole = await prisma.role.upsert({
     where: { name: 'ENCARGADO' },
     update: {
@@ -190,7 +213,7 @@ async function main() {
   console.log(`👤 Rik admin user: rik@rikmarquez.com / Acceso979971`);
   console.log(`🔧 Created ${mechanics.length} mechanics`);
   console.log(`📋 Created ${workStatuses.length} work statuses`);
-  console.log(`👥 Created 3 roles: ADMIN, RECEPCIONISTA, ENCARGADO`);
+  console.log(`👥 Created 4 roles: ADMIN, RECEPCIONISTA, RECEPCIONISTA_TALLER, ENCARGADO`);
 }
 
 main()

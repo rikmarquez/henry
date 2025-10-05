@@ -12,6 +12,7 @@ import statusLogRoutes from './statuslogs';
 import reportRoutes from './reports';
 import branchRoutes from './branches';
 import settingRoutes from './settings';
+import receptionRoutes from './reception';
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.use('/statuslogs', statusLogRoutes);
 router.use('/reports', reportRoutes);
 router.use('/branches', branchRoutes);
 router.use('/settings', settingRoutes);
+router.use('/reception', receptionRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

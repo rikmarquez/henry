@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serviceFilterSchema = exports.serviceStatusUpdateSchema = exports.updateServiceSchema = exports.createServiceSchema = void 0;
+exports.serviceFilterSchema = exports.serviceStatusUpdateSchema = exports.updateServiceSchema = exports.vehicleReceptionSchema = exports.createServiceSchema = void 0;
 const zod_1 = require("zod");
 const common_schema_1 = require("./common.schema");
 exports.createServiceSchema = zod_1.z.object({
@@ -18,6 +18,23 @@ exports.createServiceSchema = zod_1.z.object({
     totalAmount: zod_1.z.number().min(0).default(0),
     truput: zod_1.z.number().min(0).default(0),
     mechanicCommission: zod_1.z.number().min(0).default(0),
+});
+// Schema para recepción de vehículos
+exports.vehicleReceptionSchema = zod_1.z.object({
+    appointmentId: common_schema_1.idSchema.optional(),
+    clientId: common_schema_1.idSchema,
+    vehicleId: common_schema_1.idSchema,
+    kilometraje: zod_1.z.number().int().min(0, 'El kilometraje debe ser mayor o igual a 0'),
+    nivelCombustible: zod_1.z.enum(['1/4', '1/2', '3/4', 'FULL'], {
+        errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
+    }),
+    lucesOk: zod_1.z.boolean().default(true),
+    llantasOk: zod_1.z.boolean().default(true),
+    cristalesOk: zod_1.z.boolean().default(true),
+    carroceriaOk: zod_1.z.boolean().default(true),
+    observacionesRecepcion: zod_1.z.string().optional(),
+    firmaCliente: zod_1.z.string().min(1, 'La firma del cliente es requerida'),
+    fotosRecepcion: zod_1.z.array(zod_1.z.string()).optional(),
 });
 exports.updateServiceSchema = exports.createServiceSchema.partial().extend({
     id: common_schema_1.idSchema,

@@ -50,7 +50,8 @@ model User {
   branchId             Int           @default(1) @map("branch_id")
   createdAppointments  Appointment[]
   createdOpportunities Opportunity[]
-  createdServices      Service[]
+  createdServices      Service[]     @relation("CreatedServices")
+  receivedServices     Service[]     @relation("ReceivedServices")
   statusLogs           StatusLog[]
   branch               Branch        @relation(fields: [branchId], references: [id])
   role                 Role          @relation(fields: [roleId], references: [id])
@@ -171,11 +172,26 @@ model Service {
   createdAt          DateTime      @default(now()) @map("created_at")
   updatedAt          DateTime      @updatedAt @map("updated_at")
   branchId           Int           @default(1) @map("branch_id")
+
+  // ====== CAMPOS DE RECEPCIÓN ======
+  receivedBy              Int?      @map("received_by")
+  receivedAt              DateTime? @map("received_at")
+  kilometraje             Int?
+  nivelCombustible        String?   @map("nivel_combustible")
+  lucesOk                 Boolean   @default(true) @map("luces_ok")
+  llantasOk               Boolean   @default(true) @map("llantas_ok")
+  cristalesOk             Boolean   @default(true) @map("cristales_ok")
+  carroceriaOk            Boolean   @default(true) @map("carroceria_ok")
+  observacionesRecepcion  String?   @map("observaciones_recepcion")
+  firmaCliente            String?   @map("firma_cliente")
+  fotosRecepcion          Json?     @map("fotos_recepcion")
+
   opportunities      Opportunity[]
   appointment        Appointment?  @relation(fields: [appointmentId], references: [id])
   branch             Branch        @relation(fields: [branchId], references: [id])
   client             Client        @relation(fields: [clientId], references: [id])
-  createdByUser      User          @relation(fields: [createdBy], references: [id])
+  createdByUser      User          @relation("CreatedServices", fields: [createdBy], references: [id])
+  receptionist       User?         @relation("ReceivedServices", fields: [receivedBy], references: [id])
   mechanic           Mechanic?     @relation(fields: [mechanicId], references: [id])
   status             WorkStatus    @relation(fields: [statusId], references: [id])
   vehicle            Vehicle       @relation(fields: [vehicleId], references: [id])

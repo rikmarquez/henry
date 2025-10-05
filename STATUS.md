@@ -14,6 +14,208 @@
 - **Dashboard**: Error 403 solucionado, funcionando correctamente
 - **Deploy**: Cambios deployados automáticamente en Railway
 
+## 🎯 MÓDULO DE RECEPCIÓN DE VEHÍCULOS - SESIÓN 2025-10-04
+
+### 🚧 EN PROGRESO: Sistema de Recepción de Vehículos para Tablet
+- **Feature**: Módulo especializado para recepcionistas de taller con tablet
+- **Objetivo**: Registrar la recepción física de vehículos con inspección digital y firma del cliente
+- **Rol nuevo**: `RECEPCIONISTA_TALLER` con permisos limitados para solo recepción
+
+#### ✅ BACKEND COMPLETADO (100%)
+
+**1. Schema de Base de Datos** ✅
+- **Tabla services extendida** con campos de recepción:
+  - `received_by` - Usuario recepcionista que recibió el vehículo
+  - `received_at` - Timestamp de recepción
+  - `kilometraje` - Kilometraje actual del vehículo
+  - `nivel_combustible` - Nivel de combustible ('1/4', '1/2', '3/4', 'FULL')
+  - `luces_ok` - Checklist: luces funcionando
+  - `llantas_ok` - Checklist: llantas en buen estado
+  - `cristales_ok` - Checklist: cristales completos
+  - `carroceria_ok` - Checklist: carrocería sin golpes nuevos
+  - `observaciones_recepcion` - Campo de texto libre para observaciones
+  - `firma_cliente` - Firma digital del cliente (base64)
+  - `fotos_recepcion` - Array de fotos del vehículo (JSON)
+- **Migración aplicada**: `npx prisma db push` ejecutado exitosamente
+- **Relación**: User ↔ Service (receivedServices) para rastrear quién recibió cada vehículo
+
+**2. Rol y Permisos** ✅
+- **Rol creado**: `RECEPCIONISTA_TALLER`
+- **Permisos configurados**:
+  ```json
+  {
+    "clients": ["create", "read"],
+    "vehicles": ["create", "read", "update"],
+    "appointments": ["read"],
+    "services": ["create", "read", "update"],
+    "reception": ["create", "read"]
+  }
+  ```
+- **Seed actualizado**: Rol disponible en base de datos
+
+**3. Estado de Servicios** ✅
+- **Estado "Recibido"** ya existía en base de datos (ID: 1)
+- Color: `#EF4444` (rojo)
+- Primer estado en el flujo del servicio
+
+**4. Schemas de Validación Zod** ✅
+- **Archivo**: `src/shared/schemas/service.schema.ts`
+- **Schema nuevo**: `vehicleReceptionSchema`
+- **Validaciones**:
+  - Kilometraje: número entero >= 0
+  - Nivel combustible: enum ['1/4', '1/2', '3/4', 'FULL']
+  - Checkboxes: booleanos con default true
+  - Firma cliente: string requerido
+  - Fotos: array opcional de strings
+- **TypeScript type**: `VehicleReceptionInput` exportado
+
+**5. API Endpoints** ✅
+- **Archivo**: `src/server/src/routes/reception.ts`
+- **Endpoints implementados**:
+  1. `POST /api/reception/receive-vehicle`
+     - Recibe vehículo y crea servicio automáticamente
+     - Marca cita como "received" si existe
+     - Guarda todos los datos de inspección
+     - Retorna servicio completo con relaciones
+  2. `GET /api/reception/today`
+     - Lista citas del día actual
+     - Filtrado por branchId del usuario
+     - Include: client, vehicle, services
+  3. `GET /api/reception/service/:id`
+     - Detalles completos del servicio
+     - Include: client, vehicle, receptionist, mechanic, status
+- **Autenticación**: Todos los endpoints protegidos
+- **Autorización**: Permisos 'reception' requeridos
+- **Serialización BigInt**: Implementada para compatibilidad JSON
+
+**6. Integración de Rutas** ✅
+- **Archivo**: `src/server/src/routes/index.ts`
+- **Ruta registrada**: `router.use('/reception', receptionRoutes)`
+- **Backend compilado**: `npm run build` ejecutado sin errores
+
+**7. Dependencias Instaladas** ✅
+- `react-signature-canvas` - Componente de firma digital
+- `@types/react-signature-canvas` - Tipos TypeScript
+
+#### 🔄 FRONTEND PENDIENTE
+
+**Próximos pasos de implementación**:
+
+1. **Componente SignatureCanvas** (30 min)
+   - Wrapper de react-signature-canvas
+   - Botones: Limpiar, Firmar
+   - Validación de firma no vacía
+   - Export a base64
+
+2. **Página ReceptionPage** (1 hora)
+   - Vista principal optimizada para tablet (landscape)
+   - Búsqueda rápida por placa/marca/modelo/cliente
+   - Listado de citas del día con cards grandes
+   - Navegación a formulario de recepción
+
+3. **Formulario VehicleReceptionForm** (1.5 horas)
+   - Información del cliente/vehículo (solo lectura)
+   - Input kilometraje (numérico)
+   - Selector visual nivel combustible (4 botones)
+   - Checklist inspección (4 checkboxes grandes)
+   - Textarea observaciones
+   - Canvas de firma digital
+   - Botón "Completar Recepción" (grande, táctil)
+
+4. **Integración de Rutas** (15 min)
+   - Agregar `/recepcion` a React Router
+   - Agregar al menú lateral con PermissionGate
+   - Icono: ClipboardCheck
+
+5. **Hook useReception** (30 min)
+   - Query: citas del día
+   - Mutation: recibir vehículo
+   - Invalidación de queries
+   - Toast notifications
+
+#### 🎯 Flujo Operativo Diseñado
+
+```
+1. Recepcionista abre tablet → /recepcion
+2. Ve lista de citas del día (auto-refresh)
+3. Cliente llega → busca por placa o nombre
+4. Clic "RECIBIR AUTO" → Formulario
+5. Captura:
+   - Kilometraje
+   - Nivel combustible (visual)
+   - Inspección rápida (4 checkboxes)
+   - Observaciones especiales
+   - Firma digital del cliente
+6. Clic "COMPLETAR RECEPCIÓN"
+7. Backend:
+   - Crea servicio con estado "Recibido"
+   - Guarda todos los datos de recepción
+   - Marca cita como "received"
+   - Genera PDF (futuro)
+8. Servicio queda listo para asignar mecánico
+```
+
+#### 📊 Arquitectura de Datos
+
+**Flujo de información**:
+```
+Cita (scheduled)
+  ↓ [Recepcionista recibe auto]
+Service (estado: Recibido)
+  - receivedBy: userId
+  - receivedAt: timestamp
+  - kilometraje, combustible, inspección, firma
+  ↓ [Se asigna mecánico]
+Service (estado: En Diagnóstico)
+  ↓ [Mecánico diagnostica]
+Service (estado: Cotizado)
+  ↓ [Cliente aprueba]
+Service (estado: En Proceso)
+  ↓ [Trabajo completado]
+Service (estado: Terminado)
+```
+
+#### 🎨 Diseño UX Tablet
+
+**Características**:
+- Orientación landscape (1024x768)
+- Botones grandes (min 60px altura)
+- Espaciado táctil (min 44px touch targets)
+- Campos numéricos con teclado numérico
+- Selectores visuales (no dropdowns)
+- Canvas de firma generoso (400x200)
+- Mínimo scroll
+- Colores distintivos por sección
+
+#### 📝 Archivos Modificados/Creados
+
+**Backend**:
+- ✅ `prisma/schema.prisma` - Campos recepción agregados
+- ✅ `prisma/seed.ts` - Rol RECEPCIONISTA_TALLER
+- ✅ `src/shared/schemas/service.schema.ts` - vehicleReceptionSchema
+- ✅ `src/server/src/routes/reception.ts` - Nuevo archivo
+- ✅ `src/server/src/routes/index.ts` - Registro de rutas
+
+**Frontend** (pendientes):
+- ⏳ `src/client/src/components/reception/SignatureCanvas.tsx`
+- ⏳ `src/client/src/components/reception/VehicleReceptionForm.tsx`
+- ⏳ `src/client/src/pages/ReceptionPage.tsx`
+- ⏳ `src/client/src/hooks/useReception.ts`
+- ⏳ `src/client/src/App.tsx` - Agregar ruta
+- ⏳ `src/client/src/components/Layout.tsx` - Agregar menú
+
+#### ⏱️ Tiempo Estimado Restante
+- **Frontend completo**: ~3-4 horas
+- **Testing y ajustes**: ~1 hora
+- **Total restante**: 4-5 horas
+
+#### 🚀 Estado Actual
+- **Backend**: ✅ 100% completado y compilado
+- **Frontend**: ⏳ 0% (dependencias instaladas)
+- **Progreso general**: ~40% del módulo completo
+
+---
+
 ## 🎯 NUEVAS FUNCIONALIDADES - SESIÓN 2025-10-01
 
 ### ✅ COMPLETADO: Botón de Impresión Diaria en Vista Semanal
