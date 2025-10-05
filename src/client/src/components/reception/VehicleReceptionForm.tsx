@@ -33,7 +33,7 @@ const vehicleReceptionSchema = z.object({
   cristalesOk: z.boolean().default(true),
   carroceriaOk: z.boolean().default(true),
   observacionesRecepcion: z.string().optional(),
-  firmaCliente: z.string().min(1, 'La firma del cliente es requerida'),
+  firmaCliente: z.string().optional(), // Validamos manualmente en onSubmit
   fotosRecepcion: z.array(z.string()).optional(),
 
   // Campos opcionales para actualizar vehículo
