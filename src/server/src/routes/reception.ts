@@ -136,6 +136,9 @@ router.get(
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
+      console.log('[RECEPTION] Buscando citas para branchId:', branchId);
+      console.log('[RECEPTION] Rango de fechas:', { today, tomorrow });
+
       const appointments = await prisma.appointment.findMany({
         where: {
           branchId,
@@ -161,6 +164,8 @@ router.get(
         },
       });
 
+      console.log('[RECEPTION] Citas encontradas:', appointments.length);
+
       // Serializar BigInt para JSON
       const serializedAppointments = JSON.parse(
         JSON.stringify(appointments, (_, value) =>
@@ -170,8 +175,11 @@ router.get(
 
       res.json(serializedAppointments);
     } catch (error) {
-      console.error('Error al obtener citas del día:', error);
-      res.status(500).json({ message: 'Error al obtener citas del día' });
+      console.error('[RECEPTION] Error al obtener citas del día:', error);
+      res.status(500).json({
+        message: 'Error al obtener citas del día',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   }
 );

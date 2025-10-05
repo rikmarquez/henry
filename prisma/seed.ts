@@ -19,7 +19,8 @@ async function main() {
         opportunities: ['create', 'read', 'update', 'delete'],
         mechanics: ['create', 'read', 'update', 'delete'],
         branches: ['create', 'read', 'update', 'delete'],
-        reports: ['read']
+        reports: ['read'],
+        reception: ['create', 'read']
       },
     },
     create: {
@@ -33,7 +34,8 @@ async function main() {
         opportunities: ['create', 'read', 'update', 'delete'],
         mechanics: ['create', 'read', 'update', 'delete'],
         branches: ['create', 'read', 'update', 'delete'],
-        reports: ['read']
+        reports: ['read'],
+        reception: ['create', 'read']
       },
     },
   });
