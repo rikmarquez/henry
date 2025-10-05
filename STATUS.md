@@ -16,7 +16,116 @@
 
 ## 📋 PENDIENTES PRÓXIMA SESIÓN
 
-### 🚗 MEJORA RECEPCIÓN: Actualización de Datos de Vehículo durante Recepción
+### 🚗 MEJORA RECEPCIÓN 1: Recibir Vehículos SIN Cita Previa
+
+#### 📝 Contexto del Problema
+**Escenario operativo real**:
+1. Cliente llega al taller **sin cita previa** (walk-in)
+2. Recepcionista debe poder recibir el vehículo inmediatamente
+3. **NO hay datos precargados** - todo debe capturarse en ese momento
+4. Sistema actual requiere cita existente para usar módulo de recepción
+
+#### 🎯 Requerimiento Funcional
+**Botón adicional en ReceptionPage**: "Recibir Auto SIN Cita"
+
+**Flujo completo de captura**:
+1. **Datos del Cliente** (captura completa):
+   - Nombre del cliente (requerido)
+   - Teléfono/WhatsApp (requerido)
+   - Email (opcional)
+   - Búsqueda previa de cliente existente
+
+2. **Datos del Vehículo** (captura completa):
+   - Placa (requerido)
+   - Marca (requerido)
+   - Modelo (requerido)
+   - Año (opcional)
+   - Color (opcional)
+   - Búsqueda de vehículo existente por placa
+
+3. **Datos de Recepción** (igual que con cita):
+   - Kilometraje
+   - Nivel de combustible
+   - Inspección visual (checkboxes)
+   - Observaciones
+   - Firma digital del cliente
+
+#### 🔧 Implementación Propuesta
+
+**Frontend - ReceptionPage.tsx**:
+```typescript
+// Botón nuevo en header
+<button
+  onClick={() => setShowWalkInForm(true)}
+  className="bg-green-600 text-white px-6 py-3 rounded-lg"
+>
+  <Plus className="h-5 w-5 mr-2" />
+  Recibir Auto SIN Cita
+</button>
+```
+
+**Frontend - WalkInReceptionForm.tsx** (nuevo componente):
+- **Paso 1**: Buscar/Crear Cliente
+  - Input de búsqueda por nombre/teléfono
+  - Si existe → Seleccionar
+  - Si no existe → Formulario inline de creación
+
+- **Paso 2**: Buscar/Crear Vehículo
+  - Input de búsqueda por placa
+  - Si existe → Seleccionar
+  - Si no existe → Formulario inline de creación
+  - Preseleccionar cliente del paso 1
+
+- **Paso 3**: Formulario de Recepción
+  - Reutilizar VehicleReceptionForm existente
+  - Sin appointmentId (null)
+
+**Backend - reception.ts**:
+```typescript
+// POST /api/reception/receive-vehicle ya soporta appointmentId: null
+// Solo asegurar que clientId y vehicleId sean requeridos
+```
+
+#### 📊 Flujo Operativo Walk-In
+
+```
+1. Cliente llega SIN cita
+2. Recepcionista: "Recibir Auto SIN Cita"
+3. Sistema: Buscar cliente por nombre/teléfono
+   → Cliente existe: Seleccionar
+   → Cliente nuevo: Capturar (nombre, teléfono, whatsapp)
+4. Sistema: Buscar vehículo por placa
+   → Vehículo existe: Seleccionar
+   → Vehículo nuevo: Capturar (placa, marca, modelo, año, color)
+5. Formulario de recepción estándar
+6. Firma digital
+7. Servicio creado SIN cita asociada (appointmentId: null)
+```
+
+#### ✅ Beneficios Operativos
+- 🚪 **Walk-ins bienvenidos**: No rechazar clientes sin cita
+- ⚡ **Recepción inmediata**: Sin pasos previos de agendamiento
+- 📋 **Datos completos**: Captura todo en un solo flujo
+- 🔍 **Prevención duplicados**: Búsqueda antes de crear
+- 💼 **Flexibilidad**: Atención a demanda sin citas
+
+#### 📝 Notas de Implementación
+- **Prioridad**: ALTA - Afecta operación diaria
+- **Tiempo estimado**: 3-4 horas
+- **Archivos nuevos**:
+  - `src/client/src/components/reception/WalkInReceptionForm.tsx`
+  - `src/client/src/components/reception/ClientSearchCreate.tsx`
+  - `src/client/src/components/reception/VehicleSearchCreate.tsx`
+- **Archivos a modificar**:
+  - `src/client/src/pages/ReceptionPage.tsx`
+- **Reutilizar componentes**:
+  - VehicleReceptionForm (paso final)
+  - ClientForm (inline para creación)
+  - VehicleForm (inline para creación)
+
+---
+
+### 🚗 MEJORA RECEPCIÓN 2: Actualización de Datos de Vehículo durante Recepción
 
 #### 📝 Contexto del Problema
 **Escenario operativo real**:
@@ -119,6 +228,9 @@ if (vehicleUpdates && Object.keys(vehicleUpdates).length > 0) {
 #### 📝 Notas de Implementación
 - **Prioridad**: ALTA - Afecta flujo operativo diario
 - **Tiempo estimado**: 2-3 horas
+- **Relación con MEJORA 1**: Esta funcionalidad también aplica para walk-ins
+  - Walk-in puede crear vehículo con placa temporal
+  - Durante recepción se actualiza a placa real
 - **Archivos a modificar**:
   - `src/client/src/components/reception/VehicleReceptionForm.tsx`
   - `src/server/src/routes/reception.ts`
@@ -127,6 +239,29 @@ if (vehicleUpdates && Object.keys(vehicleUpdates).length > 0) {
   - Actualización de placa temporal a real
   - Validación de duplicados
   - Edición parcial (solo algunos campos)
+  - Flujo walk-in → placa temporal → actualización
+
+---
+
+## 🎯 RESUMEN DE MEJORAS PENDIENTES
+
+**Dos mejoras complementarias para recepción**:
+
+1. **🚪 Walk-In (SIN cita)**:
+   - Botón "Recibir Auto SIN Cita"
+   - Búsqueda/creación de cliente y vehículo
+   - Flujo completo en un solo proceso
+
+2. **✏️ Actualización de Datos**:
+   - Editar datos del vehículo durante recepción
+   - Especialmente placas temporales → reales
+   - Aplica tanto para citas como walk-ins
+
+**Orden de implementación sugerido**:
+1. Primero: MEJORA 2 (actualización de datos) - Base necesaria
+2. Segundo: MEJORA 1 (walk-in) - Usa la funcionalidad de actualización
+
+**Tiempo total estimado**: 5-7 horas
 
 ---
 
