@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { useReception } from '../hooks/useReception';
 import { VehicleReceptionForm } from '../components/reception/VehicleReceptionForm';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
 import {
   ClipboardCheck,
   Search,
@@ -85,26 +81,24 @@ export const ReceptionPage: React.FC = () => {
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="lg"
+          <button
             onClick={() => refetchAppointments()}
-            className="h-14 px-6"
+            className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-2 h-14"
           >
-            <RefreshCw className="mr-2 h-5 w-5" />
+            <RefreshCw className="h-5 w-5" />
             Actualizar
-          </Button>
+          </button>
         </div>
 
         {/* Búsqueda */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
+          <input
             type="text"
             placeholder="Buscar por placa, marca, modelo o cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-14 text-lg"
+            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
           />
         </div>
       </div>
@@ -130,7 +124,7 @@ export const ReceptionPage: React.FC = () => {
 
           {/* Grid de Citas */}
           {filteredAppointments.length === 0 ? (
-            <Card className="p-12 text-center">
+            <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
               <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 {searchTerm ? 'No se encontraron resultados' : 'No hay citas para hoy'}
@@ -140,45 +134,46 @@ export const ReceptionPage: React.FC = () => {
                   ? 'Intenta con otro término de búsqueda'
                   : 'Las citas del día aparecerán aquí'}
               </p>
-            </Card>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAppointments.map((appointment) => {
-                const hasService = appointment.services && appointment.services.length > 0;
                 const isReceived = appointment.status === 'received';
 
                 return (
-                  <Card
+                  <div
                     key={appointment.id}
-                    className={`hover:shadow-lg transition-shadow ${
+                    className={`bg-white rounded-lg shadow-sm border hover:shadow-lg transition-shadow ${
                       isReceived ? 'border-green-300 bg-green-50' : ''
                     }`}
                   >
-                    <CardHeader className="pb-4">
+                    {/* Header */}
+                    <div className="p-4 border-b">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3 flex-1">
                           <div className="p-2 bg-blue-100 rounded-lg">
                             <Car className="h-6 w-6 text-blue-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-xl font-bold text-gray-900 truncate">
+                            <h3 className="text-xl font-bold text-gray-900 truncate">
                               {appointment.vehicle.brand} {appointment.vehicle.model}
-                            </CardTitle>
+                            </h3>
                             <p className="text-sm text-gray-500">
                               {appointment.vehicle.year || ''} • {appointment.vehicle.color || 'N/A'}
                             </p>
                           </div>
                         </div>
                         {isReceived && (
-                          <Badge variant="default" className="bg-green-600">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Recibido
-                          </Badge>
+                          </span>
                         )}
                       </div>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent className="space-y-4">
+                    {/* Content */}
+                    <div className="p-4 space-y-4">
                       {/* Cliente */}
                       <div className="flex items-center gap-3 text-gray-700">
                         <User className="h-5 w-5 text-gray-400 flex-shrink-0" />
@@ -214,29 +209,29 @@ export const ReceptionPage: React.FC = () => {
                       )}
 
                       {/* Botón Recibir */}
-                      <Button
+                      <button
                         onClick={() => handleReceiveVehicle(appointment)}
                         disabled={isReceived}
-                        className={`w-full h-14 text-lg font-semibold ${
+                        className={`w-full py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 ${
                           isReceived
-                            ? 'bg-green-600 hover:bg-green-700'
-                            : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
                         {isReceived ? (
                           <>
-                            <CheckCircle className="mr-2 h-5 w-5" />
+                            <CheckCircle className="h-5 w-5" />
                             Ver Detalles
                           </>
                         ) : (
                           <>
-                            <ClipboardCheck className="mr-2 h-5 w-5" />
+                            <ClipboardCheck className="h-5 w-5" />
                             Recibir Auto
                           </>
                         )}
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>

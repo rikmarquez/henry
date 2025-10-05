@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import SignaturePad from 'react-signature-canvas';
-import { Button } from '../ui/button';
 import { RefreshCw, Check } from 'lucide-react';
 
 interface SignatureCanvasProps {
@@ -61,16 +60,15 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="flex gap-3">
-        <Button
+        <button
           type="button"
-          variant="outline"
           onClick={handleClear}
-          className="flex-1 h-14 text-base"
           disabled={isEmpty}
+          className="flex-1 h-14 text-base bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <RefreshCw className="mr-2 h-5 w-5" />
+          <RefreshCw className="h-5 w-5" />
           Limpiar Firma
-        </Button>
+        </button>
 
         {!isEmpty && (
           <div className="flex items-center gap-2 text-green-600 px-4">

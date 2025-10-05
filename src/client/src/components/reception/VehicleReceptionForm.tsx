@@ -4,12 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useReception } from '../../hooks/useReception';
 import { SignatureCanvas } from './SignatureCanvas';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Label } from '../ui/label';
 import {
   ArrowLeft,
   Car,
@@ -102,15 +96,15 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <Button
-          variant="ghost"
+        <button
+          type="button"
           onClick={onCancel}
-          className="mb-4 h-12 text-lg"
           disabled={isReceivingVehicle}
+          className="mb-4 h-12 text-lg px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
         >
           <ArrowLeft className="mr-2 h-5 w-5" />
           Volver a Lista
-        </Button>
+        </button>
 
         <div className="flex items-center gap-3">
           <div className="p-3 bg-blue-600 rounded-lg">
@@ -125,16 +119,16 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
         {/* Información del Vehículo y Cliente */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold flex items-center gap-2">
               <Car className="h-5 w-5" />
               Información del Vehículo
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </h3>
+          </div>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label className="text-base font-semibold text-gray-700">Vehículo</Label>
+              <label className="block text-base font-semibold text-gray-700">Vehículo</label>
               <p className="text-xl font-bold text-gray-900 mt-1">
                 {appointment.vehicle.brand} {appointment.vehicle.model} {appointment.vehicle.year}
               </p>
@@ -142,45 +136,45 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
             </div>
 
             <div>
-              <Label className="text-base font-semibold text-gray-700">Placa</Label>
+              <label className="block text-base font-semibold text-gray-700">Placa</label>
               <div className="mt-1 px-4 py-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg font-bold text-2xl text-gray-900 inline-block">
                 {appointment.vehicle.plate}
               </div>
             </div>
 
             <div>
-              <Label className="text-base font-semibold text-gray-700 flex items-center gap-2">
+              <label className="block text-base font-semibold text-gray-700 flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Cliente
-              </Label>
+              </label>
               <p className="text-lg font-medium text-gray-900 mt-1">{appointment.client.name}</p>
             </div>
 
             <div>
-              <Label className="text-base font-semibold text-gray-700 flex items-center gap-2">
+              <label className="block text-base font-semibold text-gray-700 flex items-center gap-2">
                 <Phone className="h-4 w-4" />
                 Teléfono
-              </Label>
+              </label>
               <p className="text-lg text-gray-900 mt-1">{appointment.client.phone}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Kilometraje */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold flex items-center gap-2">
               <Gauge className="h-5 w-5" />
               Kilometraje
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="p-4">
             <div className="flex items-center gap-4">
-              <Input
+              <input
                 type="number"
                 placeholder="Ej: 45000"
                 {...register('kilometraje', { valueAsNumber: true })}
-                className="h-16 text-2xl font-semibold max-w-xs"
+                className="h-16 text-2xl font-semibold max-w-xs w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 inputMode="numeric"
               />
               <span className="text-xl font-medium text-gray-600">km</span>
@@ -188,18 +182,18 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
             {errors.kilometraje && (
               <p className="text-red-500 text-sm mt-2">{errors.kilometraje.message}</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Nivel de Combustible */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold flex items-center gap-2">
               <Fuel className="h-5 w-5" />
               Nivel de Combustible
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {fuelLevels.map((level) => (
                 <button
@@ -220,117 +214,120 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
             {errors.nivelCombustible && (
               <p className="text-red-500 text-sm mt-2">{errors.nivelCombustible.message}</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Inspección Visual */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold flex items-center gap-2">
               <CheckCircle className="h-5 w-5" />
               Inspección Visual Rápida
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </h3>
+          </div>
+          <div className="p-4 space-y-4">
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <Checkbox
+              <input
+                type="checkbox"
                 id="lucesOk"
                 checked={watch('lucesOk')}
-                onCheckedChange={(checked) => setValue('lucesOk', checked as boolean)}
-                className="h-6 w-6"
+                onChange={(e) => setValue('lucesOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <Label htmlFor="lucesOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+              <label htmlFor="lucesOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
                 <Lightbulb className="h-5 w-5 text-yellow-600" />
                 Luces funcionando correctamente
-              </Label>
+              </label>
             </div>
 
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <Checkbox
+              <input
+                type="checkbox"
                 id="llantasOk"
                 checked={watch('llantasOk')}
-                onCheckedChange={(checked) => setValue('llantasOk', checked as boolean)}
-                className="h-6 w-6"
+                onChange={(e) => setValue('llantasOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <Label htmlFor="llantasOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+              <label htmlFor="llantasOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
                 <Circle className="h-5 w-5 text-gray-600" />
                 Llantas en buen estado
-              </Label>
+              </label>
             </div>
 
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <Checkbox
+              <input
+                type="checkbox"
                 id="cristalesOk"
                 checked={watch('cristalesOk')}
-                onCheckedChange={(checked) => setValue('cristalesOk', checked as boolean)}
-                className="h-6 w-6"
+                onChange={(e) => setValue('cristalesOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <Label htmlFor="cristalesOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+              <label htmlFor="cristalesOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
                 <Shield className="h-5 w-5 text-blue-600" />
                 Cristales completos sin daños
-              </Label>
+              </label>
             </div>
 
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <Checkbox
+              <input
+                type="checkbox"
                 id="carroceriaOk"
                 checked={watch('carroceriaOk')}
-                onCheckedChange={(checked) => setValue('carroceriaOk', checked as boolean)}
-                className="h-6 w-6"
+                onChange={(e) => setValue('carroceriaOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <Label htmlFor="carroceriaOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+              <label htmlFor="carroceriaOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
                 <Droplet className="h-5 w-5 text-gray-600" />
                 Carrocería sin golpes nuevos
-              </Label>
+              </label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Observaciones */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
               Observaciones Especiales
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
+            </h3>
+          </div>
+          <div className="p-4">
+            <textarea
               placeholder="Rayón puerta trasera, cristal estrellado, golpe defensa delantera, etc."
               {...register('observacionesRecepcion')}
-              className="min-h-[120px] text-lg"
+              className="min-h-[120px] text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <p className="text-sm text-gray-500 mt-2">
               Describa cualquier daño visible, golpe, rayón o detalle importante
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Firma Digital */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Firma del Cliente</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-4 border-b">
+            <h3 className="text-xl font-semibold">Firma del Cliente</h3>
+          </div>
+          <div className="p-4">
             <SignatureCanvas onSignatureChange={handleSignatureChange} error={signatureError} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Botones de Acción */}
         <div className="flex gap-4 pt-4">
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={onCancel}
             disabled={isReceivingVehicle}
-            className="flex-1 h-16 text-lg"
+            className="flex-1 h-16 text-lg px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
-          </Button>
-          <Button
+          </button>
+          <button
             type="submit"
             disabled={isReceivingVehicle}
-            className="flex-1 h-16 text-lg bg-green-600 hover:bg-green-700"
+            className="flex-1 h-16 text-lg px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isReceivingVehicle ? (
               <>
@@ -343,7 +340,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
                 Completar Recepción
               </>
             )}
-          </Button>
+          </button>
         </div>
       </form>
     </div>
