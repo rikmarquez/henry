@@ -15,13 +15,9 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
-// Schema para crear cliente
+// Schema para crear cliente (solo requiere whatsapp, phone se copia después)
 const clientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
-  phone: z
-    .string()
-    .min(10, 'El teléfono debe tener al menos 10 dígitos')
-    .regex(/^[+]?[\d\s-()]+$/, 'Formato de teléfono inválido'),
   whatsapp: z
     .string()
     .min(10, 'El WhatsApp debe tener al menos 10 dígitos')
