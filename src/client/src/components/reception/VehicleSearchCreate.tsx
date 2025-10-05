@@ -81,13 +81,17 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
   });
 
   const handleCreateVehicle = async (formData: VehicleFormData) => {
+    console.log('[VehicleSearchCreate] handleCreateVehicle llamado');
+    console.log('[VehicleSearchCreate] formData:', formData);
+    console.log('[VehicleSearchCreate] errors:', errors);
+
     try {
       setIsCreating(true);
       const { data } = await api.post('/vehicles', formData);
       toast.success('Vehículo creado exitosamente');
       onVehicleSelected(data);
     } catch (error: any) {
-      console.error('Error al crear vehículo:', error);
+      console.error('[VehicleSearchCreate] Error al crear vehículo:', error);
       toast.error(error.response?.data?.message || 'Error al crear vehículo');
     } finally {
       setIsCreating(false);
@@ -117,7 +121,16 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
           Cliente: <span className="font-semibold">{clientName}</span>
         </p>
 
-        <form onSubmit={handleSubmit(handleCreateVehicle)} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(
+            handleCreateVehicle,
+            (validationErrors) => {
+              console.log('[VehicleSearchCreate] Errores de validación:', validationErrors);
+              toast.error('Por favor completa los campos requeridos');
+            }
+          )}
+          className="space-y-4"
+        >
           {/* Placa */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
