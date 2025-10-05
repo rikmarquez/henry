@@ -187,7 +187,44 @@
 - ✅ **Formato profesional:** Emojis, estructura clara, calls-to-action definidos
 - ⚡ **Beneficio:** Un clic abre WhatsApp con mensaje profesional pre-escrito
 
-### 3.12 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
+### 3.12 Módulo de Recepción de Vehículos ✅ COMPLETAMENTE IMPLEMENTADO
+**Estado:** Sistema completo de recepción para tablet/desktop (Sesión 2025-10-04)
+- ✅ **Backend API completo:**
+  - POST `/api/reception/receive-vehicle` - Recibir vehículo con inspección digital
+  - GET `/api/reception/today` - Citas del día (zona horaria México UTC-6)
+  - GET `/api/reception/service/:id` - Detalles completos de servicio recibido
+- ✅ **Schema de Base de Datos:**
+  - 9 campos nuevos en tabla `services` para datos de recepción
+  - Relación `received_by` → User (recepcionista que recibió)
+  - Campos: kilometraje, nivel_combustible, checklist inspección (4 items), observaciones, firma digital, fotos
+- ✅ **Frontend Tablet/Desktop:**
+  - ReceptionPage con búsqueda y listado de citas del día
+  - VehicleReceptionForm con inspección digital completa
+  - SignatureCanvas para firma digital del cliente
+  - Auto-refresh cada 60 segundos
+  - Optimizado para pantallas táctiles
+- ✅ **Rol y Permisos:**
+  - Rol `RECEPCIONISTA_TALLER` con permisos limitados
+  - Permisos: `reception.create`, `reception.read`
+  - Disponible también para roles ADMIN y ENCARGADO
+- ✅ **Funcionalidades Operativas:**
+  - Registro de recepción física del vehículo
+  - Inspección visual con checklist (luces, llantas, cristales, carrocería)
+  - Captura de kilometraje y nivel de combustible
+  - Firma digital del cliente (base64)
+  - Observaciones especiales de recepción
+  - Creación automática de servicio en estado "Recibido"
+  - Actualización de cita a status "received"
+- ✅ **Integración Completa:**
+  - Citas → Recepción → Servicio (flujo continuo)
+  - Datos de recepción disponibles en historial del servicio
+  - Compatible con citas telefónicas y walk-ins
+- ⏳ **Pendientes Próximos:**
+  - Walk-in (recibir auto SIN cita previa)
+  - Actualización de datos de vehículo durante recepción (placas temporales)
+  - Generación de PDF de recepción con firma
+
+### 3.13 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
 **Estado:** Fase futura de desarrollo
 - ⏳ **Pendiente:** API móvil específica
 - ⏳ **Pendiente:** Autenticación por teléfono
@@ -281,7 +318,7 @@ henry/ ✅ ESTRUCTURA ACTUAL
 └── DEPLOYMENT.md               # ✅ Guía de deployment
 ```
 
-### 5.3 Diagrama de Relaciones de Base de Datos ✅ IMPLEMENTADO
+### 5.3 Diagrama de Relaciones de Base de Datos ✅ ACTUALIZADO
 
 ```mermaid
 erDiagram
@@ -295,6 +332,7 @@ erDiagram
     ROLES ||--o{ USERS : has
     USERS ||--o{ APPOINTMENTS : creates
     USERS ||--o{ SERVICES : creates
+    USERS ||--o{ SERVICES : receives_vehicle
     USERS ||--o{ OPPORTUNITIES : creates
     USERS ||--o{ STATUS_LOGS : logs
 
@@ -317,7 +355,7 @@ erDiagram
     OPPORTUNITIES ||--o{ APPOINTMENTS : creates
     SERVICES ||--o{ OPPORTUNITIES : generates
     SERVICES ||--o{ STATUS_LOGS : tracked_by
-    
+
     BRANCHES {
         int id PK
         string name
@@ -332,7 +370,7 @@ erDiagram
 
     ROLES {
         int id PK
-        string name
+        string name UK
         json permissions
         timestamp created_at
     }
@@ -340,7 +378,7 @@ erDiagram
     USERS {
         int id PK
         string name
-        string email
+        string email UK
         string phone
         string password_hash
         int role_id FK
@@ -349,7 +387,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     CLIENTS {
         int id PK
         string name
@@ -360,7 +398,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     VEHICLES {
         int id PK
         string plate UK
@@ -377,7 +415,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     MECHANICS {
         int id PK
         string name
@@ -388,7 +426,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     WORK_STATUSES {
         int id PK
         string name
@@ -396,7 +434,7 @@ erDiagram
         string color
         timestamp created_at
     }
-    
+
     APPOINTMENTS {
         int id PK
         int client_id FK
@@ -411,7 +449,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     SERVICES {
         int id PK
         int appointment_id FK
@@ -428,6 +466,17 @@ erDiagram
         decimal total_amount
         decimal truput
         decimal mechanic_commission
+        int received_by FK
+        timestamp received_at
+        int kilometraje
+        string nivel_combustible
+        boolean luces_ok
+        boolean llantas_ok
+        boolean cristales_ok
+        boolean carroceria_ok
+        text observaciones_recepcion
+        text firma_cliente
+        json fotos_recepcion
         timestamp started_at
         timestamp completed_at
         int created_by FK
@@ -435,7 +484,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     OPPORTUNITIES {
         int id PK
         int client_id FK
@@ -451,7 +500,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     STATUS_LOGS {
         int id PK
         int service_id FK
@@ -472,10 +521,32 @@ erDiagram
     }
 ```
 
-### 5.4 Estructura de Base de Datos SQL
+**Cambios principales implementados:**
+- ✅ **Tabla BRANCHES** agregada para multi-taller
+- ✅ **Campos de recepción** agregados a SERVICES (9 campos nuevos)
+- ✅ **Relación USERS → SERVICES** (received_by) para rastrear recepcionista
+- ✅ **Campos extendidos** en VEHICLES (fuel_type, transmission, engine_number, chassis_number)
+- ✅ **Sistema pricing** completo en SERVICES (labor_price, parts_price, parts_cost, truput)
+- ✅ **Tabla SETTINGS** para configuración por sucursal
+
+### 5.4 Estructura de Base de Datos SQL ✅ ACTUALIZADA
 
 ```sql
--- Usuarios y Roles
+-- ==================== MULTI-TALLER ====================
+-- Sucursales
+CREATE TABLE branches (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(20) NOT NULL UNIQUE,
+    address TEXT,
+    phone VARCHAR(20),
+    city VARCHAR(50),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==================== USUARIOS Y ROLES ====================
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -487,15 +558,16 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
-    phone VARCHAR(20) NOT NULL,
-    password_hash VARCHAR(255),
-    role_id INTEGER REFERENCES roles(id),
+    phone VARCHAR(20),
+    password_hash VARCHAR(255) NOT NULL,
+    role_id INTEGER REFERENCES roles(id) NOT NULL,
+    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Clientes
+-- ==================== CLIENTES Y VEHÍCULOS (GLOBALES) ====================
 CREATE TABLE clients (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -507,7 +579,6 @@ CREATE TABLE clients (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Vehículos
 CREATE TABLE vehicles (
     id SERIAL PRIMARY KEY,
     plate VARCHAR(20) UNIQUE NOT NULL,
@@ -515,228 +586,316 @@ CREATE TABLE vehicles (
     model VARCHAR(50) NOT NULL,
     year INTEGER,
     color VARCHAR(30),
+    fuel_type VARCHAR(20),              -- NUEVO: Tipo de combustible
+    transmission VARCHAR(20),            -- NUEVO: Transmisión
+    engine_number VARCHAR(50),           -- NUEVO: Número de motor
+    chassis_number VARCHAR(50),          -- NUEVO: Número de chasis
     client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Mecánicos
+-- ==================== MECÁNICOS (POR SUCURSAL) ====================
 CREATE TABLE mechanics (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
     commission_percentage DECIMAL(5,2) NOT NULL DEFAULT 0.00,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Estados de trabajo
-CREATE TABLE work_statuses (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    order_index INTEGER NOT NULL,
-    color VARCHAR(7) DEFAULT '#6B7280', -- Color hex para UI
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insertar estados por defecto
-INSERT INTO work_statuses (name, order_index, color) VALUES 
-('Recibido', 1, '#EF4444'),
-('Cotizado', 2, '#F59E0B'),
-('Autorizado', 3, '#3B82F6'),
-('En Proceso', 4, '#8B5CF6'),
-('Terminado', 5, '#10B981');
-
--- Citas
-CREATE TABLE appointments (
-    id SERIAL PRIMARY KEY,
-    client_id INTEGER REFERENCES clients(id),
-    vehicle_id INTEGER REFERENCES vehicles(id),
-    opportunity_id INTEGER REFERENCES opportunities(id), -- NULL si es cita nueva
-    scheduled_date TIMESTAMP NOT NULL,
-    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled, confirmed, cancelled, completed
-    notes TEXT,
-    is_from_opportunity BOOLEAN DEFAULT false,
-    created_by INTEGER REFERENCES users(id),
+    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Servicios/Trabajos
+-- ==================== ESTADOS DE TRABAJO ====================
+CREATE TABLE work_statuses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    order_index INTEGER NOT NULL,
+    color VARCHAR(7) DEFAULT '#6B7280',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Estados implementados
+INSERT INTO work_statuses (name, order_index, color) VALUES
+('Recibido', 1, '#EF4444'),
+('Cotizado', 2, '#F59E0B'),
+('Rechazado', 3, '#DC2626'),         -- NUEVO: Estado para cotizaciones rechazadas
+('En Proceso', 4, '#8B5CF6'),
+('Terminado', 5, '#10B981');
+
+-- ==================== CITAS (POR SUCURSAL) ====================
+CREATE TABLE appointments (
+    id SERIAL PRIMARY KEY,
+    client_id INTEGER REFERENCES clients(id) NOT NULL,
+    vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
+    opportunity_id INTEGER REFERENCES opportunities(id),
+    scheduled_date TIMESTAMP NOT NULL,
+    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled, confirmed, cancelled, received
+    notes TEXT,
+    is_from_opportunity BOOLEAN DEFAULT false,
+    created_by INTEGER REFERENCES users(id) NOT NULL,
+    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==================== SERVICIOS (POR SUCURSAL) ====================
 CREATE TABLE services (
     id SERIAL PRIMARY KEY,
+    -- Relaciones básicas
     appointment_id INTEGER REFERENCES appointments(id),
     client_id INTEGER REFERENCES clients(id) NOT NULL,
     vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
     mechanic_id INTEGER REFERENCES mechanics(id),
     status_id INTEGER REFERENCES work_statuses(id) DEFAULT 1,
+
+    -- Descripción del servicio
     problem_description TEXT,
     diagnosis TEXT,
     quotation_details TEXT,
-    total_amount DECIMAL(10,2) DEFAULT 0.00,
-    mechanic_commission DECIMAL(10,2) DEFAULT 0.00,
+
+    -- Sistema de pricing
+    labor_price DECIMAL(10,2) DEFAULT 0.00,           -- Precio mano de obra
+    parts_price DECIMAL(10,2) DEFAULT 0.00,           -- Precio refacciones (venta)
+    parts_cost DECIMAL(10,2) DEFAULT 0.00,            -- Costo refacciones (compra)
+    total_amount DECIMAL(10,2) DEFAULT 0.00,          -- Total del servicio
+    truput DECIMAL(10,2) DEFAULT 0.00,                -- Ganancia (parts_price - parts_cost)
+    mechanic_commission DECIMAL(10,2) DEFAULT 0.00,   -- Comisión del mecánico
+
+    -- ====== CAMPOS DE RECEPCIÓN DE VEHÍCULOS ======
+    received_by INTEGER REFERENCES users(id),         -- Usuario recepcionista
+    received_at TIMESTAMP,                            -- Fecha/hora de recepción
+    kilometraje INTEGER,                              -- Kilometraje del vehículo
+    nivel_combustible VARCHAR(10),                    -- '1/4', '1/2', '3/4', 'FULL'
+    luces_ok BOOLEAN DEFAULT true,                    -- Checklist: luces
+    llantas_ok BOOLEAN DEFAULT true,                  -- Checklist: llantas
+    cristales_ok BOOLEAN DEFAULT true,                -- Checklist: cristales
+    carroceria_ok BOOLEAN DEFAULT true,               -- Checklist: carrocería
+    observaciones_recepcion TEXT,                     -- Observaciones de recepción
+    firma_cliente TEXT,                               -- Firma digital (base64)
+    fotos_recepcion JSON,                             -- Array de fotos
+
+    -- Timestamps
     started_at TIMESTAMP,
     completed_at TIMESTAMP,
-    created_by INTEGER REFERENCES users(id),
+    created_by INTEGER REFERENCES users(id) NOT NULL,
+    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Oportunidades
+-- ==================== OPORTUNIDADES (POR SUCURSAL) ====================
 CREATE TABLE opportunities (
     id SERIAL PRIMARY KEY,
     client_id INTEGER REFERENCES clients(id) NOT NULL,
     vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
     service_id INTEGER REFERENCES services(id),
-    type VARCHAR(50) NOT NULL, -- 'MANTENIMIENTO', 'TRABAJO_PENDIENTE'
+    type VARCHAR(50) NOT NULL,          -- 'MANTENIMIENTO', 'TRABAJO_PENDIENTE'
     description TEXT NOT NULL,
     follow_up_date DATE NOT NULL,
     status VARCHAR(20) DEFAULT 'pending', -- pending, contacted, scheduled, closed
     notes TEXT,
-    created_by INTEGER REFERENCES users(id),
+    created_by INTEGER REFERENCES users(id) NOT NULL,
+    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Logs de cambios de estado
+-- ==================== LOGS DE AUDITORÍA ====================
 CREATE TABLE status_logs (
     id SERIAL PRIMARY KEY,
     service_id INTEGER REFERENCES services(id) NOT NULL,
     old_status_id INTEGER REFERENCES work_statuses(id),
     new_status_id INTEGER REFERENCES work_statuses(id) NOT NULL,
-    changed_by INTEGER REFERENCES users(id),
+    changed_by INTEGER REFERENCES users(id) NOT NULL,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índices para mejorar performance
+-- ==================== CONFIGURACIÓN (POR SUCURSAL) ====================
+CREATE TABLE settings (
+    id SERIAL PRIMARY KEY,
+    branch_id INTEGER REFERENCES branches(id) NOT NULL,
+    type VARCHAR(50) NOT NULL,          -- 'general', 'fiscal', etc.
+    data JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(branch_id, type)
+);
+
+-- ==================== ÍNDICES PARA PERFORMANCE ====================
 CREATE INDEX idx_clients_phone ON clients(phone);
 CREATE INDEX idx_vehicles_plate ON vehicles(plate);
 CREATE INDEX idx_vehicles_client ON vehicles(client_id);
 CREATE INDEX idx_services_client ON services(client_id);
 CREATE INDEX idx_services_vehicle ON services(vehicle_id);
 CREATE INDEX idx_services_status ON services(status_id);
+CREATE INDEX idx_services_branch ON services(branch_id);
 CREATE INDEX idx_appointments_date ON appointments(scheduled_date);
+CREATE INDEX idx_appointments_branch ON appointments(branch_id);
 CREATE INDEX idx_opportunities_follow_up ON opportunities(follow_up_date);
+CREATE INDEX idx_opportunities_branch ON opportunities(branch_id);
+CREATE INDEX idx_mechanics_branch ON mechanics(branch_id);
+CREATE INDEX idx_users_branch ON users(branch_id);
 ```
 
 ### 5.5 API Endpoints ✅ IMPLEMENTADOS
 
 #### Autenticación ✅
 ```
-POST /api/auth/login          # ✅ Login con email/phone y password
-POST /api/auth/logout         # ✅ Logout
-GET  /api/auth/me            # ✅ Obtener usuario actual con branch
-POST /api/auth/refresh       # ✅ Refresh token
+POST /api/auth/login              # ✅ Login con email/phone y password
+POST /api/auth/logout             # ✅ Logout
+POST /api/auth/register           # ✅ Registrar nuevo usuario (auth requerido)
+POST /api/auth/refresh            # ✅ Refresh token
+POST /api/auth/change-password    # ✅ Cambiar contraseña
+GET  /api/auth/profile            # ✅ Obtener perfil usuario actual
 ```
 
 #### Usuarios y Roles ✅
 ```
-GET    /api/users            # ✅ Listar usuarios (admin)
-POST   /api/users            # ✅ Crear usuario (admin)
-GET    /api/users/:id        # ✅ Obtener usuario
-PUT    /api/users/:id        # ✅ Actualizar usuario
-DELETE /api/users/:id        # ✅ Eliminar usuario (admin)
-GET    /api/roles            # ✅ Listar roles disponibles
+GET    /api/users                 # ✅ Listar usuarios (filtrado por branch)
+POST   /api/users                 # ✅ Crear usuario (permisos: users.create)
+GET    /api/users/:id             # ✅ Obtener usuario (permisos: users.read)
+PUT    /api/users/:id             # ✅ Actualizar usuario (permisos: users.update)
+PUT    /api/users/:id/password    # ✅ Actualizar contraseña (permisos: users.update)
+DELETE /api/users/:id             # ✅ Eliminar usuario (permisos: users.delete)
+GET    /api/users/roles           # ✅ Listar roles disponibles
 ```
 
-#### Clientes ✅ (GLOBALES)
+#### Clientes ✅ (GLOBALES - sin filtro branch)
 ```
-GET    /api/clients                    # ✅ Listar clientes (sin filtro branch)
-POST   /api/clients                    # ✅ Crear cliente
-GET    /api/clients/:id                # ✅ Obtener cliente
-PUT    /api/clients/:id                # ✅ Actualizar cliente
-DELETE /api/clients/:id                # ✅ Eliminar cliente
-GET    /api/clients/search?q={query}   # ✅ Buscar clientes (frontend filtering)
-```
-
-#### Vehículos ✅ (GLOBALES)
-```
-GET    /api/vehicles                      # ✅ Listar vehículos (sin filtro branch)
-POST   /api/vehicles                      # ✅ Crear vehículo
-GET    /api/vehicles/:id                  # ✅ Obtener vehículo
-PUT    /api/vehicles/:id                  # ✅ Actualizar vehículo
-DELETE /api/vehicles/:id                  # ✅ Eliminar vehículo
-GET    /api/vehicles/search?q={query}     # ✅ Buscar vehículos (frontend filtering)
-GET    /api/vehicles/client/:clientId     # ✅ Vehículos de un cliente
-GET    /api/vehicles/:id/history          # ✅ Historial de servicios
+GET    /api/clients               # ✅ Listar clientes con paginación
+POST   /api/clients               # ✅ Crear cliente
+GET    /api/clients/:id           # ✅ Obtener cliente con detalles
+PUT    /api/clients/:id           # ✅ Actualizar cliente
+DELETE /api/clients/:id           # ✅ Eliminar cliente
+POST   /api/clients/:id/activate  # ✅ Activar/desactivar cliente
 ```
 
-#### Citas ✅ (POR SUCURSAL)
+#### Vehículos ✅ (GLOBALES - sin filtro branch)
 ```
-GET    /api/appointments                    # ✅ Listar citas (filtrado por branch)
-POST   /api/appointments                    # ✅ Crear cita (nueva o desde oportunidad)
-POST   /api/appointments/from-opportunity   # ✅ Crear cita desde oportunidad
-GET    /api/appointments/:id                # ✅ Obtener cita
-PUT    /api/appointments/:id                # ✅ Actualizar cita
-DELETE /api/appointments/:id                # ✅ Cancelar cita
-GET    /api/appointments/date/:date         # ✅ Citas por fecha
-GET    /api/appointments/calendar           # ✅ Vista calendario (mensual/diaria)
+GET    /api/vehicles                  # ✅ Listar vehículos con paginación
+POST   /api/vehicles                  # ✅ Crear vehículo
+GET    /api/vehicles/:id              # ✅ Obtener vehículo con detalles
+PUT    /api/vehicles/:id              # ✅ Actualizar vehículo
+DELETE /api/vehicles/:id              # ✅ Eliminar vehículo
+POST   /api/vehicles/:id/activate     # ✅ Activar/desactivar vehículo
+GET    /api/vehicles/by-client/:clientId  # ✅ Vehículos de un cliente específico
 ```
 
-#### Servicios ✅ (POR SUCURSAL)
+#### Citas ✅ (POR SUCURSAL - filtrado por branchId)
 ```
-GET    /api/services                      # ✅ Listar servicios (filtrado por branch)
+GET    /api/appointments                      # ✅ Listar citas con filtros (branch, fecha, status)
+POST   /api/appointments                      # ✅ Crear cita nueva
+POST   /api/appointments/from-opportunity     # ✅ Crear cita desde oportunidad
+GET    /api/appointments/:id                  # ✅ Obtener cita con detalles
+PUT    /api/appointments/:id                  # ✅ Actualizar/reagendar cita
+DELETE /api/appointments/:id                  # ✅ Cancelar cita
+POST   /api/appointments/:id/confirm          # ✅ Confirmar cita
+POST   /api/appointments/:id/complete         # ✅ Marcar cita como completada
+```
+
+#### Servicios ✅ (POR SUCURSAL - filtrado por branchId)
+```
+GET    /api/services                      # ✅ Listar servicios con filtros
 POST   /api/services                      # ✅ Crear servicio
-GET    /api/services/:id                  # ✅ Obtener servicio
-PUT    /api/services/:id                  # ✅ Actualizar servicio
-PUT    /api/services/:id/status           # ✅ Cambiar estado (con logs)
+GET    /api/services/:id                  # ✅ Obtener servicio con detalles completos
+PUT    /api/services/:id                  # ✅ Actualizar servicio (info general)
+PUT    /api/services/:id/status           # ✅ Cambiar estado (con log automático)
 DELETE /api/services/:id                  # ✅ Eliminar servicio
-GET    /api/services/vehicle/:vehicleId   # ✅ Servicios por vehículo
-GET    /api/services/client/:clientId     # ✅ Servicios por cliente
-GET    /api/services/mechanic/:mechanicId # ✅ Servicios por mecánico
+POST   /api/services/:id/activate         # ✅ Activar/desactivar servicio
+POST   /api/services/:id/assign-mechanic  # ✅ Asignar mecánico a servicio
+GET    /api/services/vehicle/:vehicleId   # ✅ Historial servicios de un vehículo
+GET    /api/services/client/:clientId     # ✅ Historial servicios de un cliente
 ```
 
-#### Oportunidades ✅ (POR SUCURSAL)
+#### Recepción de Vehículos ✅ NUEVO (POR SUCURSAL)
 ```
-GET    /api/opportunities                 # ✅ Listar oportunidades (filtrado por branch)
-POST   /api/opportunities                 # ✅ Crear oportunidad
-GET    /api/opportunities/:id             # ✅ Obtener oportunidad
+POST   /api/reception/receive-vehicle     # ✅ Recibir vehículo con inspección completa
+GET    /api/reception/today               # ✅ Citas del día para recepción (zona horaria MX)
+GET    /api/reception/service/:id         # ✅ Detalles completos de servicio recibido
+```
+**Permisos requeridos**: `reception.create` y `reception.read`
+**Campos de recepción**: kilometraje, nivel combustible, checklist inspección, firma digital, fotos
+
+#### Oportunidades ✅ (POR SUCURSAL - filtrado por branchId)
+```
+GET    /api/opportunities                 # ✅ Listar oportunidades con filtros
+POST   /api/opportunities                 # ✅ Crear oportunidad manualmente
+POST   /api/opportunities/from-service    # ✅ Crear oportunidad desde servicio completado
+GET    /api/opportunities/:id             # ✅ Obtener oportunidad con detalles
 PUT    /api/opportunities/:id             # ✅ Actualizar oportunidad
 DELETE /api/opportunities/:id             # ✅ Eliminar oportunidad
-GET    /api/opportunities/due             # ✅ Oportunidades próximas
-PUT    /api/opportunities/:id/schedule    # ✅ Convertir oportunidad en cita
+POST   /api/opportunities/:id/schedule    # ✅ Convertir oportunidad en cita
+POST   /api/opportunities/:id/contact     # ✅ Marcar como contactada
+GET    /api/opportunities/due             # ✅ Oportunidades próximas a follow-up
 ```
 
-#### Mecánicos y Comisiones ✅ (POR SUCURSAL)
+#### Mecánicos ✅ (POR SUCURSAL - filtrado por branchId)
 ```
-GET    /api/mechanics                     # ✅ Listar mecánicos (filtrado por branch)
+GET    /api/mechanics                     # ✅ Listar mecánicos de la sucursal
 POST   /api/mechanics                     # ✅ Crear mecánico
-GET    /api/mechanics/:id                 # ✅ Obtener mecánico
+GET    /api/mechanics/:id                 # ✅ Obtener mecánico con estadísticas
 PUT    /api/mechanics/:id                 # ✅ Actualizar mecánico
-GET    /api/mechanics/:id/commissions     # ⏳ Comisiones por mecánico (pendiente)
-GET    /api/reports/commissions           # ⏳ Reporte de comisiones (pendiente)
+DELETE /api/mechanics/:id                 # ✅ Eliminar mecánico
+POST   /api/mechanics/:id/activate        # ✅ Activar/desactivar mecánico
+GET    /api/mechanics/debug-schema        # ✅ Debug endpoint para verificación schema
 ```
 
-#### Dashboard y Reportes ✅ (POR SUCURSAL)
+#### Dashboard y Reportes ✅ (POR SUCURSAL - filtrado por branchId)
 ```
-GET    /api/reports/dashboard             # ✅ Dashboard con KPIs y gráficos
-GET    /api/reports/daily                 # ⏳ Reporte diario (pendiente)
-GET    /api/reports/monthly               # ⏳ Reporte mensual (pendiente)
-GET    /api/reports/services              # ⏳ Reporte de servicios (pendiente)
+GET    /api/reports/dashboard             # ✅ KPIs completos (ingresos, servicios, gráficos)
+GET    /api/reports/test                  # ✅ Test endpoint básico
+GET    /api/reports/step1                 # ✅ Debug: verificar conteo básico
+GET    /api/reports/step2                 # ✅ Debug: verificar servicios con detalles
+GET    /api/reports/step3                 # ✅ Debug: verificar serialización BigInt
 ```
+**KPIs implementados**: Total ingresos, mano de obra, precio refacciones, servicios por estado, productividad mecánicos
 
-#### Sucursales y Configuración ✅ (SOLO ADMIN)
+#### Sucursales ✅ (SOLO ADMIN - permisos: branches.*)
 ```
-GET    /api/branches                      # ✅ Listar sucursales
-POST   /api/branches                      # ✅ Crear sucursal
-GET    /api/branches/:id                  # ✅ Obtener sucursal
+GET    /api/branches                      # ✅ Listar todas las sucursales
+GET    /api/branches/active               # ✅ Listar solo sucursales activas
+POST   /api/branches                      # ✅ Crear nueva sucursal
+GET    /api/branches/:id                  # ✅ Obtener sucursal específica
 PUT    /api/branches/:id                  # ✅ Actualizar sucursal
 DELETE /api/branches/:id                  # ✅ Eliminar sucursal
-GET    /api/settings                      # ✅ Obtener configuración por sucursal
-POST   /api/settings                      # ✅ Guardar configuración
+GET    /api/branches/debug-table          # ✅ Debug endpoint para verificación tabla
 ```
 
-#### Estados de Trabajo y Logs ✅
+#### Configuración ✅ (POR SUCURSAL - permisos: settings.*)
 ```
-GET    /api/workstatus                    # ✅ Listar estados de trabajo
-GET    /api/statuslogs/service/:id        # ✅ Logs de un servicio
+GET    /api/settings                      # ✅ Obtener configuración por branch y type
+POST   /api/settings                      # ✅ Guardar/actualizar configuración
+PUT    /api/settings/:id                  # ✅ Actualizar configuración específica
+```
+**Tipos de configuración**: general, fiscal, horarios, notificaciones
+
+#### Estados de Trabajo ✅
+```
+GET    /api/workstatus                    # ✅ Listar todos los estados con colores
+GET    /api/workstatus/:id                # ✅ Obtener estado específico
+POST   /api/workstatus                    # ✅ Crear estado personalizado
+PUT    /api/workstatus/:id                # ✅ Actualizar estado
+DELETE /api/workstatus/:id                # ✅ Eliminar estado
+POST   /api/workstatus/:id/activate       # ✅ Activar/desactivar estado
+```
+
+#### Logs de Auditoría ✅
+```
+GET    /api/statuslogs                    # ✅ Listar todos los logs con paginación
+GET    /api/statuslogs/:id                # ✅ Obtener log específico
+GET    /api/statuslogs/service/:serviceId # ✅ Logs de un servicio específico
+GET    /api/statuslogs/user/:userId       # ✅ Logs de cambios por usuario
+GET    /api/statuslogs/date/:date         # ✅ Logs por fecha
 ```
 
 #### Utilidades ✅
 ```
-GET    /api/health                        # ✅ Health check
-GET    /api/debug                         # ✅ Debug info para Railway
+GET    /api/health                        # ✅ Health check (status, timestamp, env, version)
+GET    /api/debug                         # ✅ Debug completo (DB connection, counts, admin user)
 ```
 
 #### API Móvil (Propietarios) ⏳ NO IMPLEMENTADO
@@ -744,7 +903,17 @@ GET    /api/debug                         # ✅ Debug info para Railway
 POST   /api/mobile/auth                   # ⏳ Login móvil con teléfono
 GET    /api/mobile/vehicles/:phone        # ⏳ Vehículos del propietario
 GET    /api/mobile/services/:vehicleId    # ⏳ Servicios de un vehículo
+GET    /api/mobile/notifications          # ⏳ Notificaciones push
 ```
+
+#### Notas importantes sobre los endpoints:
+- **Autenticación**: Todos los endpoints (excepto `/auth/login`) requieren JWT token válido
+- **Autorización**: Sistema de permisos granular por recurso y acción (read, create, update, delete)
+- **Paginación**: Endpoints de listado soportan `?page=N&limit=M` (default: page=1, limit=20)
+- **Filtrado**: Múltiples filtros por query params (search, status, dateFrom, dateTo, etc.)
+- **Serialización BigInt**: Todos los endpoints serializan BigInt a string para compatibilidad JSON
+- **Multi-tenant**: Endpoints marcados como "POR SUCURSAL" filtran automáticamente por `branchId` del JWT
+- **Globales**: Clientes y vehículos NO tienen filtro de sucursal (disponibles para todos)
 
 ### 5.6 Características Técnicas Específicas ✅ IMPLEMENTADAS
 
