@@ -18,7 +18,24 @@ import {
   Shield,
   Droplet,
 } from 'lucide-react';
-import { vehicleReceptionSchema } from '../../../../shared/schemas/service.schema';
+
+// Schema de validación local para el frontend
+const vehicleReceptionSchema = z.object({
+  appointmentId: z.number().optional(),
+  clientId: z.number(),
+  vehicleId: z.number(),
+  kilometraje: z.number().int().min(0, 'El kilometraje debe ser mayor o igual a 0'),
+  nivelCombustible: z.enum(['1/4', '1/2', '3/4', 'FULL'], {
+    errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
+  }),
+  lucesOk: z.boolean().default(true),
+  llantasOk: z.boolean().default(true),
+  cristalesOk: z.boolean().default(true),
+  carroceriaOk: z.boolean().default(true),
+  observacionesRecepcion: z.string().optional(),
+  firmaCliente: z.string().min(1, 'La firma del cliente es requerida'),
+  fotosRecepcion: z.array(z.string()).optional(),
+});
 
 type VehicleReceptionFormData = z.infer<typeof vehicleReceptionSchema>;
 
