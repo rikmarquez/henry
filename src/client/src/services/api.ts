@@ -13,19 +13,28 @@ export const api = axios.create({
 // Interceptor para requests - agregar token automáticamente
 api.interceptors.request.use(
   (config) => {
+    console.log('[API Interceptor] Procesando request a:', config.url);
+
     // Intentar obtener el token de localStorage
     const authData = localStorage.getItem('henry-auth');
+    console.log('[API Interceptor] authData existe?:', !!authData);
+
     if (authData) {
       try {
         const parsed = JSON.parse(authData);
         const token = parsed.state?.token;
+        console.log('[API Interceptor] Token parseado:', token ? '✓ Existe' : '✗ NO existe');
+
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+          console.log('[API Interceptor] Header Authorization configurado:', config.headers.Authorization?.substring(0, 30) + '...');
         }
       } catch (e) {
-        console.error('Error parsing auth data:', e);
+        console.error('[API Interceptor] Error parsing auth data:', e);
       }
     }
+
+    console.log('[API Interceptor] Headers finales:', config.headers);
     return config;
   },
   (error) => {
