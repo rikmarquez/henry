@@ -94,6 +94,8 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
     }
 
     try {
+      console.log('[VehicleReceptionForm] Datos del formulario:', data);
+
       // Filtrar solo campos que tengan valor en vehicleUpdates
       const vehicleUpdates = data.vehicleUpdates
         ? Object.fromEntries(
@@ -107,10 +109,16 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
         vehicleUpdates: vehicleUpdates && Object.keys(vehicleUpdates).length > 0 ? vehicleUpdates : undefined,
       };
 
+      console.log('[VehicleReceptionForm] Payload a enviar:', payload);
+
       await receiveVehicleAsync(payload);
+
+      console.log('[VehicleReceptionForm] Recepción exitosa');
       onComplete();
     } catch (error: any) {
-      console.error('Error al recibir vehículo:', error);
+      console.error('[VehicleReceptionForm] Error completo:', error);
+      console.error('[VehicleReceptionForm] Error response:', error?.response);
+      console.error('[VehicleReceptionForm] Error data:', error?.response?.data);
 
       // Manejar error de placa duplicada
       if (error?.response?.status === 409 && error?.response?.data?.code === 'DUPLICATE_PLATE') {
@@ -123,6 +131,11 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
           // Cliente diferente - mostrar error
           alert(`Error: La placa ya está registrada para otro cliente: ${errorData.existingVehicle.client.name}\n\nPor favor, verifica la placa ingresada.`);
         }
+      } else {
+        // Otros errores - mostrar mensaje genérico
+        const errorMessage = error?.response?.data?.message || error?.message || 'Error desconocido al recibir vehículo';
+        console.error('[VehicleReceptionForm] Mostrando error al usuario:', errorMessage);
+        alert(`Error: ${errorMessage}\n\nPor favor, verifica la consola para más detalles.`);
       }
     }
   };
