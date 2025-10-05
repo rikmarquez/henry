@@ -93,8 +93,15 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
     try {
       setIsCreating(true);
       const { data } = await api.post('/vehicles', formData);
+      console.log('[VehicleSearchCreate] Response completa:', data);
+
+      // La respuesta tiene estructura: { success, data: { vehicle: {...} } }
+      const vehicleData = data.data?.vehicle || data.vehicle || data.data || data;
+      console.log('[VehicleSearchCreate] Vehículo extraído:', vehicleData);
+      console.log('[VehicleSearchCreate] Vehículo ID:', vehicleData?.id);
+
       toast.success('Vehículo creado exitosamente');
-      onVehicleSelected(data);
+      onVehicleSelected(vehicleData);
     } catch (error: any) {
       console.error('[VehicleSearchCreate] Error al crear vehículo:', error);
       toast.error(error.response?.data?.message || 'Error al crear vehículo');

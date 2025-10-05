@@ -90,13 +90,13 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
 
       const { data } = await api.post('/clients', dataToSend);
       console.log('[ClientSearchCreate] Response completa:', data);
-      console.log('[ClientSearchCreate] Cliente creado con ID:', data?.id || data?.data?.id);
+
+      // La respuesta tiene estructura: { success, data: { client: {...} } }
+      const clientData = data.data?.client || data.client || data.data || data;
+      console.log('[ClientSearchCreate] Cliente extraído:', clientData);
+      console.log('[ClientSearchCreate] Cliente ID:', clientData?.id);
 
       toast.success('Cliente creado exitosamente');
-
-      // Asegurarse de pasar el objeto cliente correcto
-      const clientData = data.data || data;
-      console.log('[ClientSearchCreate] Pasando cliente a onClientSelected:', clientData);
       onClientSelected(clientData);
     } catch (error: any) {
       console.error('[ClientSearchCreate] Error al crear cliente:', error);
