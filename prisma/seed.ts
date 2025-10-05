@@ -90,7 +90,8 @@ async function main() {
         vehicles: ['create', 'read', 'update'],
         appointments: ['read'],
         services: ['create', 'read', 'update'],
-        reception: ['create', 'read']
+        reception: ['create', 'read'],
+        reports: ['read']
       },
     },
     create: {
@@ -100,7 +101,8 @@ async function main() {
         vehicles: ['create', 'read', 'update'],
         appointments: ['read'],
         services: ['create', 'read', 'update'],
-        reception: ['create', 'read']
+        reception: ['create', 'read'],
+        reports: ['read']
       },
     },
   });
