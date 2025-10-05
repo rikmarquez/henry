@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 router.post(
   '/receive-vehicle',
   authenticate,
-  authorize('reception', 'create'),
+  authorize(['reception'], ['create']),
   validate(vehicleReceptionSchema),
   async (req, res) => {
     try {
@@ -121,7 +121,7 @@ router.post(
 router.get(
   '/today',
   authenticate,
-  authorize('reception', 'read'),
+  authorize(['reception'], ['read']),
   async (req, res) => {
     try {
       const branchId = req.user?.branchId;
@@ -191,7 +191,7 @@ router.get(
 router.get(
   '/service/:id',
   authenticate,
-  authorize('reception', 'read'),
+  authorize(['reception'], ['read']),
   async (req, res) => {
     try {
       const serviceId = parseInt(req.params.id);
