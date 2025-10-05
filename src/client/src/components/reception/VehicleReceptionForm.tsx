@@ -21,7 +21,7 @@ import {
 
 // Schema de validación local para el frontend
 const vehicleReceptionSchema = z.object({
-  appointmentId: z.number().optional(),
+  appointmentId: z.number().nullable().optional(),
   clientId: z.number(),
   vehicleId: z.number(),
   kilometraje: z.number().int().min(0, 'El kilometraje debe ser mayor o igual a 0'),
