@@ -87,8 +87,12 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
   const nivelCombustible = watch('nivelCombustible');
 
   const onSubmit = async (data: VehicleReceptionFormData) => {
+    console.log('[VehicleReceptionForm] ========== INICIO onSubmit ==========');
+    console.log('[VehicleReceptionForm] Signature existe?:', !!signature);
+
     // Validar firma
     if (!signature) {
+      console.log('[VehicleReceptionForm] ERROR: No hay firma');
       setSignatureError('La firma del cliente es requerida');
       return;
     }
@@ -508,6 +512,7 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
           <button
             type="submit"
             disabled={isReceivingVehicle}
+            onClick={() => console.log('[VehicleReceptionForm] Botón submit clickeado')}
             className="flex-1 h-16 text-lg px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isReceivingVehicle ? (
