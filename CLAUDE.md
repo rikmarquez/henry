@@ -2,14 +2,16 @@
 
 ## 📋 Context inicial importante
 **OBLIGATORIO AL INICIO DE CADA SESIÓN:**
-1. **Leer STATUS.md** - Estado actual del desarrollo y última sesión
-2. **Leer ESPECIFICACION.md** - Arquitectura y módulos implementados
-3. **Leer APRENDIZAJES.md** - Lecciones técnicas y errores a evitar ⭐ NUEVO
+1. **Leer STATUS.md** - Estado actual y última sesión
+2. **Leer ESPECIFICACION.md** - Funcionalidades y módulos
+3. **Leer APRENDIZAJES.md** - Lecciones técnicas y errores a evitar
+4. **Opcional: ARQUITECTURA.md** - Solo si necesitas detalles técnicos (BD, API, deployment)
 
 **OBLIGATORIO AL FINAL DE CADA SESIÓN:**
 1. **Actualizar STATUS.md** - Última sesión y cambios realizados
 2. **Actualizar APRENDIZAJES.md** - Si se encontraron bugs o lecciones nuevas
-3. **Actualizar ESPECIFICACION.md** - Si hay cambios arquitectónicos o nuevos módulos
+3. **Actualizar ESPECIFICACION.md** - Si hay nuevos módulos o funcionalidades
+4. **Actualizar ARQUITECTURA.md** - Si hay cambios en BD, API o deployment
 
 ## 🎯 Objetivo del Proyecto
 Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web completa para gestionar clientes, vehículos, servicios, mecánicos y operaciones del taller.
@@ -99,12 +101,13 @@ Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web co
 - Mejores prácticas identificadas
 - **Leer APRENDIZAJES.md antes de deployment** para evitar errores conocidos
 
-## 📖 Archivos de Documentación
-- **CLAUDE.md** - Este archivo (memoria del proyecto)
-- **STATUS.md** - Estado actual y última sesión (simplificado)
-- **ESPECIFICACION.md** - Arquitectura técnica completa
+## 📖 Sistema de Documentación (4 archivos principales)
+- **CLAUDE.md** - Este archivo (memoria y protocolo del proyecto)
+- **STATUS.md** - Estado actual y última sesión (simplificado, 292 líneas)
+- **ESPECIFICACION.md** - Funcionalidades y módulos (simplificado, 443 líneas)
+- **ARQUITECTURA.md** - Detalles técnicos: BD, API, deployment ⭐ NUEVO
 - **APRENDIZAJES.md** - Lecciones técnicas y debugging ⭐ NUEVO
-- **DEPLOYMENT.md** - Guía de deployment Railway
+- **DEPLOYMENT.md** - Guía de deployment Railway (legacy)
 
 ---
 *Archivo creado: 2025-08-20*

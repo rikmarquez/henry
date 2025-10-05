@@ -1,12 +1,19 @@
-# Especificación Técnica Completa - App Henry Diagnostics
+# ESPECIFICACION.md - Henry Diagnostics App
+
+## 📚 Propósito
+Este documento describe **funcionalidades y módulos del sistema**. Para detalles técnicos (BD, API, deployment), ver `ARQUITECTURA.md`.
+
+---
 
 ## 1. Información General
 - **Nombre del Taller:** Henry Diagnostics
 - **Tipo de Sistema:** Aplicación web responsiva para gestión integral de taller mecánico
-- **Plataformas:** 
+- **Plataformas:**
   - Desktop/Tablet: Operación completa del taller
-  - Móvil: Consulta de status para propietarios
+  - Móvil: Interfaz adaptativa para citas + consulta de status (futuro)
 - **Estado Actual:** ✅ Sistema 100% funcional con multi-taller implementado
+
+---
 
 ## 2. Flujo de Operaciones Implementado ✅
 
@@ -18,9 +25,9 @@
 5. **Autorización** - Cliente aprueba el trabajo
 6. **Proceso de Trabajo** - Ejecución de reparaciones
 7. **Finalización y Cobro** - Se termina y cobra el trabajo
-8. **Creación de Oportunidades** - Para trabajos futuros/recurrentes (con todos los datos completos)
+8. **Creación de Oportunidades** - Para trabajos futuros/recurrentes
 9. **Seguimiento** - Una semana antes de fecha pactada
-10. **Nueva Cita desde Oportunidad** - Con datos pre-cargados, salto directo al paso 2
+10. **Nueva Cita desde Oportunidad** - Con datos pre-cargados
 
 ### Flujos de Citas:
 **Flujo A - Cita Nueva (telefónica):**
@@ -32,56 +39,67 @@
 - Al llegar: directo a "Recibido" sin captura adicional de datos
 - Referencia a la oportunidad origen
 
-## 3. Módulos del Sistema ✅ COMPLETADOS
+**Flujo C - Walk-In (sin cita previa):**
+- Cliente llega sin cita
+- Recepcionista usa flujo de 3 pasos: Cliente → Vehículo → Recepción
+- Se crea servicio sin cita asociada
 
-### 3.1 Módulo de Usuarios y Roles ✅ IMPLEMENTADO
-- **ADMIN:** Gestión completa de usuarios, roles, sucursales y configuración
-- **RECEPCIONISTA:** Dashboard, citas, clientes, vehículos, servicios y oportunidades
-- **MECANICO:** Solo lectura para consultas básicas
-- **Sistema de permisos granular:** Implementado con PermissionGate
-- **Multi-sucursal:** Segregación automática por branchId en JWT
+---
 
-### 3.2 Módulo de Citas ✅ IMPLEMENTADO + OPTIMIZACIÓN MÓVIL COMPLETA
-**Funcionalidades implementadas:**
+## 3. Módulos del Sistema ✅
+
+### 3.1 Módulo de Usuarios y Roles ✅
+**Funcionalidades**:
+- Sistema multi-sucursal con segregación por `branchId`
+- 4 roles implementados: ADMIN, RECEPCIONISTA, RECEPCIONISTA_TALLER, ENCARGADO
+- Permisos granulares por recurso y acción
+- PermissionGate en frontend para ocultar UI no autorizada
+- Middleware de autorización en backend
+
+**Roles principales**:
+- **ADMIN**: Acceso completo, gestión de usuarios, roles y sucursales
+- **RECEPCIONISTA**: Dashboard, citas, clientes, vehículos, servicios, oportunidades
+- **RECEPCIONISTA_TALLER**: Dashboard, recepción, citas (lectura), servicios limitados
+- **ENCARGADO**: Similar a recepcionista con más permisos
+
+---
+
+### 3.2 Módulo de Citas ✅
+**Funcionalidades implementadas**:
 - ✅ Citas nuevas (telefónicas) con información básica
 - ✅ Citas desde oportunidades con datos pre-cargados
 - ✅ Calendario diario (8:00 AM - 7:00 PM) y vista mensual
 - ✅ Creación de vehículos inline desde modal de citas
 - ✅ Vista mensual muestra vehículo (marca+modelo) en lugar de cliente
 - ✅ Integración completa con workflow de servicios
-- ✅ **NUEVO: Interfaz móvil adaptativa completa**
+- ✅ Sistema de impresión y exportación Excel
 
-**Optimización Móvil (2025-09-28):**
-- ✅ **Auto-detección dispositivo**: Hook `useIsMobile()` detecta automáticamente móviles (< 768px)
-- ✅ **Vista por defecto adaptativa**: Lista en móvil vs Semana en desktop
-- ✅ **Componentes móviles específicos**:
-  - `MobileAppointmentCard.tsx`: Cards expandibles con información jerárquizada
-  - `MobileNavigation.tsx`: Navegación simplificada (Lista/Hoy/Mes)
-  - `MobileAppointmentsList.tsx`: Lista optimizada con pull-to-refresh
-- ✅ **Funcionalidades táctiles**:
-  - Pull-to-refresh nativo para actualizar datos
-  - Cards expandibles con tap (información esencial + detalles)
-  - Enlaces directos para llamadas telefónicas (tel:)
-  - Botones grandes optimizados para dedos
-- ✅ **Acciones rápidas móviles**:
-  - Confirmar/Cancelar/Recibir Auto directamente desde cards
-  - WhatsApp integrado con recordatorios en cada card
-  - Paginación táctil con botones grandes
-- ✅ **Experiencia unificada**: Misma funcionalidad adaptada por dispositivo
-- ✅ **Performance optimizada**: Componentes ligeros específicos para móvil
-- ✅ **Integración WhatsApp móvil**: Acceso rápido a recordatorios desde cards
+**Optimización Móvil**:
+- ✅ Auto-detección de dispositivo móvil (< 768px)
+- ✅ Vista lista por defecto en móvil vs semana en desktop
+- ✅ Componentes móviles específicos: MobileAppointmentCard, MobileNavigation
+- ✅ Pull-to-refresh nativo
+- ✅ Cards expandibles con información jerárquizada
+- ✅ Enlaces directos para llamadas telefónicas
+- ✅ Acciones rápidas: Confirmar/Cancelar/Recibir desde cards
+- ✅ WhatsApp integrado en cada card
 
-### 3.3 Módulo de Clientes ✅ IMPLEMENTADO
-**Funcionalidades implementadas:**
+---
+
+### 3.3 Módulo de Clientes ✅
+**Funcionalidades**:
 - ✅ CRUD completo de clientes
 - ✅ Frontend-Only Filtering (búsqueda sin pérdida de foco)
 - ✅ Información: nombre, teléfono, WhatsApp, email, dirección
 - ✅ Historial completo de servicios por cliente
 - ✅ Paginación local con límite 1000 registros
-- ✅ Permisos granulares por rol de usuario
+- ✅ **GLOBALES**: Disponibles en todas las sucursales
+- ✅ Búsqueda inteligente en dashboard para prevenir duplicados
 
-### 3.4 Módulo de Vehículos ✅ IMPLEMENTADO
-**Funcionalidades implementadas:**
+---
+
+### 3.4 Módulo de Vehículos ✅
+**Funcionalidades**:
 - ✅ CRUD completo de vehículos
 - ✅ Frontend-Only Filtering (búsqueda sin pérdida de foco)
 - ✅ Campos: placa, marca, modelo, año, color, tipo combustible, transmisión
@@ -89,12 +107,16 @@
 - ✅ Cliente propietario con relación cascada
 - ✅ Historial completo de servicios
 - ✅ Notas especiales por vehículo
-- ✅ **GLOBAL:** Vehículos disponibles en todas las sucursales
+- ✅ **GLOBALES**: Vehículos disponibles en todas las sucursales
+- ✅ Soporte para placas temporales (TEMP-xxxxx)
 
-### 3.5 Módulo de Servicios/Trabajos ✅ IMPLEMENTADO
-**Funcionalidades implementadas:**
+---
+
+### 3.5 Módulo de Servicios/Trabajos ✅
+**Funcionalidades**:
 - ✅ CRUD completo de servicios
-- ✅ Sistema de estados con workflow: Recibido → Cotizado → Autorizado → En Proceso → Terminado
+- ✅ Sistema de estados con workflow: Recibido → Cotizado → En Proceso → Terminado
+- ✅ Estado adicional: Rechazado (para cotizaciones no aprobadas)
 - ✅ Vista Kanban con drag & drop entre estados
 - ✅ Sistema de pricing completo: labor_price, parts_price, parts_cost, total_amount, truput
 - ✅ Mecánico asignado con cálculo automático de comisiones
@@ -102,13 +124,20 @@
 - ✅ Timestamps automáticos (started_at, completed_at)
 - ✅ Logs de auditoría de cambios de estado
 - ✅ Segregación por sucursal (branchId)
-- ✅ **Integración con citas:** Creación de servicios desde citas confirmadas
-- ✅ **Edición de vehículos inline:** Campos editables en formulario de servicios desde citas
-- ✅ **Precarga automática:** Campo automóvil se precarga correctamente en edición
-- ✅ **Actualización de datos:** Auto-actualización de vehículo al crear servicio desde cita
+- ✅ Integración con citas y recepción
+- ✅ Campos de recepción: kilometraje, combustible, checklist, firma, fotos
 
-### 3.6 Módulo de Búsqueda y Consultas ✅ IMPLEMENTADO
-**Funcionalidades implementadas:**
+**Estados de Trabajo**:
+1. **Recibido** (#EF4444) - Vehículo recibido en taller
+2. **Cotizado** (#F59E0B) - Cotización generada
+3. **En Proceso** (#8B5CF6) - Trabajo en ejecución
+4. **Terminado** (#10B981) - Trabajo completado (genera ingresos)
+5. **Rechazado** (#DC2626) - Cotización rechazada (NO genera ingresos)
+
+---
+
+### 3.6 Módulo de Búsqueda y Consultas ✅
+**Funcionalidades**:
 - ✅ Frontend-Only Filtering en clientes y vehículos
 - ✅ Búsqueda por nombre de cliente
 - ✅ Búsqueda por placa de vehículo
@@ -117,20 +146,12 @@
 - ✅ Filtros por fecha de servicio en dashboard
 - ✅ Historial completo por cliente/vehículo
 - ✅ Autocompletado inteligente para grandes DBs
+- ✅ Sección prominente en dashboard para prevenir duplicados
 
-### 3.7 Módulo de Estados de Trabajo ✅ IMPLEMENTADO
-**Estados implementados:**
-- ✅ **Recibido** (color: #EF4444)
-- ✅ **Cotizado** (color: #F59E0B)
-- ✅ **Autorizado** (color: #3B82F6)
-- ✅ **En Proceso** (color: #8B5CF6)
-- ✅ **Terminado** (color: #10B981)
-- ✅ Workflow con validaciones de transiciones
-- ✅ Vista Kanban con drag & drop
-- ✅ Logs automáticos de cambios de estado
+---
 
-### 3.8 Módulo de Oportunidades ✅ IMPLEMENTADO
-**Funcionalidades implementadas:**
+### 3.7 Módulo de Oportunidades ✅
+**Funcionalidades**:
 - ✅ CRUD completo de oportunidades
 - ✅ Tipos: MANTENIMIENTO, TRABAJO_PENDIENTE
 - ✅ Fecha de seguimiento (follow_up_date)
@@ -139,1263 +160,205 @@
 - ✅ Referencia bidireccional oportunidad ↔ cita
 - ✅ Segregación por sucursal (branchId)
 - ✅ Modal de detalles con vista completa
+- ✅ WhatsApp integrado para seguimiento
+
+---
+
+### 3.8 Módulo de Recepción de Vehículos ✅
+**Estado**: Sistema completo implementado (2025-10-04 + 2025-10-05)
+
+**Funcionalidades con Cita**:
+- ✅ Listado de citas del día (zona horaria México UTC-6)
+- ✅ Inspección digital completa
+- ✅ Checklist visual: luces, llantas, cristales, carrocería
+- ✅ Captura de kilometraje y nivel de combustible
+- ✅ Firma digital del cliente (canvas)
+- ✅ Observaciones especiales
+- ✅ Creación automática de servicio en estado "Recibido"
+- ✅ Actualización de cita a status "received"
+
+**Funcionalidades Walk-In (sin cita)**:
+- ✅ Botón "Recibir Auto SIN Cita"
+- ✅ Flujo de 3 pasos: Cliente → Vehículo → Recepción
+- ✅ Búsqueda/creación inline de clientes
+- ✅ Búsqueda/creación inline de vehículos
+- ✅ Stepper visual con indicadores de progreso
+- ✅ Mismo formulario de inspección que con cita
+
+**Actualización de Vehículos**:
+- ✅ Campos editables: placa, marca, modelo, año, color
+- ✅ Badge naranja para placas temporales (TEMP-xxxxx)
+- ✅ Detección automática de placas duplicadas
+- ✅ 3 flujos operativos:
+  1. Actualización simple (sin conflicto)
+  2. Merge mismo cliente (modal confirmación)
+  3. Bloqueo cliente diferente (alerta error)
+- ✅ Endpoint merge para fusionar vehículos
+
+**Permisos**:
+- Roles: ADMIN, ENCARGADO, RECEPCIONISTA_TALLER
+- Permisos: `reception.create`, `reception.read`
+
+---
 
 ### 3.9 Módulo de Comisiones ✅ PARCIALMENTE IMPLEMENTADO
-**Funcionalidades implementadas:**
+**Funcionalidades implementadas**:
 - ✅ Registro de mecánicos con porcentaje personalizable
 - ✅ Cálculo automático en servicios (mechanic_commission)
 - ✅ Segregación por sucursal (branchId)
-- ⏳ **Pendiente:** Reportes detallados de comisiones
-- ⏳ **Pendiente:** Estados de pago
-- ⏳ **Pendiente:** Exportación de reportes
 
-### 3.10 Sistema de Impresión y Exportación ✅ IMPLEMENTADO
-**Estado:** Funcionalidad completa implementada para módulo de citas
-- ✅ **Impresión optimizada:** CSS específico para @media print
-- ✅ **Vista diaria:** Orientación vertical carta, horarios 8AM-7PM
-- ✅ **Vista semanal:** Orientación horizontal carta, grid 7 días
-- ✅ **Exportación Excel:** Archivos .xlsx nativos con múltiples hojas
-- ✅ **Integración UX:** Botones integrados en vistas diaria/semanal
-- ✅ **Arquitectura:** Hooks personalizados y componentes especializados
-- ✅ **Dependencias:** xlsx v0.18+ para exportación nativa
-- ⚡ **Benefit:** Un clic para imprimir/exportar exactamente lo que está en pantalla
-
-### 3.11 Sistema de Comunicaciones WhatsApp ✅ COMPLETAMENTE IMPLEMENTADO
-**Estado:** Sistema completo de mensajería automatizada implementado
-- ✅ **Arquitectura:** Enlaces wa.me con plantillas personalizadas (sin APIs complejas)
-- ✅ **Integración modular:** Botones integrados en todos los módulos principales
-- ✅ **Tipos de mensajes implementados:**
-  - 📅 **Recordatorio de citas:** Fecha, hora, vehículo, solicitud de confirmación
-  - 💰 **Cotización lista:** Monto, diagnóstico, solicitud de autorización
-  - ✅ **Vehículo listo:** Notificación de trabajo completado
-  - 🔄 **Seguimiento oportunidades:** Recordatorios de mantenimiento
-  - 📞 **Contacto general:** Comunicación flexible personalizada
-- ✅ **Componentes técnicos:**
-  - `WhatsAppButton.tsx`: Componente base reutilizable con variantes
-  - `whatsapp.ts`: Utilidades de formateo y validación de números
-  - Componentes especializados por tipo (Reminder, Quotation, Ready, FollowUp)
-- ✅ **Características avanzadas:**
-  - Validación automática números México (+52)
-  - Plantillas con marca "Henry's Diagnostics"
-  - Condicionales inteligentes por estado de servicio/cita
-  - Variantes visuales (outline, primary, secondary)
-  - Tooltips descriptivos y responsive design
-- ✅ **Ubicación de botones:**
-  - **Módulo Citas:** Modal detalles (recordatorios)
-  - **Módulo Servicios:** Modal detalles (cotización/vehículo listo)
-  - **Módulo Oportunidades:** Modal detalles (seguimiento)
-- ✅ **Formato profesional:** Emojis, estructura clara, calls-to-action definidos
-- ⚡ **Beneficio:** Un clic abre WhatsApp con mensaje profesional pre-escrito
-
-### 3.12 Módulo de Recepción de Vehículos ✅ COMPLETAMENTE IMPLEMENTADO
-**Estado:** Sistema completo de recepción para tablet/desktop (Sesión 2025-10-04 + Mejora 2025-10-05)
-- ✅ **Backend API completo:**
-  - POST `/api/reception/receive-vehicle` - Recibir vehículo con inspección digital
-  - POST `/api/reception/merge-vehicle` - Fusionar vehículo temporal con existente
-  - GET `/api/reception/today` - Citas del día (zona horaria México UTC-6)
-  - GET `/api/reception/service/:id` - Detalles completos de servicio recibido
-- ✅ **Schema de Base de Datos:**
-  - 9 campos nuevos en tabla `services` para datos de recepción
-  - Relación `received_by` → User (recepcionista que recibió)
-  - Campos: kilometraje, nivel_combustible, checklist inspección (4 items), observaciones, firma digital, fotos
-- ✅ **Frontend Tablet/Desktop:**
-  - ReceptionPage con búsqueda y listado de citas del día
-  - VehicleReceptionForm con inspección digital completa
-  - SignatureCanvas para firma digital del cliente
-  - Auto-refresh cada 60 segundos
-  - Optimizado para pantallas táctiles
-- ✅ **Rol y Permisos:**
-  - Rol `RECEPCIONISTA_TALLER` con permisos limitados
-  - Permisos: `reception.create`, `reception.read`
-  - Disponible también para roles ADMIN y ENCARGADO
-- ✅ **Funcionalidades Operativas:**
-  - Registro de recepción física del vehículo
-  - Inspección visual con checklist (luces, llantas, cristales, carrocería)
-  - Captura de kilometraje y nivel de combustible
-  - Firma digital del cliente (base64)
-  - Observaciones especiales de recepción
-  - Creación automática de servicio en estado "Recibido"
-  - Actualización de cita a status "received"
-- ✅ **MEJORA RECEPCIÓN 2 - Actualización de Vehículos (2025-10-05):**
-  - ✅ **Campos editables:** Placa, marca, modelo, año, color modificables durante recepción
-  - ✅ **Indicador visual:** Badge naranja para placas temporales (TEMP-xxxxx)
-  - ✅ **Detección de duplicados:** Validación automática al actualizar placa
-  - ✅ **3 Flujos operativos:**
-    1. **Actualización simple:** Si no hay conflicto, actualiza el vehículo directamente
-    2. **Merge mismo cliente:** Modal de confirmación con comparación visual lado a lado
-    3. **Bloqueo cliente diferente:** Error si la placa ya existe en otro cliente
-  - ✅ **Modal de merge:** Comparación vehículo existente vs temporal con opción confirmar/cancelar
-  - ✅ **Endpoint merge:** Fusiona registros, actualiza cita, elimina vehículo temporal
-- ✅ **Integración Completa:**
-  - Citas → Recepción → Servicio (flujo continuo)
-  - Datos de recepción disponibles en historial del servicio
-  - Compatible con citas telefónicas y walk-ins
-  - Actualización de vehículos con validación inteligente
-- ⏳ **Pendientes Próximos:**
-  - Walk-in (recibir auto SIN cita previa) - MEJORA RECEPCIÓN 1
-  - Generación de PDF de recepción con firma
-
-### 3.13 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
-**Estado:** Fase futura de desarrollo
-- ⏳ **Pendiente:** API móvil específica
-- ⏳ **Pendiente:** Autenticación por teléfono
-- ⏳ **Pendiente:** Consulta de status
-- ⏳ **Pendiente:** Notificaciones push
-- ⏳ **Pendiente:** Interface móvil optimizada
-
-## 4. Interfaces de Usuario
-
-### 4.1 Desktop/Tablet (Operación Principal)
-- Interfaz completa con todos los módulos
-- Optimizada para pantallas grandes
-- Navegación rápida entre funciones
-- Dashboards con métricas clave
-
-### 4.2 Móvil (Propietarios)
-- Interfaz simplificada
-- Enfoque en consulta de status
-- Notificaciones push
-- Fácil acceso desde WhatsApp/SMS
-
-## 5. Especificación Técnica
-
-### 5.1 Framework y Stack Tecnológico
-**Stack Principal:**
-- **Frontend:** React 18+ con TypeScript
-- **Backend:** Node.js con Express.js
-- **Base de Datos:** PostgreSQL 15+
-- **ORM:** Prisma ORM
-- **Autenticación:** JWT + bcrypt
-- **Build Tool:** Vite (Frontend) + tsc (Backend)
-- **Styling:** Tailwind CSS + shadcn/ui components
-- **State Management:** Zustand o React Context
-- **HTTP Client:** Axios
-- **Validación:** Zod (compartido frontend/backend)
-- **Testing:** Vitest + React Testing Library
-- **Linting:** ESLint + Prettier
-- **WhatsApp Integration:** wa.me enlaces + plantillas personalizadas
-- **Date Formatting:** date-fns con locales español México
-
-**Deployment:**
-- **Plataforma:** Railway
-- **Arquitectura:** Monolítica (Frontend + Backend en un servicio)
-- **Base de Datos:** PostgreSQL service separado en Railway
-- **CI/CD:** GitHub integration automático
-
-### 5.2 Estructura de Carpetas del Proyecto ✅ IMPLEMENTADA
-
-```
-henry/ ✅ ESTRUCTURA ACTUAL
-├── prisma/
-│   ├── schema.prisma           # ✅ Esquema multi-taller con Branch
-│   └── seed.ts                # ✅ Datos iniciales completos
-├── src/
-│   ├── client/                 # ✅ Frontend React completo
-│   │   ├── public/
-│   │   ├── src/
-│   │   │   ├── components/     # ✅ Componentes UI (shadcn/ui + móviles)
-│   │   │   │   ├── appointments/
-│   │   │   │   │   ├── AppointmentCalendar.tsx
-│   │   │   │   │   ├── WeeklyCalendar.tsx
-│   │   │   │   │   ├── DailyCalendar.tsx
-│   │   │   │   │   ├── CreateAppointmentModal.tsx
-│   │   │   │   │   ├── AppointmentDetails.tsx
-│   │   │   │   │   ├── MobileAppointmentCard.tsx      # ✅ NUEVO: Cards móviles
-│   │   │   │   │   ├── MobileNavigation.tsx           # ✅ NUEVO: Navegación móvil
-│   │   │   │   │   └── MobileAppointmentsList.tsx     # ✅ NUEVO: Lista móvil
-│   │   │   ├── pages/          # ✅ Todas las páginas implementadas
-│   │   │   ├── hooks/          # ✅ Custom hooks (usePermissions, useIsMobile, etc.)
-│   │   │   ├── context/        # ✅ Context API (BranchContext)
-│   │   │   ├── utils/          # ✅ Utilidades y helpers
-│   │   │   ├── types/          # ✅ Tipos TypeScript
-│   │   │   ├── App.tsx         # ✅ Router principal
-│   │   │   └── main.tsx        # ✅ Punto de entrada
-│   │   ├── package.json
-│   │   └── vite.config.ts
-│   ├── server/                 # ✅ Backend Express completo
-│   │   ├── src/
-│   │   │   ├── routes/         # ✅ Todas las rutas implementadas
-│   │   │   ├── services/       # ✅ Lógica de negocio
-│   │   │   ├── middleware/     # ✅ Auth, permisos, validación
-│   │   │   ├── utils/          # ✅ Utilidades backend
-│   │   │   ├── app.ts          # ✅ App Express configurada
-│   │   │   └── server.ts       # ✅ Servidor principal
-│   │   ├── package.json
-│   │   └── tsconfig.json
-├── package.json                # ✅ Scripts de build Railway
-├── CLAUDE.md                   # ✅ Memoria del proyecto
-├── STATUS.md                   # ✅ Estado actualizado
-├── ESPECIFICACION.md           # ✅ Este archivo
-└── DEPLOYMENT.md               # ✅ Guía de deployment
-```
-
-### 5.3 Diagrama de Relaciones de Base de Datos ✅ ACTUALIZADO
-
-```mermaid
-erDiagram
-    BRANCHES ||--o{ USERS : assigns
-    BRANCHES ||--o{ APPOINTMENTS : schedules
-    BRANCHES ||--o{ SERVICES : provides
-    BRANCHES ||--o{ OPPORTUNITIES : tracks
-    BRANCHES ||--o{ MECHANICS : employs
-    BRANCHES ||--o{ SETTINGS : configures
-
-    ROLES ||--o{ USERS : has
-    USERS ||--o{ APPOINTMENTS : creates
-    USERS ||--o{ SERVICES : creates
-    USERS ||--o{ SERVICES : receives_vehicle
-    USERS ||--o{ OPPORTUNITIES : creates
-    USERS ||--o{ STATUS_LOGS : logs
-
-    CLIENTS ||--o{ VEHICLES : owns
-    CLIENTS ||--o{ APPOINTMENTS : schedules
-    CLIENTS ||--o{ SERVICES : receives
-    CLIENTS ||--o{ OPPORTUNITIES : has
-
-    VEHICLES ||--o{ APPOINTMENTS : scheduled_for
-    VEHICLES ||--o{ SERVICES : serviced
-    VEHICLES ||--o{ OPPORTUNITIES : related_to
-
-    MECHANICS ||--o{ SERVICES : works_on
-
-    WORK_STATUSES ||--o{ SERVICES : current_status
-    WORK_STATUSES ||--o{ STATUS_LOGS : old_status
-    WORK_STATUSES ||--o{ STATUS_LOGS : new_status
-
-    APPOINTMENTS ||--o{ SERVICES : generates
-    OPPORTUNITIES ||--o{ APPOINTMENTS : creates
-    SERVICES ||--o{ OPPORTUNITIES : generates
-    SERVICES ||--o{ STATUS_LOGS : tracked_by
-
-    BRANCHES {
-        int id PK
-        string name
-        string code UK
-        string address
-        string phone
-        string city
-        boolean is_active
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    ROLES {
-        int id PK
-        string name UK
-        json permissions
-        timestamp created_at
-    }
-
-    USERS {
-        int id PK
-        string name
-        string email UK
-        string phone
-        string password_hash
-        int role_id FK
-        int branch_id FK
-        boolean is_active
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    CLIENTS {
-        int id PK
-        string name
-        string phone
-        string whatsapp
-        string email
-        text address
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    VEHICLES {
-        int id PK
-        string plate UK
-        string brand
-        string model
-        int year
-        string color
-        string fuel_type
-        string transmission
-        string engine_number
-        string chassis_number
-        int client_id FK
-        text notes
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    MECHANICS {
-        int id PK
-        string name
-        string phone
-        decimal commission_percentage
-        boolean is_active
-        int branch_id FK
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    WORK_STATUSES {
-        int id PK
-        string name
-        int order_index
-        string color
-        timestamp created_at
-    }
-
-    APPOINTMENTS {
-        int id PK
-        int client_id FK
-        int vehicle_id FK
-        int opportunity_id FK
-        timestamp scheduled_date
-        string status
-        text notes
-        boolean is_from_opportunity
-        int created_by FK
-        int branch_id FK
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    SERVICES {
-        int id PK
-        int appointment_id FK
-        int client_id FK
-        int vehicle_id FK
-        int mechanic_id FK
-        int status_id FK
-        text problem_description
-        text diagnosis
-        text quotation_details
-        decimal labor_price
-        decimal parts_price
-        decimal parts_cost
-        decimal total_amount
-        decimal truput
-        decimal mechanic_commission
-        int received_by FK
-        timestamp received_at
-        int kilometraje
-        string nivel_combustible
-        boolean luces_ok
-        boolean llantas_ok
-        boolean cristales_ok
-        boolean carroceria_ok
-        text observaciones_recepcion
-        text firma_cliente
-        json fotos_recepcion
-        timestamp started_at
-        timestamp completed_at
-        int created_by FK
-        int branch_id FK
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    OPPORTUNITIES {
-        int id PK
-        int client_id FK
-        int vehicle_id FK
-        int service_id FK
-        string type
-        text description
-        date follow_up_date
-        string status
-        text notes
-        int created_by FK
-        int branch_id FK
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    STATUS_LOGS {
-        int id PK
-        int service_id FK
-        int old_status_id FK
-        int new_status_id FK
-        int changed_by FK
-        text notes
-        timestamp created_at
-    }
-
-    SETTINGS {
-        int id PK
-        int branch_id FK
-        string type
-        json data
-        timestamp created_at
-        timestamp updated_at
-    }
-```
-
-**Cambios principales implementados:**
-- ✅ **Tabla BRANCHES** agregada para multi-taller
-- ✅ **Campos de recepción** agregados a SERVICES (9 campos nuevos)
-- ✅ **Relación USERS → SERVICES** (received_by) para rastrear recepcionista
-- ✅ **Campos extendidos** en VEHICLES (fuel_type, transmission, engine_number, chassis_number)
-- ✅ **Sistema pricing** completo en SERVICES (labor_price, parts_price, parts_cost, truput)
-- ✅ **Tabla SETTINGS** para configuración por sucursal
-
-### 5.4 Estructura de Base de Datos SQL ✅ ACTUALIZADA
-
-```sql
--- ==================== MULTI-TALLER ====================
--- Sucursales
-CREATE TABLE branches (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    code VARCHAR(20) NOT NULL UNIQUE,
-    address TEXT,
-    phone VARCHAR(20),
-    city VARCHAR(50),
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== USUARIOS Y ROLES ====================
-CREATE TABLE roles (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    permissions JSON,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    phone VARCHAR(20),
-    password_hash VARCHAR(255) NOT NULL,
-    role_id INTEGER REFERENCES roles(id) NOT NULL,
-    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== CLIENTES Y VEHÍCULOS (GLOBALES) ====================
-CREATE TABLE clients (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
-    whatsapp VARCHAR(20),
-    email VARCHAR(100),
-    address TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE vehicles (
-    id SERIAL PRIMARY KEY,
-    plate VARCHAR(20) UNIQUE NOT NULL,
-    brand VARCHAR(50) NOT NULL,
-    model VARCHAR(50) NOT NULL,
-    year INTEGER,
-    color VARCHAR(30),
-    fuel_type VARCHAR(20),              -- NUEVO: Tipo de combustible
-    transmission VARCHAR(20),            -- NUEVO: Transmisión
-    engine_number VARCHAR(50),           -- NUEVO: Número de motor
-    chassis_number VARCHAR(50),          -- NUEVO: Número de chasis
-    client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== MECÁNICOS (POR SUCURSAL) ====================
-CREATE TABLE mechanics (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20),
-    commission_percentage DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-    is_active BOOLEAN DEFAULT true,
-    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== ESTADOS DE TRABAJO ====================
-CREATE TABLE work_statuses (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    order_index INTEGER NOT NULL,
-    color VARCHAR(7) DEFAULT '#6B7280',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Estados implementados
-INSERT INTO work_statuses (name, order_index, color) VALUES
-('Recibido', 1, '#EF4444'),
-('Cotizado', 2, '#F59E0B'),
-('Rechazado', 3, '#DC2626'),         -- NUEVO: Estado para cotizaciones rechazadas
-('En Proceso', 4, '#8B5CF6'),
-('Terminado', 5, '#10B981');
-
--- ==================== CITAS (POR SUCURSAL) ====================
-CREATE TABLE appointments (
-    id SERIAL PRIMARY KEY,
-    client_id INTEGER REFERENCES clients(id) NOT NULL,
-    vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
-    opportunity_id INTEGER REFERENCES opportunities(id),
-    scheduled_date TIMESTAMP NOT NULL,
-    status VARCHAR(20) DEFAULT 'scheduled', -- scheduled, confirmed, cancelled, received
-    notes TEXT,
-    is_from_opportunity BOOLEAN DEFAULT false,
-    created_by INTEGER REFERENCES users(id) NOT NULL,
-    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== SERVICIOS (POR SUCURSAL) ====================
-CREATE TABLE services (
-    id SERIAL PRIMARY KEY,
-    -- Relaciones básicas
-    appointment_id INTEGER REFERENCES appointments(id),
-    client_id INTEGER REFERENCES clients(id) NOT NULL,
-    vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
-    mechanic_id INTEGER REFERENCES mechanics(id),
-    status_id INTEGER REFERENCES work_statuses(id) DEFAULT 1,
-
-    -- Descripción del servicio
-    problem_description TEXT,
-    diagnosis TEXT,
-    quotation_details TEXT,
-
-    -- Sistema de pricing
-    labor_price DECIMAL(10,2) DEFAULT 0.00,           -- Precio mano de obra
-    parts_price DECIMAL(10,2) DEFAULT 0.00,           -- Precio refacciones (venta)
-    parts_cost DECIMAL(10,2) DEFAULT 0.00,            -- Costo refacciones (compra)
-    total_amount DECIMAL(10,2) DEFAULT 0.00,          -- Total del servicio
-    truput DECIMAL(10,2) DEFAULT 0.00,                -- Ganancia (parts_price - parts_cost)
-    mechanic_commission DECIMAL(10,2) DEFAULT 0.00,   -- Comisión del mecánico
-
-    -- ====== CAMPOS DE RECEPCIÓN DE VEHÍCULOS ======
-    received_by INTEGER REFERENCES users(id),         -- Usuario recepcionista
-    received_at TIMESTAMP,                            -- Fecha/hora de recepción
-    kilometraje INTEGER,                              -- Kilometraje del vehículo
-    nivel_combustible VARCHAR(10),                    -- '1/4', '1/2', '3/4', 'FULL'
-    luces_ok BOOLEAN DEFAULT true,                    -- Checklist: luces
-    llantas_ok BOOLEAN DEFAULT true,                  -- Checklist: llantas
-    cristales_ok BOOLEAN DEFAULT true,                -- Checklist: cristales
-    carroceria_ok BOOLEAN DEFAULT true,               -- Checklist: carrocería
-    observaciones_recepcion TEXT,                     -- Observaciones de recepción
-    firma_cliente TEXT,                               -- Firma digital (base64)
-    fotos_recepcion JSON,                             -- Array de fotos
-
-    -- Timestamps
-    started_at TIMESTAMP,
-    completed_at TIMESTAMP,
-    created_by INTEGER REFERENCES users(id) NOT NULL,
-    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== OPORTUNIDADES (POR SUCURSAL) ====================
-CREATE TABLE opportunities (
-    id SERIAL PRIMARY KEY,
-    client_id INTEGER REFERENCES clients(id) NOT NULL,
-    vehicle_id INTEGER REFERENCES vehicles(id) NOT NULL,
-    service_id INTEGER REFERENCES services(id),
-    type VARCHAR(50) NOT NULL,          -- 'MANTENIMIENTO', 'TRABAJO_PENDIENTE'
-    description TEXT NOT NULL,
-    follow_up_date DATE NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending', -- pending, contacted, scheduled, closed
-    notes TEXT,
-    created_by INTEGER REFERENCES users(id) NOT NULL,
-    branch_id INTEGER REFERENCES branches(id) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== LOGS DE AUDITORÍA ====================
-CREATE TABLE status_logs (
-    id SERIAL PRIMARY KEY,
-    service_id INTEGER REFERENCES services(id) NOT NULL,
-    old_status_id INTEGER REFERENCES work_statuses(id),
-    new_status_id INTEGER REFERENCES work_statuses(id) NOT NULL,
-    changed_by INTEGER REFERENCES users(id) NOT NULL,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ==================== CONFIGURACIÓN (POR SUCURSAL) ====================
-CREATE TABLE settings (
-    id SERIAL PRIMARY KEY,
-    branch_id INTEGER REFERENCES branches(id) NOT NULL,
-    type VARCHAR(50) NOT NULL,          -- 'general', 'fiscal', etc.
-    data JSON NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(branch_id, type)
-);
-
--- ==================== ÍNDICES PARA PERFORMANCE ====================
-CREATE INDEX idx_clients_phone ON clients(phone);
-CREATE INDEX idx_vehicles_plate ON vehicles(plate);
-CREATE INDEX idx_vehicles_client ON vehicles(client_id);
-CREATE INDEX idx_services_client ON services(client_id);
-CREATE INDEX idx_services_vehicle ON services(vehicle_id);
-CREATE INDEX idx_services_status ON services(status_id);
-CREATE INDEX idx_services_branch ON services(branch_id);
-CREATE INDEX idx_appointments_date ON appointments(scheduled_date);
-CREATE INDEX idx_appointments_branch ON appointments(branch_id);
-CREATE INDEX idx_opportunities_follow_up ON opportunities(follow_up_date);
-CREATE INDEX idx_opportunities_branch ON opportunities(branch_id);
-CREATE INDEX idx_mechanics_branch ON mechanics(branch_id);
-CREATE INDEX idx_users_branch ON users(branch_id);
-```
-
-### 5.5 API Endpoints ✅ IMPLEMENTADOS
-
-#### Autenticación ✅
-```
-POST /api/auth/login              # ✅ Login con email/phone y password
-POST /api/auth/logout             # ✅ Logout
-POST /api/auth/register           # ✅ Registrar nuevo usuario (auth requerido)
-POST /api/auth/refresh            # ✅ Refresh token
-POST /api/auth/change-password    # ✅ Cambiar contraseña
-GET  /api/auth/profile            # ✅ Obtener perfil usuario actual
-```
-
-#### Usuarios y Roles ✅
-```
-GET    /api/users                 # ✅ Listar usuarios (filtrado por branch)
-POST   /api/users                 # ✅ Crear usuario (permisos: users.create)
-GET    /api/users/:id             # ✅ Obtener usuario (permisos: users.read)
-PUT    /api/users/:id             # ✅ Actualizar usuario (permisos: users.update)
-PUT    /api/users/:id/password    # ✅ Actualizar contraseña (permisos: users.update)
-DELETE /api/users/:id             # ✅ Eliminar usuario (permisos: users.delete)
-GET    /api/users/roles           # ✅ Listar roles disponibles
-```
-
-#### Clientes ✅ (GLOBALES - sin filtro branch)
-```
-GET    /api/clients               # ✅ Listar clientes con paginación
-POST   /api/clients               # ✅ Crear cliente
-GET    /api/clients/:id           # ✅ Obtener cliente con detalles
-PUT    /api/clients/:id           # ✅ Actualizar cliente
-DELETE /api/clients/:id           # ✅ Eliminar cliente
-POST   /api/clients/:id/activate  # ✅ Activar/desactivar cliente
-```
-
-#### Vehículos ✅ (GLOBALES - sin filtro branch)
-```
-GET    /api/vehicles                  # ✅ Listar vehículos con paginación
-POST   /api/vehicles                  # ✅ Crear vehículo
-GET    /api/vehicles/:id              # ✅ Obtener vehículo con detalles
-PUT    /api/vehicles/:id              # ✅ Actualizar vehículo
-DELETE /api/vehicles/:id              # ✅ Eliminar vehículo
-POST   /api/vehicles/:id/activate     # ✅ Activar/desactivar vehículo
-GET    /api/vehicles/by-client/:clientId  # ✅ Vehículos de un cliente específico
-```
-
-#### Citas ✅ (POR SUCURSAL - filtrado por branchId)
-```
-GET    /api/appointments                      # ✅ Listar citas con filtros (branch, fecha, status)
-POST   /api/appointments                      # ✅ Crear cita nueva
-POST   /api/appointments/from-opportunity     # ✅ Crear cita desde oportunidad
-GET    /api/appointments/:id                  # ✅ Obtener cita con detalles
-PUT    /api/appointments/:id                  # ✅ Actualizar/reagendar cita
-DELETE /api/appointments/:id                  # ✅ Cancelar cita
-POST   /api/appointments/:id/confirm          # ✅ Confirmar cita
-POST   /api/appointments/:id/complete         # ✅ Marcar cita como completada
-```
-
-#### Servicios ✅ (POR SUCURSAL - filtrado por branchId)
-```
-GET    /api/services                      # ✅ Listar servicios con filtros
-POST   /api/services                      # ✅ Crear servicio
-GET    /api/services/:id                  # ✅ Obtener servicio con detalles completos
-PUT    /api/services/:id                  # ✅ Actualizar servicio (info general)
-PUT    /api/services/:id/status           # ✅ Cambiar estado (con log automático)
-DELETE /api/services/:id                  # ✅ Eliminar servicio
-POST   /api/services/:id/activate         # ✅ Activar/desactivar servicio
-POST   /api/services/:id/assign-mechanic  # ✅ Asignar mecánico a servicio
-GET    /api/services/vehicle/:vehicleId   # ✅ Historial servicios de un vehículo
-GET    /api/services/client/:clientId     # ✅ Historial servicios de un cliente
-```
-
-#### Recepción de Vehículos ✅ COMPLETO (POR SUCURSAL)
-```
-POST   /api/reception/receive-vehicle     # ✅ Recibir vehículo con inspección completa
-POST   /api/reception/merge-vehicle       # ✅ Fusionar vehículo temporal con existente
-GET    /api/reception/today               # ✅ Citas del día para recepción (zona horaria MX)
-GET    /api/reception/service/:id         # ✅ Detalles completos de servicio recibido
-```
-**Permisos requeridos**: `reception.create` y `reception.read`
-**Campos de recepción**: kilometraje, nivel combustible, checklist inspección, firma digital, fotos
-**Actualización de vehículos**: Campo `vehicleUpdates` para modificar placa/marca/modelo/año/color durante recepción
-**Detección de duplicados**: Validación automática de placa duplicada con 3 flujos operativos:
-  1. **Actualización simple**: Si no hay conflicto, actualiza el vehículo directamente
-  2. **Merge mismo cliente**: Si existe placa y es del mismo cliente, modal confirma fusión
-  3. **Error cliente diferente**: Si existe placa de otro cliente, bloquea y muestra alerta
-**Merge endpoint**: Fusiona vehículo temporal con existente (mismo cliente), actualiza cita, elimina temporal
-
-#### Oportunidades ✅ (POR SUCURSAL - filtrado por branchId)
-```
-GET    /api/opportunities                 # ✅ Listar oportunidades con filtros
-POST   /api/opportunities                 # ✅ Crear oportunidad manualmente
-POST   /api/opportunities/from-service    # ✅ Crear oportunidad desde servicio completado
-GET    /api/opportunities/:id             # ✅ Obtener oportunidad con detalles
-PUT    /api/opportunities/:id             # ✅ Actualizar oportunidad
-DELETE /api/opportunities/:id             # ✅ Eliminar oportunidad
-POST   /api/opportunities/:id/schedule    # ✅ Convertir oportunidad en cita
-POST   /api/opportunities/:id/contact     # ✅ Marcar como contactada
-GET    /api/opportunities/due             # ✅ Oportunidades próximas a follow-up
-```
-
-#### Mecánicos ✅ (POR SUCURSAL - filtrado por branchId)
-```
-GET    /api/mechanics                     # ✅ Listar mecánicos de la sucursal
-POST   /api/mechanics                     # ✅ Crear mecánico
-GET    /api/mechanics/:id                 # ✅ Obtener mecánico con estadísticas
-PUT    /api/mechanics/:id                 # ✅ Actualizar mecánico
-DELETE /api/mechanics/:id                 # ✅ Eliminar mecánico
-POST   /api/mechanics/:id/activate        # ✅ Activar/desactivar mecánico
-GET    /api/mechanics/debug-schema        # ✅ Debug endpoint para verificación schema
-```
-
-#### Dashboard y Reportes ✅ (POR SUCURSAL - filtrado por branchId)
-```
-GET    /api/reports/dashboard             # ✅ KPIs completos (ingresos, servicios, gráficos)
-GET    /api/reports/test                  # ✅ Test endpoint básico
-GET    /api/reports/step1                 # ✅ Debug: verificar conteo básico
-GET    /api/reports/step2                 # ✅ Debug: verificar servicios con detalles
-GET    /api/reports/step3                 # ✅ Debug: verificar serialización BigInt
-```
-**KPIs implementados**: Total ingresos, mano de obra, precio refacciones, servicios por estado, productividad mecánicos
-
-#### Sucursales ✅ (SOLO ADMIN - permisos: branches.*)
-```
-GET    /api/branches                      # ✅ Listar todas las sucursales
-GET    /api/branches/active               # ✅ Listar solo sucursales activas
-POST   /api/branches                      # ✅ Crear nueva sucursal
-GET    /api/branches/:id                  # ✅ Obtener sucursal específica
-PUT    /api/branches/:id                  # ✅ Actualizar sucursal
-DELETE /api/branches/:id                  # ✅ Eliminar sucursal
-GET    /api/branches/debug-table          # ✅ Debug endpoint para verificación tabla
-```
-
-#### Configuración ✅ (POR SUCURSAL - permisos: settings.*)
-```
-GET    /api/settings                      # ✅ Obtener configuración por branch y type
-POST   /api/settings                      # ✅ Guardar/actualizar configuración
-PUT    /api/settings/:id                  # ✅ Actualizar configuración específica
-```
-**Tipos de configuración**: general, fiscal, horarios, notificaciones
-
-#### Estados de Trabajo ✅
-```
-GET    /api/workstatus                    # ✅ Listar todos los estados con colores
-GET    /api/workstatus/:id                # ✅ Obtener estado específico
-POST   /api/workstatus                    # ✅ Crear estado personalizado
-PUT    /api/workstatus/:id                # ✅ Actualizar estado
-DELETE /api/workstatus/:id                # ✅ Eliminar estado
-POST   /api/workstatus/:id/activate       # ✅ Activar/desactivar estado
-```
-
-#### Logs de Auditoría ✅
-```
-GET    /api/statuslogs                    # ✅ Listar todos los logs con paginación
-GET    /api/statuslogs/:id                # ✅ Obtener log específico
-GET    /api/statuslogs/service/:serviceId # ✅ Logs de un servicio específico
-GET    /api/statuslogs/user/:userId       # ✅ Logs de cambios por usuario
-GET    /api/statuslogs/date/:date         # ✅ Logs por fecha
-```
-
-#### Utilidades ✅
-```
-GET    /api/health                        # ✅ Health check (status, timestamp, env, version)
-GET    /api/debug                         # ✅ Debug completo (DB connection, counts, admin user)
-```
-
-#### API Móvil (Propietarios) ⏳ NO IMPLEMENTADO
-```
-POST   /api/mobile/auth                   # ⏳ Login móvil con teléfono
-GET    /api/mobile/vehicles/:phone        # ⏳ Vehículos del propietario
-GET    /api/mobile/services/:vehicleId    # ⏳ Servicios de un vehículo
-GET    /api/mobile/notifications          # ⏳ Notificaciones push
-```
-
-#### Notas importantes sobre los endpoints:
-- **Autenticación**: Todos los endpoints (excepto `/auth/login`) requieren JWT token válido
-- **Autorización**: Sistema de permisos granular por recurso y acción (read, create, update, delete)
-- **Paginación**: Endpoints de listado soportan `?page=N&limit=M` (default: page=1, limit=20)
-- **Filtrado**: Múltiples filtros por query params (search, status, dateFrom, dateTo, etc.)
-- **Serialización BigInt**: Todos los endpoints serializan BigInt a string para compatibilidad JSON
-- **Multi-tenant**: Endpoints marcados como "POR SUCURSAL" filtran automáticamente por `branchId` del JWT
-- **Globales**: Clientes y vehículos NO tienen filtro de sucursal (disponibles para todos)
-
-### 5.6 Características Técnicas Específicas ✅ IMPLEMENTADAS
-
-#### Búsqueda ✅
-- ✅ **Frontend-Only Filtering** implementado (sin pérdida de foco)
-- ✅ Índices en campos críticos (plate, phone, name)
-- ✅ Búsqueda unificada en clientes y vehículos
-- ✅ Filtros por fecha, estado, mecánico en dashboard
-- ✅ Autocompletado inteligente para grandes DBs
-
-#### Autenticación y Seguridad ✅
-- ✅ JWT con refresh tokens + **branchId** para multi-taller
-- ✅ Bcrypt para hash de passwords
-- ✅ Validación de datos con middleware personalizado
-- ✅ Sistema de permisos granular con PermissionGate
-- ✅ Middleware de autorización por rol/recurso
-- ✅ CORS configurado para Railway
-
-#### Estados y Workflow ✅
-- ✅ Validación de transiciones de estado secuencial
-- ✅ Logs automáticos con StatusLog model
-- ✅ Timestamps automáticos (started_at, completed_at)
-- ✅ Vista Kanban con drag & drop entre estados
-- ⏳ **Pendiente:** Notificaciones en tiempo real
-
-#### Performance ✅
-- ✅ Frontend-Only Filtering (carga única de 1000 registros)
-- ✅ Lazy loading en componentes React
-- ✅ Queries optimizadas con Prisma includes
-- ✅ Compresión automática en Railway
-- ✅ Paginación local en frontend para mejor UX
-
-#### Notificaciones ⏳ PENDIENTE
-- ⏳ **Pendiente:** WebSocket para tiempo real
-- ⏳ **Pendiente:** Sistema push para móvil
-- ⏳ **Pendiente:** Integración WhatsApp API
-- ⏳ **Pendiente:** Emails automáticos
-
-### 5.7 Configuración Railway Específica ✅ IMPLEMENTADA
-
-#### Configuración del Proyecto Railway
-```yaml
-# railway.json
-{
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm run build"
-  },
-  "deploy": {
-    "startCommand": "npm start",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  },
-  "healthcheckPath": "/api/health",
-  "healthcheckTimeout": 100,
-  "environmentVariables": {
-    "NODE_ENV": "production"
-  }
-}
-```
-
-#### Scripts package.json (Raíz)
-```json
-{
-  "name": "henry-diagnostics",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "cd src/client && npm install && npm run build",
-    "build:server": "cd src/server && npm install && npm run build",
-    "start": "cd src/server && npm start",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd src/server && npm run dev",
-    "dev:client": "cd src/client && npm run dev",
-    "postinstall": "cd src/server && npm install && npx prisma generate && npx prisma migrate deploy"
-  },
-  "dependencies": {
-    "concurrently": "^8.2.0"
-  }
-}
-```
-
-#### Variables de Entorno Railway
-```env
-# Automáticamente proporcionadas por Railway
-DATABASE_URL=postgresql://postgres:[password]@[host]:[port]/railway
-
-# Configurar manualmente en Railway Dashboard
-NODE_ENV=production
-PORT=3000
-JWT_SECRET=your_super_secret_jwt_key_here_min_32_chars
-JWT_REFRESH_SECRET=your_refresh_secret_here_min_32_chars
-JWT_EXPIRES_IN=7d
-JWT_REFRESH_EXPIRES_IN=30d
-
-# CORS y Frontend
-ALLOWED_ORIGINS=https://your-app.up.railway.app
-
-# Configuraciones opcionales
-BCRYPT_SALT_ROUNDS=12
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# Para desarrollo futuro
-WHATSAPP_API_KEY=
-WHATSAPP_API_URL=https://api.whatsapp.business
-EMAIL_SERVICE_API_KEY=
-```
-
-#### Estructura de Deployment
-```
-Railway Project: henry-diagnostics
-├── Service 1: henry-diagnostics-app (Monolítico)
-│   ├── Build: Nixpacks auto-detect
-│   ├── Start: npm start
-│   ├── Port: 3000
-│   ├── Domain: henry-diagnostics.up.railway.app
-│   └── Environment Variables: [configuradas arriba]
-└── Service 2: PostgreSQL
-    ├── Auto-managed PostgreSQL 15
-    ├── Automatic backups
-    ├── Connection string: $DATABASE_URL
-    └── Metrics included
-```
-
-#### Prisma Schema (prisma/schema.prisma) ✅ IMPLEMENTADO
-```prisma
-✅ **SCHEMA ACTUAL MULTI-TALLER:** Ver archivo completo en `/prisma/schema.prisma`
-
-**Cambios principales implementados:**
-- ✅ **Branch model** para multi-taller
-- ✅ **branchId** en User, Mechanic, Appointment, Service, Opportunity
-- ✅ **Campos extendidos** en Vehicle (fuel_type, transmission, engine_number, chassis_number)
-- ✅ **Sistema pricing** en Service (labor_price, parts_price, parts_cost, truput)
-- ✅ **Settings model** para configuración por sucursal
-- ✅ **StatusLog model** para auditoría de cambios
-
-model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String?  @unique
-  phone        String
-  passwordHash String   @map("password_hash")
-  roleId       Int      @map("role_id")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
-  role Role @relation(fields: [roleId], references: [id])
-  
-  createdClients       Client[]
-  createdAppointments  Appointment[]
-  createdServices      Service[]
-  createdOpportunities Opportunity[]
-  statusLogs           StatusLog[]
-  
-  @@map("users")
-}
-
-model Client {
-  id        Int      @id @default(autoincrement())
-  name      String
-  phone     String
-  whatsapp  String?
-  email     String?
-  address   String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  vehicles      Vehicle[]
-  appointments  Appointment[]
-  services      Service[]
-  opportunities Opportunity[]
-  
-  @@map("clients")
-}
-
-model Vehicle {
-  id        Int      @id @default(autoincrement())
-  plate     String   @unique
-  brand     String
-  model     String
-  year      Int?
-  color     String?
-  clientId  Int      @map("client_id")
-  notes     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  
-  appointments  Appointment[]
-  services      Service[]
-  opportunities Opportunity[]
-  
-  @@map("vehicles")
-}
-
-model Mechanic {
-  id                    Int     @id @default(autoincrement())
-  name                  String
-  commissionPercentage  Decimal @default(0.00) @map("commission_percentage") @db.Decimal(5, 2)
-  isActive              Boolean @default(true) @map("is_active")
-  createdAt             DateTime @default(now()) @map("created_at")
-  
-  services Service[]
-  
-  @@map("mechanics")
-}
-
-model WorkStatus {
-  id         Int      @id @default(autoincrement())
-  name       String
-  orderIndex Int      @map("order_index")
-  color      String   @default("#6B7280")
-  createdAt  DateTime @default(now()) @map("created_at")
-  
-  services         Service[]
-  oldStatusLogs    StatusLog[] @relation("OldStatus")
-  newStatusLogs    StatusLog[] @relation("NewStatus")
-  
-  @@map("work_statuses")
-}
-
-model Appointment {
-  id                 Int       @id @default(autoincrement())
-  clientId           Int       @map("client_id")
-  vehicleId          Int       @map("vehicle_id")
-  opportunityId      Int?      @map("opportunity_id")
-  scheduledDate      DateTime  @map("scheduled_date")
-  status             String    @default("scheduled")
-  notes              String?
-  isFromOpportunity  Boolean   @default(false) @map("is_from_opportunity")
-  createdBy          Int       @map("created_by")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  
-  client      Client       @relation(fields: [clientId], references: [id])
-  vehicle     Vehicle      @relation(fields: [vehicleId], references: [id])
-  opportunity Opportunity? @relation(fields: [opportunityId], references: [id])
-  createdByUser User       @relation(fields: [createdBy], references: [id])
-  
-  services Service[]
-  
-  @@map("appointments")
-}
-
-model Service {
-  id                  Int       @id @default(autoincrement())
-  appointmentId       Int?      @map("appointment_id")
-  clientId            Int       @map("client_id")
-  vehicleId           Int       @map("vehicle_id")
-  mechanicId          Int?      @map("mechanic_id")
-  statusId            Int       @default(1) @map("status_id")
-  problemDescription  String?   @map("problem_description")
-  diagnosis           String?
-  quotationDetails    String?   @map("quotation_details")
-  totalAmount         Decimal   @default(0.00) @map("total_amount") @db.Decimal(10, 2)
-  mechanicCommission  Decimal   @default(0.00) @map("mechanic_commission") @db.Decimal(10, 2)
-  startedAt           DateTime? @map("started_at")
-  completedAt         DateTime? @map("completed_at")
-  createdBy           Int       @map("created_by")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  
-  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
-  client        Client       @relation(fields: [clientId], references: [id])
-  vehicle       Vehicle      @relation(fields: [vehicleId], references: [id])
-  mechanic      Mechanic?    @relation(fields: [mechanicId], references: [id])
-  status        WorkStatus   @relation(fields: [statusId], references: [id])
-  createdByUser User         @relation(fields: [createdBy], references: [id])
-  
-  opportunities Opportunity[]
-  statusLogs    StatusLog[]
-  
-  @@map("services")
-}
-
-model Opportunity {
-  id           Int      @id @default(autoincrement())
-  clientId     Int      @map("client_id")
-  vehicleId    Int      @map("vehicle_id")
-  serviceId    Int?     @map("service_id")
-  type         String
-  description  String
-  followUpDate DateTime @map("follow_up_date") @db.Date
-  status       String   @default("pending")
-  notes        String?
-  createdBy    Int      @map("created_by")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  
-  client        Client    @relation(fields: [clientId], references: [id])
-  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id])
-  service       Service?  @relation(fields: [serviceId], references: [id])
-  createdByUser User      @relation(fields: [createdBy], references: [id])
-  
-  appointments Appointment[]
-  
-  @@map("opportunities")
-}
-
-model StatusLog {
-  id           Int      @id @default(autoincrement())
-  serviceId    Int      @map("service_id")
-  oldStatusId  Int?     @map("old_status_id")
-  newStatusId  Int      @map("new_status_id")
-  changedBy    Int      @map("changed_by")
-  notes        String?
-  createdAt    DateTime @default(now()) @map("created_at")
-  
-  service       Service     @relation(fields: [serviceId], references: [id])
-  oldStatus     WorkStatus? @relation("OldStatus", fields: [oldStatusId], references: [id])
-  newStatus     WorkStatus  @relation("NewStatus", fields: [newStatusId], references: [id])
-  changedByUser User        @relation(fields: [changedBy], references: [id])
-  
-  @@map("status_logs")
-}
-```
-
-## 6. Funcionalidades Específicas ✅ IMPLEMENTADAS
-
-### 6.1 Gestión de Citas ✅ IMPLEMENTADO
-- ✅ **Citas Nuevas:** Modal con cliente, vehículo, fecha/hora
-- ✅ **Creación vehículo inline** desde modal de citas
-- ✅ **Citas desde Oportunidades:** Datos pre-cargados automáticamente
-- ✅ **Calendario visual:** Vista mensual y diaria (8:00 AM - 7:00 PM)
-- ✅ **Vista mensual:** Muestra vehículo (marca+modelo) en lugar de cliente
-- ✅ **Reagendamiento:** Edición completa de citas
-- ✅ **Cancelación:** Eliminación con confirmación
-- ⏳ **Pendiente:** Notificaciones de recordatorio
-
-### 6.2 Flujo de Estados ✅ IMPLEMENTADO
-- ✅ **Transición secuencial:** Recibido → Cotizado → Autorizado → En Proceso → Terminado
-- ✅ **Vista Kanban:** Drag & drop entre estados con validación
-- ✅ **Timestamps automáticos:** started_at al pasar a "En Proceso", completed_at al "Terminado"
-- ✅ **Logs de auditoría:** StatusLog automático en cada cambio
-- ✅ **Colores identificativos:** Cada estado con color distintivo
-- ⏳ **Pendiente:** Notificaciones automáticas a propietarios
-
-### 6.3 Dashboard Principal ✅ COMPLETAMENTE IMPLEMENTADO
-- ✅ **Búsqueda Inteligente de Clientes:** Sección prominente azul para prevenir duplicados
+**Pendiente**:
+- ⏳ Reportes detallados de comisiones por período
+- ⏳ Estados de pago
+- ⏳ Exportación de reportes
+
+---
+
+### 3.10 Sistema de Impresión y Exportación ✅
+**Estado**: Funcionalidad completa implementada para módulo de citas
+
+**Características**:
+- ✅ Impresión optimizada con CSS específico (@media print)
+- ✅ Vista diaria: Orientación vertical carta, horarios 8AM-7PM
+- ✅ Vista semanal: Orientación horizontal carta, grid 7 días
+- ✅ Exportación Excel: Archivos .xlsx nativos con múltiples hojas
+- ✅ Integración UX: Botones integrados en vistas diaria/semanal
+- ✅ Arquitectura: Hooks personalizados y componentes especializados
+- ✅ Dependencia: xlsx v0.18+
+
+**Beneficio**: Un clic para imprimir/exportar exactamente lo que está en pantalla
+
+---
+
+### 3.11 Sistema de Comunicaciones WhatsApp ✅
+**Estado**: Sistema completo implementado (2025-09-29)
+
+**Arquitectura**:
+- ✅ Enlaces wa.me con plantillas personalizadas (sin APIs complejas)
+- ✅ Integración modular en todos los módulos principales
+- ✅ Componente base reutilizable con variantes
+
+**Tipos de Mensajes**:
+1. **Recordatorio de citas** - Fecha, hora, vehículo, solicitud de confirmación
+2. **Cotización lista** - Monto, diagnóstico, solicitud de autorización
+3. **Vehículo listo** - Notificación de trabajo completado
+4. **Seguimiento oportunidades** - Recordatorios de mantenimiento
+5. **Contacto general** - Comunicación flexible personalizada
+
+**Componentes Técnicos**:
+- `WhatsAppButton.tsx` - Componente base reutilizable
+- `whatsapp.ts` - Utilidades de formateo y validación
+- Componentes especializados por tipo de mensaje
+
+**Características Avanzadas**:
+- Validación automática números México (+52)
+- Plantillas con marca "Henry's Diagnostics"
+- Condicionales inteligentes por estado
+- Variantes visuales (outline, primary, secondary)
+- Responsive design con tooltips
+
+**Ubicación de Botones**:
+- Modal detalles de citas (recordatorios)
+- Modal detalles de servicios (cotización/listo)
+- Modal detalles de oportunidades (seguimiento)
+
+**Beneficio**: Un clic abre WhatsApp con mensaje profesional pre-escrito
+
+---
+
+### 3.12 Dashboard Principal ✅
+**Funcionalidades**:
+- ✅ **Búsqueda Inteligente de Clientes** - Sección prominente azul
   - Búsqueda por nombre, teléfono, WhatsApp, placa, marca, modelo
   - Información completa: datos cliente + vehículos + servicios recientes
   - Navegación directa a citas con preselección automática
   - Botón "Crear Cliente Nuevo" si no se encuentra
-  - ✅ **NUEVO (2025-09-30): Agregar vehículos inline**
-    - Botón "Agregar Otro" en sección de vehículos de cada cliente
-    - Modal inline con VehicleForm reutilizable
-    - Cliente preseleccionado automáticamente
-    - Actualización automática de resultados tras crear
-    - Flujo continuo: Buscar → Agregar vehículo → Crear cita (sin salir del dashboard)
-- ✅ **Resumen del día:** Citas, trabajos en proceso, servicios completados
-- ✅ **KPIs con Chart.js:** Ingresos, servicios por estado, productividad mecánicos
-- ✅ **Vista Kanban:** Servicios organizados por estado con drag & drop
-- ✅ **Formato mexicano:** MXN, fechas es-MX consistente
-- ✅ **Filtrado por sucursal:** Datos segregados automáticamente
-- ✅ **Gráficos interactivos:** Estadísticas visuales en tiempo real
+  - Agregar vehículos inline desde resultados de búsqueda
+- ✅ **Resumen del día** - Citas, trabajos en proceso, servicios completados
+- ✅ **KPIs con Chart.js** - Ingresos, servicios por estado, productividad mecánicos
+- ✅ **Vista Kanban** - Servicios organizados por estado con drag & drop
+- ✅ **Formato mexicano** - MXN, fechas es-MX
+- ✅ **Filtrado por sucursal** - Datos segregados automáticamente
+- ✅ **Gráficos interactivos** - Estadísticas visuales en tiempo real
 
-### 6.4 Sistema de Búsqueda Inteligente ✅ COMPLETAMENTE IMPLEMENTADO
-**Estado:** Sistema avanzado de búsqueda con preselección implementado
-- ✅ **Búsqueda Dashboard Principal**: Sección prominente para búsqueda de clientes antes de crear citas
-- ✅ **Búsqueda en tiempo real**: Por nombre, teléfono, WhatsApp, placa, marca, modelo de vehículo
-- ✅ **Información enriquecida**: Cliente completo con vehículos y servicios recientes
-- ✅ **Prevención duplicados**: Verificación obligatoria antes de crear nuevos clientes
-- ✅ **Navegación inteligente**: Dashboard → Citas con datos preseleccionados via URL params
-- ✅ **Frontend-Only Filtering:** Búsqueda instantánea sin pérdida de foco en módulos
-- ✅ **Búsqueda global:** Clientes por nombre/teléfono, vehículos por placa/marca
-- ✅ **Autocompletado inteligente:** Para grandes bases de datos
-- ✅ **Filtros por módulo:** Cada lista con búsqueda independiente
-- ✅ **Reset automático:** Página 1 al cambiar filtros
-- ✅ **Paginación local:** Sin llamadas API durante búsqueda
-- ✅ **Integración CreateAppointmentModal**: Soporte preselección cliente/vehículo
+---
 
-### 6.5 Gestión de Oportunidades ✅ IMPLEMENTADO
-- ✅ **Creación manual:** Por usuarios autorizados después de servicios
-- ✅ **Datos completos:** Cliente y vehículo con toda la información
-- ✅ **Tipos:** MANTENIMIENTO, TRABAJO_PENDIENTE
-- ✅ **Estados:** pending, contacted, scheduled, closed
-- ✅ **Conversión a cita:** Botón directo con datos pre-cargados
-- ✅ **Referencia bidireccional:** Oportunidad ↔ Cita con opportunityId
-- ✅ **Modal de detalles:** Vista completa con historial
-- ✅ **Segregación:** Por sucursal automáticamente
+### 3.13 Módulo Móvil para Propietarios ⏳ NO IMPLEMENTADO
+**Estado**: Fase futura de desarrollo
 
-### 6.6 App Móvil para Propietarios ⏳ NO IMPLEMENTADO
-**Estado:** Fase futura - no implementado aún
-- ⏳ **Pendiente:** Login simplificado por teléfono
-- ⏳ **Pendiente:** Vista de vehículos del propietario
-- ⏳ **Pendiente:** Estado de servicios en progreso
-- ⏳ **Pendiente:** Historial de servicios
-- ⏳ **Pendiente:** Notificaciones push
-- ⏳ **Pendiente:** Interfaz móvil optimizada
+**Pendiente**:
+- ⏳ API móvil específica
+- ⏳ Autenticación por teléfono
+- ⏳ Consulta de status
+- ⏳ Notificaciones push
+- ⏳ Interface móvil optimizada
 
-### 6.7 Sistema de Comisiones ✅ PARCIALMENTE IMPLEMENTADO
-- ✅ **Registro mecánicos:** Con porcentaje personalizable
-- ✅ **Cálculo automático:** mechanic_commission en servicios
-- ✅ **Segregación:** Por sucursal (branchId)
-- ⏳ **Pendiente:** Reportes detallados por período
-- ⏳ **Pendiente:** Estados de pago
-- ⏳ **Pendiente:** Exportación PDF/Excel
+---
 
-### 6.8 Gestión de Clientes y Vehículos ✅ IMPLEMENTADO
-- ✅ **Relación 1:N:** Cliente → Múltiples vehículos
-- ✅ **Historial completo:** Servicios por cliente/vehículo
-- ✅ **Campos extendidos:** Combustible, transmisión, motor, chasis
-- ✅ **Notas especiales:** Por vehículo
-- ✅ **Contactos múltiples:** Teléfono, WhatsApp, email
-- ✅ **GLOBALES:** Disponibles en todas las sucursales
-- ⏳ **Pendiente:** Merge de duplicados automático
+## 4. Características Técnicas Clave
 
-### 6.9 Sistema de Comunicaciones WhatsApp ✅ COMPLETAMENTE IMPLEMENTADO
-**Estado:** Sistema completo de mensajería profesional implementado
-- ✅ **Integración sin APIs:** Basado en enlaces wa.me (sin costos adicionales)
-- ✅ **Plantillas dinámicas:** 5 tipos de mensajes con personalización automática
-- ✅ **Componentes reutilizables:** Arquitectura modular y escalable
-- ✅ **Tipos de comunicación:**
-  - **Recordatorios de citas:** Con fecha, hora, vehículo y solicitud de confirmación
-  - **Cotizaciones listas:** Con monto, diagnóstico y solicitud de autorización
-  - **Vehículos listos:** Con detalles de trabajo completado y horarios de recolección
-  - **Seguimiento oportunidades:** Recordatorios de mantenimientos recomendados
-  - **Contacto general:** Comunicación flexible personalizada
-- ✅ **Características técnicas:**
-  - Formateo automático de números México (+52)
-  - Encoding correcto de caracteres especiales y emojis
-  - Validación condicional por estado de servicio/cita
-  - Integración responsive con tooltips descriptivos
-- ✅ **Ubicaciones estratégicas:**
-  - Modal detalles de citas (recordatorios)
-  - Modal detalles de servicios (cotización/vehículo listo)
-  - Modal detalles de oportunidades (seguimiento)
-- ✅ **Experiencia de usuario:**
-  - Un clic abre WhatsApp con mensaje profesional pre-escrito
-  - Variantes visuales distintivas por tipo de mensaje
-  - Aparición condicional basada en datos disponibles
-- ⚡ **Beneficio:** Comunicación eficiente y profesional con clientes sin costos adicionales
+### Autenticación y Seguridad ✅
+- JWT con refresh tokens + branchId para multi-taller
+- Bcrypt para hash de passwords (12 salt rounds)
+- Validación de datos con Zod (frontend y backend)
+- Sistema de permisos granular con PermissionGate
+- Middleware de autorización por rol/recurso
+- CORS configurado para Railway
 
-## 7. Interfaces de Usuario
+### Performance ✅
+- Frontend-Only Filtering (carga única de 500-1000 registros)
+- Lazy loading en componentes React
+- Queries optimizadas con Prisma includes
+- Paginación local en frontend para mejor UX
+- Índices en campos críticos de BD
 
-### 7.1 Desktop/Tablet (Operación Principal)
+### Estados y Workflow ✅
+- Validación de transiciones de estado secuencial
+- Logs automáticos con StatusLog model
+- Timestamps automáticos (started_at, completed_at)
+- Vista Kanban con drag & drop entre estados
+- Dropdown inteligente muestra solo transiciones válidas
+
+---
+
+## 5. Interfaces de Usuario
+
+### 5.1 Desktop/Tablet (Operación Principal)
 - Sidebar con navegación principal
 - Dashboard con widgets personalizables
 - Tablas con paginación, ordenamiento y filtros
 - Modales para formularios de creación/edición
 - Notificaciones toast para feedback
-- Tema claro/oscuro
+- Vista Kanban para servicios
 
-### 7.2 Móvil (Propietarios)
+### 5.2 Móvil (Citas Adaptativas)
+- Auto-detección de dispositivo (< 768px)
+- Vista lista optimizada por defecto
+- Cards expandibles con información jerárquizada
+- Pull-to-refresh para actualizar
+- Botones grandes optimizados para dedos
+- Enlaces directos para llamadas (tel:)
+- WhatsApp integrado en cards
+
+### 5.3 Móvil (Propietarios) - Futuro
 - Bottom navigation para funciones principales
 - Cards para mostrar vehículos y servicios
 - Timeline para seguimiento de estados
-- Pull-to-refresh para actualizar datos
 - Notificaciones push nativas
 
-## 8. Fases de Desarrollo Sugeridas
+---
 
-### Fase 1 - Core (MVP) - 2-3 semanas
+## 6. Fases de Desarrollo
+
+### Fase 1 - Core (MVP) ✅ COMPLETADA
 - Setup Railway monolítico + PostgreSQL
 - Autenticación y sistema de usuarios/roles
 - CRUD básico: clientes, vehículos, mecánicos
-- Sistema de citas básico
-- Estados de trabajo (sin transiciones automáticas)
-- Dashboard básico
+- Sistema de citas con calendario
+- Estados de trabajo con workflow
+- Dashboard con KPIs
 
-### Fase 2 - Operaciones - 2-3 semanas
+### Fase 2 - Operaciones ✅ COMPLETADA
 - Gestión completa de servicios con workflow
 - Sistema de transiciones de estado
 - Búsqueda unificada
@@ -1403,74 +366,77 @@ model StatusLog {
 - Logs de auditoría
 - Dashboard avanzado con métricas
 
-### Fase 3 - Avanzado - 3-4 semanas
-- App móvil para propietarios
+### Fase 3 - Avanzado ✅ COMPLETADA
 - Sistema de comisiones para mecánicos
-- ✅ ~~Reportes y exportación (PDF/Excel)~~ **COMPLETADO EN FASE 1**
+- Reportes y exportación (PDF/Excel)
+- Sistema de comunicaciones WhatsApp
+- Recepción de vehículos con/sin cita
+- Optimización móvil de citas
+
+### Fase 4 - Futuro ⏳ PENDIENTE
+- App móvil para propietarios
 - Notificaciones en tiempo real (WebSocket)
 - Sistema de notificaciones push
-
-### Fase 4 - Optimización - 2-3 semanas
-- Integración WhatsApp API
-- Optimizaciones de performance
-- Funciones avanzadas basadas en feedback
+- WhatsApp API avanzado
 - Tests automatizados
-- Documentación completa
+- Merge automático de clientes duplicados
 
-## 9. Consideraciones Adicionales
+---
 
-### 9.1 Backup y Recuperación
+## 7. Consideraciones Operativas
+
+### Backup y Recuperación
 - Backups automáticos diarios en Railway
 - Export manual de datos críticos
 - Procedimientos de recuperación documentados
 
-### 9.2 Monitoreo
+### Monitoreo
 - Logs centralizados en Railway
 - Monitoreo de performance con métricas integradas
 - Alertas por email para errores críticos
-- Health checks automáticos
+- Health checks automáticos (`/api/health`)
 
-### 9.3 Escalabilidad
+### Escalabilidad
 - Arquitectura preparada para crecimiento
 - Índices de base de datos optimizados
 - Paginación en todas las listas
 - Lazy loading para mejor UX
+- Frontend-Only Filtering para operaciones moderadas
 
-### 9.4 Seguridad
+### Seguridad
 - Validación exhaustiva de inputs
 - Protección contra SQL injection (usando ORM)
-- Rate limiting para prevenir ataques
+- Rate limiting para prevenir ataques (opcional)
 - Logs de seguridad para auditoría
+- CORS configurado correctamente
 
 ---
+
 ## ✅ ESTADO FINAL: SISTEMA 100% FUNCIONAL
 
-**Henry Diagnostics v1.0 - COMPLETAMENTE IMPLEMENTADO + RECEPCIÓN AVANZADA**
-- ✅ **Deployment:** Monolítico en Railway + PostgreSQL ACTIVO
-- ✅ **Stack:** React + Node.js + TypeScript + Prisma COMPLETO
-- ✅ **Multi-taller:** Arquitectura enterprise implementada
-- ✅ **Permisos:** Sistema granular user-friendly
-- ✅ **UX avanzado:** Frontend-Only Filtering, Kanban, Chart.js
-- ✅ **WhatsApp:** Sistema completo de comunicaciones automatizadas
-- ✅ **Recepción:** Sistema avanzado con actualización de vehículos y merge inteligente
-- ✅ **Database:** Limpia con usuario ADMIN único
+**Henry Diagnostics v1.0** - COMPLETAMENTE IMPLEMENTADO
+- ✅ **Deployment**: Monolítico en Railway + PostgreSQL ACTIVO
+- ✅ **Stack**: React + Node.js + TypeScript + Prisma COMPLETO
+- ✅ **Multi-taller**: Arquitectura enterprise implementada
+- ✅ **Permisos**: Sistema granular user-friendly
+- ✅ **UX avanzado**: Frontend-Only Filtering, Kanban, Chart.js
+- ✅ **WhatsApp**: Sistema completo de comunicaciones
+- ✅ **Recepción**: Sistema avanzado con walk-in y merge inteligente
+- ✅ **Móvil**: Interfaz adaptativa para citas
+- ✅ **Exportación**: PDF y Excel integrados
 
-**Nuevas funcionalidades 2025-10-05:**
-- 🚗 **MEJORA RECEPCIÓN 2:** Actualización de vehículos durante recepción
-- 🏷️ **Detección duplicados:** Validación automática de placas con 3 flujos operativos
-- 🔄 **Merge inteligente:** Fusión de vehículos temporales con existentes (mismo cliente)
-- 🎨 **Indicadores visuales:** Badge naranja para placas TEMP-xxxxx
-- ⚙️ **Campos editables:** Placa/marca/modelo/año/color modificables en recepción
+**Última actualización**: 2025-10-05
+**Credenciales**: rik@rikmarquez.com / Acceso979971
+**Deployment**: https://henry-production.up.railway.app
 
-**Funcionalidades previas 2025-09-29:**
-- 📱 **Comunicaciones WhatsApp:** 5 tipos de mensajes profesionales automatizados
-- 🔧 **Fix creación clientes:** Formulario unificado solo WhatsApp
-- 📋 **Plantillas personalizadas:** Marca Henry's Diagnostics con calls-to-action
-- ⚡ **Integración modular:** Botones en citas, servicios y oportunidades
+**🎉 SISTEMA COMPLETAMENTE LISTO PARA PRODUCCIÓN**
 
-**Última actualización:** 2025-10-05
-**Credenciales:** rik@rikmarquez.com / Acceso979971
-**URLs:** Frontend y Backend deployados en Railway
-**Commits recientes:** fffd81a, d13f965, 5ad02dd (fixes recepción) + documentación actualizada
+---
 
-**🎉 SISTEMA COMPLETAMENTE LISTO PARA PRODUCCIÓN CON RECEPCIÓN AVANZADA**
+## 📖 Documentación Relacionada
+
+- **ARQUITECTURA.md** - Detalles técnicos (BD, API, deployment)
+- **STATUS.md** - Estado actual y última sesión
+- **APRENDIZAJES.md** - Lecciones técnicas y debugging
+- **CLAUDE.md** - Memoria del proyecto y protocolo
+- **DEPLOYMENT.md** - Guía de deployment Railway
