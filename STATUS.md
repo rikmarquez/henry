@@ -14,6 +14,122 @@
 - **Dashboard**: Error 403 solucionado, funcionando correctamente
 - **Deploy**: Cambios deployados automáticamente en Railway
 
+## 📋 PENDIENTES PRÓXIMA SESIÓN
+
+### 🚗 MEJORA RECEPCIÓN: Actualización de Datos de Vehículo durante Recepción
+
+#### 📝 Contexto del Problema
+**Escenario operativo real**:
+1. Cliente llama por teléfono para agendar cita
+2. **Información incompleta proporcionada**:
+   - ✅ SIEMPRE proporciona: Nombre y teléfono
+   - ❌ NO proporciona: Placa (no la ve en el momento)
+   - ❌ A VECES no proporciona: Marca o modelo exacto
+3. Sistema crea vehículo con **placa temporal**: `TEMP-xxxxx`
+4. Cita se agenda con datos incompletos
+5. **Problema actual**: Al recibir el vehículo físicamente, no se pueden actualizar los datos
+
+#### 🎯 Requerimiento Funcional
+**Al momento de recepción del vehículo**, el recepcionista debe poder:
+- ✏️ **Actualizar placa real** (reemplazar `TEMP-xxxxx` con placa verdadera)
+- ✏️ **Actualizar/corregir marca** del vehículo
+- ✏️ **Actualizar/corregir modelo** del vehículo
+- ✏️ **Actualizar/corregir año** del vehículo
+- ✏️ **Actualizar/corregir color** del vehículo
+- ✏️ **Agregar notas adicionales** sobre el vehículo
+
+#### 🔧 Implementación Propuesta
+
+**Frontend - VehicleReceptionForm.tsx**:
+- Convertir campos del vehículo de **solo lectura** a **editables**
+- Campos a habilitar para edición:
+  - `plate` - Input de texto con validación
+  - `brand` - Input de texto
+  - `model` - Input de texto
+  - `year` - Input numérico (1900-2030)
+  - `color` - Input de texto
+- **Indicador visual** cuando placa empieza con "TEMP"
+  - Badge naranja: "⚠️ PLACA TEMPORAL - Actualizar con placa real"
+  - Resaltar campo de placa para llamar atención
+
+**Backend - reception.ts**:
+- Endpoint `/receive-vehicle` debe:
+  1. Recibir datos del vehículo junto con datos de recepción
+  2. **Actualizar vehículo** si hay cambios en los datos
+  3. Crear servicio con datos de recepción
+  4. Validar que placa no esté duplicada (si se actualiza)
+
+**Flujo Operativo Mejorado**:
+```
+1. Cita telefónica → Vehículo creado con TEMP-12345
+2. Cliente llega al taller con auto
+3. Recepcionista abre formulario de recepción
+4. Sistema muestra: ⚠️ PLACA TEMPORAL - Campo resaltado
+5. Recepcionista ve placa real del auto físico
+6. Actualiza: TEMP-12345 → ABC-1234 (placa real)
+7. Corrige marca/modelo si es necesario
+8. Completa inspección y firma
+9. Sistema actualiza vehículo + crea servicio
+10. Datos del vehículo quedan correctos en sistema
+```
+
+#### 📊 Cambios Técnicos Necesarios
+
+**1. Schema de Validación** (shared):
+```typescript
+// Extender vehicleReceptionSchema
+export const vehicleReceptionSchema = z.object({
+  // ... campos existentes de recepción ...
+
+  // NUEVOS: Datos del vehículo actualizables
+  vehicleUpdates: z.object({
+    plate: z.string().min(1).optional(),
+    brand: z.string().optional(),
+    model: z.string().optional(),
+    year: z.number().int().min(1900).max(2030).optional(),
+    color: z.string().optional(),
+  }).optional(),
+});
+```
+
+**2. Endpoint Backend**:
+```typescript
+// En /receive-vehicle
+if (vehicleUpdates && Object.keys(vehicleUpdates).length > 0) {
+  await prisma.vehicle.update({
+    where: { id: vehicleId },
+    data: vehicleUpdates,
+  });
+}
+```
+
+**3. Frontend - Formulario**:
+- Sección nueva: "Datos del Vehículo" (editable)
+- Detección automática de placas temporales
+- Validación en tiempo real
+- Toast notification: "Vehículo actualizado: ABC-1234"
+
+#### ✅ Beneficios Operativos
+- 🎯 **Datos precisos**: Placas reales en sistema desde recepción
+- ⚡ **Flujo simplificado**: No necesitar módulo de vehículos para corrección
+- 📋 **Trazabilidad**: Historial de cuando se actualizó placa temporal
+- 💼 **Productividad**: Recepcionista completa todo en un solo paso
+- 🚫 **Prevención duplicados**: Validación de placa única al actualizar
+
+#### 📝 Notas de Implementación
+- **Prioridad**: ALTA - Afecta flujo operativo diario
+- **Tiempo estimado**: 2-3 horas
+- **Archivos a modificar**:
+  - `src/client/src/components/reception/VehicleReceptionForm.tsx`
+  - `src/server/src/routes/reception.ts`
+  - `src/shared/schemas/service.schema.ts`
+- **Testing requerido**:
+  - Actualización de placa temporal a real
+  - Validación de duplicados
+  - Edición parcial (solo algunos campos)
+
+---
+
 ## 🎯 MÓDULO DE RECEPCIÓN DE VEHÍCULOS - SESIÓN 2025-10-04
 
 ### ✅ COMPLETADO: Sistema de Recepción de Vehículos para Tablet
@@ -226,6 +342,61 @@ Service (estado: Terminado)
 - **Resultado**: Citas con estados 'scheduled', 'confirmed', 'received', etc. son elegibles
 - **Solo se excluyen**: Citas con status = 'cancelled'
 - **Commit**: fix: permitir recibir cualquier cita no cancelada
+
+#### 🐛 ERRORES RESUELTOS EN PRODUCCIÓN
+
+**Error 1: Error 500 - Permisos de Recepción Faltantes** ✅
+- **Síntoma**: Error 500 al cargar `/api/reception/today`
+- **Root Cause**: Roles ADMIN y ENCARGADO no tenían permisos `reception: ['create', 'read']`
+- **Solución**: Agregado permiso `reception` a roles ADMIN y ENCARGADO en seed.ts
+- **Lección**: Nuevos módulos requieren actualizar permisos de todos los roles relevantes
+- **Commit**: `e170f27` + `5cf64ee`
+
+**Error 2: Error 500 - Parámetros Incorrectos en Middleware** ✅
+- **Síntoma**: Error 500 persistente después de agregar permisos
+- **Root Cause**: Middleware `authorize` espera **arrays** pero recibía **strings**
+  - ❌ Incorrecto: `authorize('reception', 'read')`
+  - ✅ Correcto: `authorize(['reception'], ['read'])`
+- **Debugging**: Revisión del tipo de parámetros esperados por middleware
+- **Solución**: Cambiar todos los llamados de authorize en reception.ts a formato array
+- **Lección**: Verificar signature de funciones al usar middlewares
+- **Commit**: `225c980`
+
+**Error 3: Zona Horaria - No Muestra Citas del Día** ✅
+- **Síntoma**: Endpoint funciona pero retorna 0 citas cuando hay 7 citas del día
+- **Root Cause**: Problema de timezone UTC vs México (UTC-6)
+  - Hora México: 8:50 PM sábado 4
+  - Hora UTC servidor: 2:50 AM domingo 5
+  - Código buscaba citas del "domingo" en UTC
+- **Debugging**: Script de verificación mostró que sí hay citas del sábado
+- **Solución**: Ajuste de zona horaria México en cálculo de rango de fechas
+  ```typescript
+  const mexicoOffsetHours = -6;
+  const mexicoTime = new Date(nowUTC.getTime() + (mexicoOffsetHours * 60 * 60 * 1000));
+  const todayMexico = new Date(mexicoTime.getFullYear(), mexicoTime.getMonth(), mexicoTime.getDate());
+  const today = new Date(todayMexico.getTime() - (mexicoOffsetHours * 60 * 60 * 1000));
+  ```
+- **Lección**: Railway usa UTC, siempre considerar timezone del cliente
+- **Commit**: `bc736a0`
+
+#### 🎓 Aprendizajes Adicionales de Debugging
+
+**1. Middleware Signature Validation**
+- Verificar SIEMPRE los tipos de parámetros esperados
+- TypeScript no siempre detecta errores en middleware encadenado
+- Revisar ejemplos en el código existente
+
+**2. Timezone en Servidores Cloud**
+- Railway/Heroku/AWS por defecto usan UTC
+- México = UTC-6 (o UTC-5 en horario de verano)
+- Calcular día actual considerando offset del cliente
+- Logs deben mostrar AMBAS zonas horarias para debugging
+
+**3. Debugging Sistemático de Permisos**
+- Error 500 puede ser permisos faltantes (no solo 403)
+- Revisar roles en seed.ts
+- Verificar que `upsert` tenga `update: { permisos }` no `update: {}`
+- User debe cerrar sesión y volver a entrar para JWT actualizado
 
 #### 🚨 DEPLOYMENT ERRORS RESUELTOS - Railway Build Issues
 
