@@ -19,6 +19,7 @@ import BranchesPage from './pages/BranchesPage';
 import UsersPage from './pages/UsersPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
+import { ReceptionPage } from './pages/ReceptionPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -101,7 +102,15 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
-          
+
+          <Route path="/recepcion" element={
+            <ProtectedRoute>
+              <Layout>
+                <ReceptionPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/reports" element={
             <ProtectedRoute>
               <Layout>

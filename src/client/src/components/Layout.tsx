@@ -2,20 +2,21 @@ import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { useBranch } from '../contexts/BranchContext';
-import { 
-  Home, 
-  Users, 
-  Car, 
-  Calendar, 
-  Wrench, 
-  BarChart3, 
-  Settings, 
+import {
+  Home,
+  Users,
+  Car,
+  Calendar,
+  Wrench,
+  BarChart3,
+  Settings,
   LogOut,
   Menu,
   X,
   Target,
   UserCog,
-  Building2
+  Building2,
+  ClipboardCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,7 @@ export default function Layout({ children }: LayoutProps) {
   const getNavigation = () => {
     const baseNavigation = [
       { name: 'Dashboard', href: '/dashboard', icon: Home },
+      { name: 'Recepción', href: '/recepcion', icon: ClipboardCheck },
       { name: 'Citas', href: '/appointments', icon: Calendar },
       { name: 'Servicios', href: '/services', icon: Wrench },
       { name: 'Oportunidades', href: '/opportunities', icon: Target },
