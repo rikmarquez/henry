@@ -115,7 +115,8 @@ async function main() {
         services: ['create', 'read', 'update', 'delete'],
         opportunities: ['create', 'read', 'update', 'delete'],
         mechanics: ['read'],
-        reports: ['read']
+        reports: ['read'],
+        reception: ['create', 'read']
       },
     },
     create: {
@@ -127,7 +128,8 @@ async function main() {
         services: ['create', 'read', 'update', 'delete'],
         opportunities: ['create', 'read', 'update', 'delete'],
         mechanics: ['read'],
-        reports: ['read']
+        reports: ['read'],
+        reception: ['create', 'read']
       },
     },
   });
