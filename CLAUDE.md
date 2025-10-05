@@ -2,21 +2,23 @@
 
 ## 📋 Context inicial importante
 **OBLIGATORIO AL INICIO DE CADA SESIÓN:**
-1. **Leer STATUS.md** - Para ponerse al tanto del desarrollo actual de la app
-2. **Leer ESPECIFICACION.md** - Para conocer el estado de implementación de cada módulo
+1. **Leer STATUS.md** - Estado actual del desarrollo y última sesión
+2. **Leer ESPECIFICACION.md** - Arquitectura y módulos implementados
+3. **Leer APRENDIZAJES.md** - Lecciones técnicas y errores a evitar ⭐ NUEVO
 
 **OBLIGATORIO AL FINAL DE CADA SESIÓN:**
-1. **Actualizar STATUS.md** - Con los cambios, logros y aprendizajes de la sesión
-2. **Actualizar ESPECIFICACION.md** - Si se implementaron nuevas funcionalidades o cambios en la arquitectura
+1. **Actualizar STATUS.md** - Última sesión y cambios realizados
+2. **Actualizar APRENDIZAJES.md** - Si se encontraron bugs o lecciones nuevas
+3. **Actualizar ESPECIFICACION.md** - Si hay cambios arquitectónicos o nuevos módulos
 
 ## 🎯 Objetivo del Proyecto
 Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web completa para gestionar clientes, vehículos, servicios, mecánicos y operaciones del taller.
 
 ## 📊 Estado Actual
-- **Fase:** Transición a Fase 1 (Core MVP)
-- **Progreso General:** 15% completado
-- **Estructura:** Base técnica completada
-- **Próximo:** Implementar autenticación y CRUD básico
+- **Fase:** Sistema 100% Funcional en Producción ✅
+- **Progreso General:** 100% completado
+- **Deployment:** Railway activo
+- **Últimas actualizaciones:** Ver STATUS.md
 
 ## 🛠️ Stack Tecnológico
 - **Frontend:** React + TypeScript + Vite
@@ -38,19 +40,24 @@ Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web co
 - `npx prisma migrate dev` - Migración de desarrollo
 - `npx prisma db seed` - Poblar datos iniciales
 
-## ⏳ Pendientes Inmediatos
-1. Ejecutar primera migración de Prisma
-2. Ejecutar seed de datos iniciales
-3. Crear esquemas de validación Zod compartidos
-4. Implementar sistema de autenticación JWT
-5. Crear middlewares de autenticación
-6. Implementar CRUD básico de usuarios y roles
+## 🎯 Módulos Completados
+1. ✅ Usuarios y Roles (multi-taller)
+2. ✅ Clientes y Vehículos (globales)
+3. ✅ Citas (calendario + móvil)
+4. ✅ Servicios (workflow Kanban)
+5. ✅ Recepción (con/sin cita + walk-in)
+6. ✅ Oportunidades
+7. ✅ Mecánicos y Comisiones
+8. ✅ Dashboard con KPIs
+9. ✅ WhatsApp (5 tipos mensajes)
+10. ✅ Impresión/Exportación
 
 ## 📝 Notas importantes
-- **PROTOCOLO SESIONES:** Leer STATUS.md + ESPECIFICACION.md al inicio, actualizarlos al final
+- **PROTOCOLO SESIONES:** Leer STATUS.md + ESPECIFICACION.md + APRENDIZAJES.md al inicio
+- **Actualizar al final:** STATUS.md (siempre) + APRENDIZAJES.md (si hay bugs/lecciones)
+- **APRENDIZAJES.md:** Contiene bugs resueltos y técnicas de debugging - LEER antes de deployment
 - Seguir la especificación detallada en ESPECIFICACION.md como referencia técnica
 - Mantener la estructura monolítica para simplicidad en Railway
-- Priorizar funcionalidades basadas en el estado actual documentado
 
 ## ⚠️ REGLAS CRÍTICAS RAILWAY DEPLOYMENT
 
@@ -86,9 +93,19 @@ Sistema de gestión de taller mecánico "Henry Diagnostics" - Aplicación web co
 6. **Un error a la vez** - no múltiples cambios simultáneos
 
 ### 📚 Aprendizajes Documentados
-- **STATUS.md** contiene sección completa "DEPLOYMENT ERRORS RESUELTOS"
-- **Leer antes de deployment** para evitar errores conocidos
-- **Actualizar STATUS.md** con nuevos aprendizajes de deployment
+- **APRENDIZAJES.md** ⭐ NUEVO - Archivo dedicado a lecciones técnicas y debugging
+- Contiene todos los bugs críticos resueltos con causa raíz y solución
+- Técnicas de debugging sistemático
+- Mejores prácticas identificadas
+- **Leer APRENDIZAJES.md antes de deployment** para evitar errores conocidos
+
+## 📖 Archivos de Documentación
+- **CLAUDE.md** - Este archivo (memoria del proyecto)
+- **STATUS.md** - Estado actual y última sesión (simplificado)
+- **ESPECIFICACION.md** - Arquitectura técnica completa
+- **APRENDIZAJES.md** - Lecciones técnicas y debugging ⭐ NUEVO
+- **DEPLOYMENT.md** - Guía de deployment Railway
 
 ---
 *Archivo creado: 2025-08-20*
+*Última actualización: 2025-10-05*
