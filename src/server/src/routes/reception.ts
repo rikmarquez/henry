@@ -130,14 +130,27 @@ router.get(
         return res.status(401).json({ message: 'Usuario no autenticado' });
       }
 
-      // Obtener fecha de inicio y fin del día de hoy
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Obtener fecha de inicio y fin del día de hoy en zona horaria México (UTC-6)
+      // Railway usa UTC, necesitamos convertir a hora local de México
+      const nowUTC = new Date();
+      const mexicoOffsetHours = -6;
+      const mexicoTime = new Date(nowUTC.getTime() + (mexicoOffsetHours * 60 * 60 * 1000));
 
+      // Crear fecha "hoy" a las 00:00 hora México, pero en UTC
+      // Si en México son las 8:50 PM del sábado 4, en UTC son las 2:50 AM del domingo 5
+      // Queremos buscar citas del sábado 4 (00:00 a 23:59 hora México)
+      // En UTC eso es: sábado 4 a las 06:00 hasta domingo 5 a las 05:59
+      const todayMexico = new Date(mexicoTime.getFullYear(), mexicoTime.getMonth(), mexicoTime.getDate());
+      const today = new Date(todayMexico.getTime() - (mexicoOffsetHours * 60 * 60 * 1000)); // Convertir a UTC
+      const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
+
+      console.log('[RECEPTION] Hora UTC servidor:', nowUTC.toISOString());
+      console.log('[RECEPTION] Hora México:', mexicoTime.toISOString());
       console.log('[RECEPTION] Buscando citas para branchId:', branchId);
-      console.log('[RECEPTION] Rango de fechas:', { today, tomorrow });
+      console.log('[RECEPTION] Rango de fechas UTC:', {
+        today: today.toISOString(),
+        tomorrow: tomorrow.toISOString()
+      });
 
       const appointments = await prisma.appointment.findMany({
         where: {
