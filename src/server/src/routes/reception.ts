@@ -18,10 +18,15 @@ router.post(
   validate(vehicleReceptionSchema),
   async (req, res) => {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?.userId;
       const branchId = req.user?.branchId;
 
+      console.log('[Reception] req.user:', req.user);
+      console.log('[Reception] userId:', userId);
+      console.log('[Reception] branchId:', branchId);
+
       if (!userId || !branchId) {
+        console.log('[Reception] ERROR: userId o branchId faltante');
         return res.status(401).json({ message: 'Usuario no autenticado' });
       }
 
