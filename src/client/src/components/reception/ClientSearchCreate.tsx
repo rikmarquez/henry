@@ -45,15 +45,25 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Query para buscar clientes
+  // Query para buscar clientes (carga todos y filtra en frontend)
   const { data: clients = [], isLoading: isSearching } = useQuery({
     queryKey: ['clients-search', searchTerm],
     queryFn: async () => {
       if (!searchTerm || searchTerm.length < 2) return [];
-      const { data } = await api.get('/clients', {
-        params: { search: searchTerm, limit: 20 },
-      });
-      return data.clients || [];
+
+      // Cargar todos los clientes
+      const { data } = await api.get('/clients?limit=1000');
+      const allClients = data.data?.clients || data.clients || [];
+
+      // Filtrar en el frontend
+      const filteredClients = allClients.filter((client: any) =>
+        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.phone.includes(searchTerm) ||
+        (client.whatsapp && client.whatsapp.includes(searchTerm)) ||
+        (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+
+      return filteredClients;
     },
     enabled: searchTerm.length >= 2,
   });
