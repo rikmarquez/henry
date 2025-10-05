@@ -218,7 +218,16 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
+      <form
+        onSubmit={handleSubmit(
+          onSubmit,
+          (errors) => {
+            console.log('[VehicleReceptionForm] ❌ ERRORES DE VALIDACIÓN:', errors);
+            alert('Error de validación del formulario. Revisa la consola para detalles.');
+          }
+        )}
+        className="space-y-6 max-w-4xl"
+      >
         {/* Información del Vehículo y Cliente */}
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-4 border-b bg-blue-50">
@@ -512,7 +521,11 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
           <button
             type="submit"
             disabled={isReceivingVehicle}
-            onClick={() => console.log('[VehicleReceptionForm] Botón submit clickeado')}
+            onClick={() => {
+              console.log('[VehicleReceptionForm] Botón submit clickeado');
+              console.log('[VehicleReceptionForm] Errores actuales:', errors);
+              console.log('[VehicleReceptionForm] isReceivingVehicle:', isReceivingVehicle);
+            }}
             className="flex-1 h-16 text-lg px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isReceivingVehicle ? (
