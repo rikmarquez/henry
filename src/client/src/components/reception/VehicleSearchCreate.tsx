@@ -51,7 +51,7 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
     queryKey: ['client-vehicles', clientId],
     queryFn: async () => {
       const { data } = await api.get(`/vehicles/by-client/${clientId}`);
-      return data || [];
+      return data.data?.vehicles || data.vehicles || [];
     },
   });
 
