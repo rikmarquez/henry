@@ -38,7 +38,57 @@ router.post(
         observacionesRecepcion,
         firmaCliente,
         fotosRecepcion,
+        vehicleUpdates,
       } = req.body;
+
+      // Si hay actualizaciones de vehículo, procesarlas primero
+      let finalVehicleId = vehicleId;
+      if (vehicleUpdates && Object.keys(vehicleUpdates).length > 0) {
+        // Si se está actualizando la placa, verificar duplicados
+        if (vehicleUpdates.plate) {
+          const existingVehicle = await prisma.vehicle.findUnique({
+            where: { plate: vehicleUpdates.plate },
+            include: {
+              client: {
+                select: {
+                  id: true,
+                  name: true,
+                  phone: true,
+                }
+              }
+            }
+          });
+
+          // Si existe un vehículo con esa placa y NO es el vehículo actual
+          if (existingVehicle && existingVehicle.id !== vehicleId) {
+            const isSameClient = existingVehicle.clientId === clientId;
+
+            return res.status(409).json({
+              code: 'DUPLICATE_PLATE',
+              message: 'La placa ya existe en el sistema',
+              canMerge: isSameClient,
+              existingVehicle: {
+                id: existingVehicle.id,
+                plate: existingVehicle.plate,
+                brand: existingVehicle.brand,
+                model: existingVehicle.model,
+                year: existingVehicle.year,
+                color: existingVehicle.color,
+                client: existingVehicle.client,
+              },
+              tempVehicle: {
+                id: vehicleId,
+              }
+            });
+          }
+        }
+
+        // Si no hay conflicto, actualizar el vehículo
+        await prisma.vehicle.update({
+          where: { id: vehicleId },
+          data: vehicleUpdates,
+        });
+      }
 
       // Crear el servicio con los datos de recepción
       const service = await prisma.service.create({
@@ -193,6 +243,62 @@ router.get(
         message: 'Error al obtener citas del día',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  }
+);
+
+/**
+ * POST /api/reception/merge-vehicle
+ * Merge de vehículo temporal con vehículo existente (mismo cliente)
+ */
+router.post(
+  '/merge-vehicle',
+  authenticate,
+  authorize(['reception'], ['create']),
+  async (req, res) => {
+    try {
+      const { tempVehicleId, existingVehicleId, appointmentId } = req.body;
+
+      if (!tempVehicleId || !existingVehicleId) {
+        return res.status(400).json({ message: 'IDs de vehículos requeridos' });
+      }
+
+      // Verificar que ambos vehículos existan
+      const [tempVehicle, existingVehicle] = await Promise.all([
+        prisma.vehicle.findUnique({ where: { id: tempVehicleId } }),
+        prisma.vehicle.findUnique({ where: { id: existingVehicleId } }),
+      ]);
+
+      if (!tempVehicle || !existingVehicle) {
+        return res.status(404).json({ message: 'Vehículo no encontrado' });
+      }
+
+      // Verificar que sean del mismo cliente (seguridad)
+      if (tempVehicle.clientId !== existingVehicle.clientId) {
+        return res.status(403).json({ message: 'Los vehículos no pertenecen al mismo cliente' });
+      }
+
+      // Actualizar la cita para usar el vehículo existente
+      if (appointmentId) {
+        await prisma.appointment.update({
+          where: { id: appointmentId },
+          data: { vehicleId: existingVehicleId },
+        });
+      }
+
+      // Eliminar el vehículo temporal
+      await prisma.vehicle.delete({
+        where: { id: tempVehicleId },
+      });
+
+      res.json({
+        success: true,
+        message: 'Vehículos fusionados exitosamente',
+        mergedVehicleId: existingVehicleId,
+      });
+    } catch (error) {
+      console.error('Error al fusionar vehículos:', error);
+      res.status(500).json({ message: 'Error al fusionar vehículos' });
     }
   }
 );

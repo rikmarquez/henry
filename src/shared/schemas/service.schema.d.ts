@@ -33,6 +33,13 @@ export declare const vehicleReceptionSchema: z.ZodObject<{
     observacionesRecepcion: z.ZodOptional<z.ZodString>;
     firmaCliente: z.ZodString;
     fotosRecepcion: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    vehicleUpdates: z.ZodOptional<z.ZodObject<{
+        plate: z.ZodOptional<z.ZodString>;
+        brand: z.ZodOptional<z.ZodString>;
+        model: z.ZodOptional<z.ZodString>;
+        year: z.ZodOptional<z.ZodNumber>;
+        color: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>;
 }, z.core.$strip>;
 export declare const updateServiceSchema: z.ZodObject<{
     appointmentId: z.ZodOptional<z.ZodOptional<z.ZodNumber>>;

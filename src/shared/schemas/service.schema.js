@@ -35,6 +35,14 @@ exports.vehicleReceptionSchema = zod_1.z.object({
     observacionesRecepcion: zod_1.z.string().optional(),
     firmaCliente: zod_1.z.string().min(1, 'La firma del cliente es requerida'),
     fotosRecepcion: zod_1.z.array(zod_1.z.string()).optional(),
+    // Campos opcionales para actualizar datos del vehículo
+    vehicleUpdates: zod_1.z.object({
+        plate: zod_1.z.string().min(1, 'La placa es requerida').optional(),
+        brand: zod_1.z.string().optional(),
+        model: zod_1.z.string().optional(),
+        year: zod_1.z.number().int().min(1900).max(2030).optional(),
+        color: zod_1.z.string().optional(),
+    }).optional(),
 });
 exports.updateServiceSchema = exports.createServiceSchema.partial().extend({
     id: common_schema_1.idSchema,

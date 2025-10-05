@@ -34,6 +34,15 @@ export const vehicleReceptionSchema = z.object({
   observacionesRecepcion: z.string().optional(),
   firmaCliente: z.string().min(1, 'La firma del cliente es requerida'),
   fotosRecepcion: z.array(z.string()).optional(),
+
+  // Campos opcionales para actualizar datos del vehículo
+  vehicleUpdates: z.object({
+    plate: z.string().min(1, 'La placa es requerida').optional(),
+    brand: z.string().optional(),
+    model: z.string().optional(),
+    year: z.number().int().min(1900).max(2030).optional(),
+    color: z.string().optional(),
+  }).optional(),
 });
 
 export const updateServiceSchema = createServiceSchema.partial().extend({

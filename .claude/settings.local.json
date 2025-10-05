@@ -59,7 +59,11 @@
       "Bash(start http://localhost:5173/appointments)",
       "Bash(npm start)",
       "Bash(git log:*)",
-      "Bash(npm run build:server:*)"
+      "Bash(npm run build:server:*)",
+      "Bash(for file in appointments.ts services.ts opportunities.ts mechanics.ts reports.ts)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+      "Bash(npm run build:client:*)"
     ],
     "deny": [],
     "ask": []

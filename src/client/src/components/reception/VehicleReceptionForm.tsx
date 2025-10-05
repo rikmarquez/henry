@@ -35,6 +35,15 @@ const vehicleReceptionSchema = z.object({
   observacionesRecepcion: z.string().optional(),
   firmaCliente: z.string().min(1, 'La firma del cliente es requerida'),
   fotosRecepcion: z.array(z.string()).optional(),
+
+  // Campos opcionales para actualizar vehículo
+  vehicleUpdates: z.object({
+    plate: z.string().min(1, 'La placa es requerida').optional(),
+    brand: z.string().optional(),
+    model: z.string().optional(),
+    year: z.number().int().min(1900).max(2030).optional(),
+    color: z.string().optional(),
+  }).optional(),
 });
 
 type VehicleReceptionFormData = z.infer<typeof vehicleReceptionSchema>;
@@ -53,6 +62,8 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
   const { receiveVehicleAsync, isReceivingVehicle } = useReception();
   const [signature, setSignature] = useState('');
   const [signatureError, setSignatureError] = useState('');
+  const [showMergeModal, setShowMergeModal] = useState(false);
+  const [duplicateData, setDuplicateData] = useState<any>(null);
 
   const {
     register,
@@ -83,15 +94,36 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
     }
 
     try {
+      // Filtrar solo campos que tengan valor en vehicleUpdates
+      const vehicleUpdates = data.vehicleUpdates
+        ? Object.fromEntries(
+            Object.entries(data.vehicleUpdates).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+          )
+        : undefined;
+
       const payload = {
         ...data,
         firmaCliente: signature,
+        vehicleUpdates: vehicleUpdates && Object.keys(vehicleUpdates).length > 0 ? vehicleUpdates : undefined,
       };
 
       await receiveVehicleAsync(payload);
       onComplete();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al recibir vehículo:', error);
+
+      // Manejar error de placa duplicada
+      if (error?.response?.status === 409 && error?.response?.data?.code === 'DUPLICATE_PLATE') {
+        const errorData = error.response.data;
+        if (errorData.canMerge) {
+          // Mismo cliente - mostrar modal de confirmación
+          setDuplicateData(errorData);
+          setShowMergeModal(true);
+        } else {
+          // Cliente diferente - mostrar error
+          alert(`Error: La placa ya está registrada para otro cliente: ${errorData.existingVehicle.client.name}\n\nPor favor, verifica la placa ingresada.`);
+        }
+      }
     }
   };
 
@@ -99,6 +131,41 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
     setSignature(sig);
     if (sig) {
       setSignatureError('');
+    }
+  };
+
+  const handleMergeConfirm = async () => {
+    if (!duplicateData) return;
+
+    try {
+      // Llamar al endpoint de merge
+      const response = await fetch('/api/reception/merge-vehicle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          tempVehicleId: duplicateData.tempVehicle.id,
+          existingVehicleId: duplicateData.existingVehicle.id,
+          appointmentId: appointment.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al fusionar vehículos');
+      }
+
+      // Cerrar modal
+      setShowMergeModal(false);
+      setDuplicateData(null);
+
+      // Notificar éxito y cerrar formulario
+      alert('Vehículos fusionados exitosamente. Por favor, vuelva a recibir el vehículo.');
+      onCancel(); // Volver a la lista para refrescar datos
+    } catch (error) {
+      console.error('Error al fusionar vehículos:', error);
+      alert('Error al fusionar vehículos. Por favor, intente nuevamente.');
     }
   };
 
@@ -137,42 +204,126 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl">
         {/* Información del Vehículo y Cliente */}
         <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-4 border-b">
+          <div className="p-4 border-b bg-blue-50">
             <h3 className="text-xl font-semibold flex items-center gap-2">
-              <Car className="h-5 w-5" />
-              Información del Vehículo
+              <Car className="h-5 w-5 text-blue-600" />
+              Datos del Vehículo
             </h3>
+            <p className="text-sm text-gray-600 mt-1">Puede actualizar los datos del vehículo durante la recepción</p>
           </div>
-          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-base font-semibold text-gray-700">Vehículo</label>
-              <p className="text-xl font-bold text-gray-900 mt-1">
-                {appointment.vehicle.brand} {appointment.vehicle.model} {appointment.vehicle.year}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">Color: {appointment.vehicle.color || 'N/A'}</p>
-            </div>
+          <div className="p-4 space-y-4">
+            {/* Indicador de placa temporal */}
+            {appointment.vehicle.plate.startsWith('TEMP') && (
+              <div className="p-3 bg-orange-100 border-l-4 border-orange-500 rounded flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-orange-600" />
+                <p className="text-sm font-medium text-orange-800">
+                  ⚠️ PLACA TEMPORAL - Actualizar con placa real del vehículo
+                </p>
+              </div>
+            )}
 
-            <div>
-              <label className="block text-base font-semibold text-gray-700">Placa</label>
-              <div className="mt-1 px-4 py-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg font-bold text-2xl text-gray-900 inline-block">
-                {appointment.vehicle.plate}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Placa - Editable */}
+              <div>
+                <label htmlFor="plate" className="block text-sm font-medium text-gray-700 mb-1">
+                  Placa del Vehículo *
+                </label>
+                <input
+                  type="text"
+                  id="plate"
+                  defaultValue={appointment.vehicle.plate}
+                  {...register('vehicleUpdates.plate')}
+                  className="h-12 text-lg font-bold uppercase w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="ABC-1234"
+                />
+                {errors.vehicleUpdates?.plate && (
+                  <p className="text-red-500 text-sm mt-1">{errors.vehicleUpdates.plate.message}</p>
+                )}
+              </div>
+
+              {/* Marca - Editable */}
+              <div>
+                <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
+                  Marca
+                </label>
+                <input
+                  type="text"
+                  id="brand"
+                  defaultValue={appointment.vehicle.brand}
+                  {...register('vehicleUpdates.brand')}
+                  className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Toyota, Ford, etc."
+                />
+              </div>
+
+              {/* Modelo - Editable */}
+              <div>
+                <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
+                  Modelo
+                </label>
+                <input
+                  type="text"
+                  id="model"
+                  defaultValue={appointment.vehicle.model}
+                  {...register('vehicleUpdates.model')}
+                  className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Corolla, F-150, etc."
+                />
+              </div>
+
+              {/* Año - Editable */}
+              <div>
+                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+                  Año
+                </label>
+                <input
+                  type="number"
+                  id="year"
+                  defaultValue={appointment.vehicle.year || ''}
+                  {...register('vehicleUpdates.year', { valueAsNumber: true })}
+                  className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="2020"
+                  min="1900"
+                  max="2030"
+                />
+                {errors.vehicleUpdates?.year && (
+                  <p className="text-red-500 text-sm mt-1">{errors.vehicleUpdates.year.message}</p>
+                )}
+              </div>
+
+              {/* Color - Editable */}
+              <div>
+                <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
+                  Color
+                </label>
+                <input
+                  type="text"
+                  id="color"
+                  defaultValue={appointment.vehicle.color || ''}
+                  {...register('vehicleUpdates.color')}
+                  className="h-12 text-lg w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Blanco, Negro, Rojo, etc."
+                />
               </div>
             </div>
 
-            <div>
-              <label className="block text-base font-semibold text-gray-700 flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Cliente
-              </label>
-              <p className="text-lg font-medium text-gray-900 mt-1">{appointment.client.name}</p>
-            </div>
+            {/* Información del Cliente - Solo Lectura */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 mt-4 border-t">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Cliente
+                </label>
+                <p className="text-lg font-medium text-gray-900 mt-1">{appointment.client.name}</p>
+              </div>
 
-            <div>
-              <label className="block text-base font-semibold text-gray-700 flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                Teléfono
-              </label>
-              <p className="text-lg text-gray-900 mt-1">{appointment.client.phone}</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Teléfono
+                </label>
+                <p className="text-lg text-gray-900 mt-1">{appointment.client.phone}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -360,6 +511,94 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
           </button>
         </div>
       </form>
+
+      {/* Modal de Confirmación de Merge */}
+      {showMergeModal && duplicateData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b bg-yellow-50">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-8 w-8 text-yellow-600" />
+                <h3 className="text-2xl font-bold text-gray-900">⚠️ Vehículo ya registrado</h3>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <p className="text-lg text-gray-700">
+                La placa <span className="font-bold text-gray-900">{duplicateData.existingVehicle.plate}</span> ya existe en el sistema para este mismo cliente.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Vehículo Existente */}
+                <div className="border border-green-300 bg-green-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5" />
+                    Vehículo Existente en Sistema
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Placa:</span> {duplicateData.existingVehicle.plate}</p>
+                    <p><span className="font-medium">Marca:</span> {duplicateData.existingVehicle.brand}</p>
+                    <p><span className="font-medium">Modelo:</span> {duplicateData.existingVehicle.model}</p>
+                    {duplicateData.existingVehicle.year && (
+                      <p><span className="font-medium">Año:</span> {duplicateData.existingVehicle.year}</p>
+                    )}
+                    {duplicateData.existingVehicle.color && (
+                      <p><span className="font-medium">Color:</span> {duplicateData.existingVehicle.color}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Vehículo Temporal */}
+                <div className="border border-gray-300 bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Car className="h-5 w-5" />
+                    Vehículo Temporal (Se eliminará)
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Placa:</span> {appointment.vehicle.plate}</p>
+                    <p><span className="font-medium">Marca:</span> {appointment.vehicle.brand}</p>
+                    <p><span className="font-medium">Modelo:</span> {appointment.vehicle.model}</p>
+                    {appointment.vehicle.year && (
+                      <p><span className="font-medium">Año:</span> {appointment.vehicle.year}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">¿Qué sucederá al confirmar?</h4>
+                <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                  <li>La cita se actualizará para usar el vehículo existente</li>
+                  <li>El vehículo temporal será eliminado</li>
+                  <li>Deberás volver a iniciar el proceso de recepción</li>
+                  <li>El historial del vehículo existente se mantendrá intacto</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="p-6 border-t bg-gray-50 flex gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMergeModal(false);
+                  setDuplicateData(null);
+                }}
+                className="flex-1 h-12 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleMergeConfirm}
+                className="flex-1 h-12 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+              >
+                <CheckCircle className="mr-2 h-5 w-5" />
+                Confirmar y Usar Vehículo Existente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
