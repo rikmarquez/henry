@@ -21,7 +21,7 @@ exports.createServiceSchema = zod_1.z.object({
 });
 // Schema para recepción de vehículos
 exports.vehicleReceptionSchema = zod_1.z.object({
-    appointmentId: common_schema_1.idSchema.optional(),
+    appointmentId: zod_1.z.number().int().positive().nullable().optional(),
     clientId: common_schema_1.idSchema,
     vehicleId: common_schema_1.idSchema,
     kilometraje: zod_1.z.number().int().min(0, 'El kilometraje debe ser mayor o igual a 0'),

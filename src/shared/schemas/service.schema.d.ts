@@ -16,7 +16,7 @@ export declare const createServiceSchema: z.ZodObject<{
     mechanicCommission: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strip>;
 export declare const vehicleReceptionSchema: z.ZodObject<{
-    appointmentId: z.ZodOptional<z.ZodNumber>;
+    appointmentId: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     clientId: z.ZodNumber;
     vehicleId: z.ZodNumber;
     kilometraje: z.ZodNumber;

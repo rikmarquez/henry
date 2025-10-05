@@ -20,7 +20,7 @@ export const createServiceSchema = z.object({
 
 // Schema para recepción de vehículos
 export const vehicleReceptionSchema = z.object({
-  appointmentId: idSchema.optional(),
+  appointmentId: z.number().int().positive().nullable().optional(),
   clientId: idSchema,
   vehicleId: idSchema,
   kilometraje: z.number().int().min(0, 'El kilometraje debe ser mayor o igual a 0'),
