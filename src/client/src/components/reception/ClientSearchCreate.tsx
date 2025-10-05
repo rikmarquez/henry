@@ -77,6 +77,10 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
   });
 
   const handleCreateClient = async (formData: ClientFormData) => {
+    console.log('[ClientSearchCreate] handleCreateClient llamado');
+    console.log('[ClientSearchCreate] formData:', formData);
+    console.log('[ClientSearchCreate] errors:', errors);
+
     try {
       setIsCreating(true);
 
@@ -86,11 +90,13 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
         phone: formData.whatsapp, // Backend requiere phone
       };
 
+      console.log('[ClientSearchCreate] dataToSend:', dataToSend);
+
       const { data } = await api.post('/clients', dataToSend);
       toast.success('Cliente creado exitosamente');
       onClientSelected(data);
     } catch (error: any) {
-      console.error('Error al crear cliente:', error);
+      console.error('[ClientSearchCreate] Error al crear cliente:', error);
       toast.error(error.response?.data?.message || 'Error al crear cliente');
     } finally {
       setIsCreating(false);
@@ -106,7 +112,16 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
           Crear Cliente Nuevo
         </h2>
 
-        <form onSubmit={handleSubmit(handleCreateClient)} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(
+            handleCreateClient,
+            (validationErrors) => {
+              console.log('[ClientSearchCreate] Errores de validación:', validationErrors);
+              toast.error('Por favor completa los campos requeridos');
+            }
+          )}
+          className="space-y-4"
+        >
           {/* Nombre */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
