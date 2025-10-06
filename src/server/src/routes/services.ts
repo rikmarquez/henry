@@ -617,25 +617,31 @@ router.put(
         // Log para debugging
         console.log(`[Status Change] Service #${id} -> Estado: "${newStatus.name}" (ID: ${newStatusId})`);
         console.log(`[Status Change] ¿Es Terminado?`, newStatus.name === 'Terminado');
-        console.log(`[Status Change] ¿Es Completado?`, newStatus.name === 'Completado');
+        console.log(`[Status Change] ¿Es En Proceso?`, newStatus.name === 'En Proceso');
 
-        const shouldSetCompletedAt = (newStatus.name === 'Completado' || newStatus.name === 'Terminado');
-        console.log(`[Status Change] shouldSetCompletedAt:`, shouldSetCompletedAt);
+        // Preparar data object
+        const updateData: any = {
+          statusId: newStatusId,
+        };
+
+        // Set startedAt if moving to "En Proceso"
+        if (newStatus.name === 'En Proceso' && !existingService.startedAt) {
+          updateData.startedAt = new Date();
+          console.log(`[Status Change] ✅ Seteando startedAt:`, updateData.startedAt);
+        }
+
+        // Set completedAt if moving to "Terminado"
+        if (newStatus.name === 'Terminado') {
+          updateData.completedAt = new Date();
+          console.log(`[Status Change] ✅ Seteando completedAt:`, updateData.completedAt);
+        }
+
+        console.log(`[Status Change] 📦 updateData final:`, updateData);
 
         // Update service status
         const updatedService = await tx.service.update({
           where: { id: parseInt(id) },
-          data: {
-            statusId: newStatusId,
-            // Set startedAt if moving to "En Progreso"
-            ...(newStatus.name === 'En Progreso' && !existingService.startedAt && {
-              startedAt: new Date(),
-            }),
-            // Set completedAt if moving to "Completado" or "Terminado"
-            ...(shouldSetCompletedAt && {
-              completedAt: new Date(),
-            }),
-          },
+          data: updateData,
           include: {
             client: { select: { id: true, name: true, phone: true, email: true } },
             vehicle: { select: { id: true, plate: true, brand: true, model: true } },
