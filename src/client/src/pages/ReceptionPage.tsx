@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useReception } from '../hooks/useReception';
 import { VehicleReceptionForm } from '../components/reception/VehicleReceptionForm';
 import { WalkInReceptionForm } from '../components/reception/WalkInReceptionForm';
+import { ServiceDetailsModal } from '../components/reception/ServiceDetailsModal';
 import {
   ClipboardCheck,
   Search,
@@ -22,6 +23,7 @@ export const ReceptionPage: React.FC = () => {
   const [showReceptionForm, setShowReceptionForm] = useState(false);
   const [showWalkInForm, setShowWalkInForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'pending' | 'received'>('pending');
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
 
   // Separar citas pendientes vs recibidas
   const pendingAppointments = todayAppointments.filter(
@@ -47,8 +49,17 @@ export const ReceptionPage: React.FC = () => {
   });
 
   const handleReceiveVehicle = (appointment: any) => {
-    setSelectedAppointment(appointment);
-    setShowReceptionForm(true);
+    const isReceived = appointment.status === 'received';
+
+    if (isReceived && appointment.services && appointment.services.length > 0) {
+      // Si ya está recibido, mostrar modal de detalles
+      const service = appointment.services[0]; // Usar el primer servicio
+      setSelectedServiceId(service.id);
+    } else {
+      // Si no está recibido, mostrar formulario de recepción
+      setSelectedAppointment(appointment);
+      setShowReceptionForm(true);
+    }
   };
 
   const handleReceptionComplete = () => {
@@ -69,6 +80,11 @@ export const ReceptionPage: React.FC = () => {
 
   const handleCancelWalkIn = () => {
     setShowWalkInForm(false);
+  };
+
+  const handleServiceDetailsClose = () => {
+    setSelectedServiceId(null);
+    refetchAppointments();
   };
 
   // Si se está mostrando el formulario de walk-in
@@ -302,12 +318,11 @@ export const ReceptionPage: React.FC = () => {
                       {/* Botón Recibir */}
                       <button
                         onClick={() => handleReceiveVehicle(appointment)}
-                        disabled={isReceived}
                         className={`w-full py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 ${
                           isReceived
                             ? 'bg-green-600 hover:bg-green-700 text-white'
                             : 'bg-blue-600 hover:bg-blue-700 text-white'
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        }`}
                       >
                         {isReceived ? (
                           <>
@@ -328,6 +343,15 @@ export const ReceptionPage: React.FC = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Modal de Detalles del Servicio */}
+      {selectedServiceId && (
+        <ServiceDetailsModal
+          serviceId={selectedServiceId}
+          onClose={handleServiceDetailsClose}
+          onUpdate={refetchAppointments}
+        />
       )}
     </div>
   );
