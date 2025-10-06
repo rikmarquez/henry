@@ -258,62 +258,6 @@ const PrintableWeeklyAgenda: React.FC<PrintableWeeklyAgendaProps> = ({
         </div>
       </div>
 
-      {/* Lista detallada de citas (opcional, para referencia rápida) */}
-      {totalAppointments > 0 && (
-        <div style={{ marginTop: '20px', pageBreakBefore: 'avoid' }}>
-          <h3 style={{
-            margin: '0 0 10px 0',
-            fontSize: '14px',
-            color: '#374151',
-            borderBottom: '1px solid #d1d5db',
-            paddingBottom: '5px'
-          }}>
-            📋 Lista Detallada de Citas
-          </h3>
-          <table className="print-table">
-            <thead>
-              <tr>
-                <th style={{ width: '12%' }}>Día</th>
-                <th style={{ width: '10%' }}>Hora</th>
-                <th style={{ width: '20%' }}>Cliente</th>
-                <th style={{ width: '15%' }}>Teléfono</th>
-                <th style={{ width: '20%' }}>Vehículo</th>
-                <th style={{ width: '10%' }}>Estado</th>
-                <th style={{ width: '13%' }}>Tipo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments
-                .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
-                .map((appointment, index) => (
-                  <tr key={index}>
-                    <td>
-                      {new Date(appointment.scheduledDate).toLocaleDateString('es-MX', {
-                        weekday: 'short',
-                        day: 'numeric'
-                      })}
-                    </td>
-                    <td>{formatTime(appointment.scheduledDate)}</td>
-                    <td>{appointment.client.name}</td>
-                    <td>{appointment.client.phone}</td>
-                    <td>
-                      {appointment.vehicle.brand} {appointment.vehicle.model} - {appointment.vehicle.plate}
-                    </td>
-                    <td>
-                      <span className={getStatusClass(appointment.status)}>
-                        {getStatusDisplay(appointment.status)}
-                      </span>
-                    </td>
-                    <td>
-                      {appointment.isFromOpportunity ? '📋 Seguimiento' : '📞 Nueva'}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {/* Footer */}
       <div className="print-footer">
         <div>
