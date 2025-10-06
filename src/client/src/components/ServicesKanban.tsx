@@ -173,11 +173,40 @@ export default function ServicesKanban({
     }
   };
 
-  // Agrupar servicios por columnas simplificadas (excluyendo PERDIDOS)
+  // Función para verificar si un servicio terminado es del día de hoy
+  const isCompletedToday = (service: Service): boolean => {
+    if (!service.completedAt) {
+      console.log(`[Kanban] Servicio #${service.id} TERMINADO sin completedAt - NO mostrar`);
+      return false;
+    }
+
+    const completedDate = new Date(service.completedAt);
+    const today = new Date();
+
+    const isToday = (
+      completedDate.getDate() === today.getDate() &&
+      completedDate.getMonth() === today.getMonth() &&
+      completedDate.getFullYear() === today.getFullYear()
+    );
+
+    console.log(`[Kanban] Servicio #${service.id} completedAt: ${service.completedAt}, isToday: ${isToday}`);
+    return isToday;
+  };
+
+  // Agrupar servicios por columnas simplificadas (excluyendo RECHAZADO)
   const servicesByColumn = simplifiedColumns.reduce((acc, column) => {
     acc[column.id] = services.filter(service => {
       const mappedColumn = mapServiceToColumn(service.statusId);
-      return mappedColumn === column.id;
+
+      // Si no coincide la columna, descartar
+      if (mappedColumn !== column.id) return false;
+
+      // REGLA ESPECIAL: Servicios TERMINADOS solo se muestran si fueron completados HOY
+      if (service.statusId === 4 && column.id === 4) {
+        return isCompletedToday(service);
+      }
+
+      return true;
     });
     return acc;
   }, {} as Record<number, Service[]>);
