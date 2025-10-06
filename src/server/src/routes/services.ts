@@ -615,25 +615,24 @@ router.put(
       // Update service and create status log in a transaction
       const result = await prisma.$transaction(async (tx) => {
         // Log para debugging
-        console.log(`[Status Change] Service #${id} -> Estado: "${newStatus.name}" (ID: ${newStatusId})`);
-        console.log(`[Status Change] ¿Es Terminado?`, newStatus.name === 'Terminado');
-        console.log(`[Status Change] ¿Es En Proceso?`, newStatus.name === 'En Proceso');
+        console.log(`[Status Change] Service #${id} -> newStatusId: ${newStatusId}, name: "${newStatus.name}"`);
 
         // Preparar data object
         const updateData: any = {
           statusId: newStatusId,
         };
 
-        // Set startedAt if moving to "En Proceso"
-        if (newStatus.name === 'En Proceso' && !existingService.startedAt) {
+        // USAR IDs en lugar de nombres para evitar problemas
+        // ID 3 = En Proceso -> setear startedAt
+        if (newStatusId === 3 && !existingService.startedAt) {
           updateData.startedAt = new Date();
-          console.log(`[Status Change] ✅ Seteando startedAt:`, updateData.startedAt);
+          console.log(`[Status Change] ✅ Estado "En Proceso" (ID:3) - Seteando startedAt:`, updateData.startedAt);
         }
 
-        // Set completedAt if moving to "Terminado"
-        if (newStatus.name === 'Terminado') {
+        // ID 4 = Terminado -> setear completedAt
+        if (newStatusId === 4) {
           updateData.completedAt = new Date();
-          console.log(`[Status Change] ✅ Seteando completedAt:`, updateData.completedAt);
+          console.log(`[Status Change] ✅ Estado "Terminado" (ID:4) - Seteando completedAt:`, updateData.completedAt);
         }
 
         console.log(`[Status Change] 📦 updateData final:`, updateData);
