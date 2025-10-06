@@ -198,66 +198,6 @@ const PrintableWeeklyAgenda: React.FC<PrintableWeeklyAgendaProps> = ({
         ))}
       </div>
 
-      {/* Resumen semanal */}
-      <div className="print-spacing" style={{ marginTop: '20px' }}>
-        <div style={{
-          backgroundColor: '#f3f4f6',
-          padding: '12px',
-          borderRadius: '4px',
-          border: '1px solid #d1d5db'
-        }}>
-          <h3 style={{
-            margin: '0 0 10px 0',
-            fontSize: '14px',
-            color: '#374151'
-          }}>
-            📊 Resumen de la Semana
-          </h3>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '15px',
-            fontSize: '11px'
-          }}>
-            <div>
-              <strong>Total de Citas:</strong> {totalAppointments}
-            </div>
-            <div>
-              <strong>Programadas:</strong> {statusSummary.scheduled}
-            </div>
-            <div>
-              <strong>Confirmadas:</strong> {statusSummary.confirmed}
-            </div>
-            <div>
-              <strong>Completadas:</strong> {statusSummary.completed}
-            </div>
-          </div>
-
-          {/* Distribución por día */}
-          <div style={{ marginTop: '10px' }}>
-            <strong style={{ fontSize: '12px', color: '#374151' }}>Distribución por día:</strong>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '8px',
-              marginTop: '5px',
-              fontSize: '10px'
-            }}>
-              {appointmentsByDay.map(({ date, appointments: dayAppointments }, index) => (
-                <div key={index} style={{ textAlign: 'center' }}>
-                  <div style={{ fontWeight: 'bold', color: '#2563eb' }}>
-                    {date.toLocaleDateString('es-MX', { weekday: 'short' })}
-                  </div>
-                  <div style={{ color: '#374151' }}>
-                    {dayAppointments.length} citas
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
       <div className="print-footer">
         <div>
