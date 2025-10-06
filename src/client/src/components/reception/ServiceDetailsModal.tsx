@@ -155,20 +155,25 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
         {/* Header */}
         <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0 z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4 flex-1">
               <div className="p-2 bg-white bg-opacity-20 rounded-lg">
                 <Car className="h-6 w-6" />
               </div>
-              <div>
+              <div className="flex-1">
                 <h2 className="text-2xl font-bold">Detalles de Recepción</h2>
                 <p className="text-blue-100">
                   {service.vehicle.brand} {service.vehicle.model} - {service.vehicle.plate}
                 </p>
               </div>
+              {/* ID SERVICIO PROMINENTE */}
+              <div className="bg-white text-blue-600 px-6 py-3 rounded-lg border-4 border-blue-300">
+                <div className="text-xs font-bold uppercase tracking-wider">ID Servicio</div>
+                <div className="text-4xl font-black">#{service.id}</div>
+              </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors ml-4"
             >
               <X className="h-6 w-6" />
             </button>

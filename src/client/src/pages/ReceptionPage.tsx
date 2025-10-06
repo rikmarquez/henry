@@ -270,12 +270,20 @@ export const ReceptionPage: React.FC = () => {
                             </p>
                           </div>
                         </div>
-                        {isReceived && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Recibido
-                          </span>
-                        )}
+                        <div className="flex flex-col items-end gap-2">
+                          {isReceived && appointment.services && appointment.services.length > 0 && (
+                            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                              <div className="text-xs font-medium opacity-90">ID SERVICIO</div>
+                              <div className="text-2xl font-bold">#{appointment.services[0].id}</div>
+                            </div>
+                          )}
+                          {isReceived && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Recibido
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 

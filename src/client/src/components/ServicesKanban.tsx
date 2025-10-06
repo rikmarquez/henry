@@ -248,14 +248,12 @@ export default function ServicesKanban({
                     draggedService?.id === service.id ? 'opacity-50' : ''
                   }`}
                 >
-                  {/* Service Status Badge */}
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${
-                      statusColors[service.status.name] || 'bg-gray-100 text-gray-800 border-gray-200'
-                    }`}>
-                      {getStatusIcon(service.status.name)}
-                      <span>#{service.id}</span>
-                    </span>
+                  {/* ID SERVICIO PROMINENTE */}
+                  <div className="flex justify-between items-center mb-3 pb-3 border-b-2 border-blue-200">
+                    <div className="bg-blue-600 text-white px-3 py-2 rounded-lg">
+                      <div className="text-[10px] font-bold uppercase tracking-wider opacity-90">ID Servicio</div>
+                      <div className="text-2xl font-black">#{service.id}</div>
+                    </div>
                     <div className="flex space-x-1">
                       <button
                         onClick={() => onViewDetails(service)}
@@ -286,8 +284,11 @@ export default function ServicesKanban({
 
                   {/* Vehicle Info */}
                   <div className="mt-2">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm font-semibold text-gray-800">
                       {service.vehicle.brand} {service.vehicle.model} ({service.vehicle.year})
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Placa: {service.vehicle.plate}
                     </div>
                   </div>
 
