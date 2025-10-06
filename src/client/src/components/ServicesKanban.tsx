@@ -153,25 +153,22 @@ export default function ServicesKanban({
 }: ServicesKanbanProps) {
   const [draggedService, setDraggedService] = useState<Service | null>(null);
 
-  // Define las 4 columnas del flujo activo de trabajo (sin PERDIDO)
+  // Define las 4 columnas del flujo activo de trabajo (sin RECHAZADO)
   const simplifiedColumns = [
     { id: 1, name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
     { id: 2, name: 'COTIZADO', color: 'bg-yellow-50', orderIndex: 2 },
-    { id: 4, name: 'EN PROCESO', color: 'bg-purple-50', orderIndex: 3 },
-    { id: 5, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
+    { id: 3, name: 'EN PROCESO', color: 'bg-purple-50', orderIndex: 3 },
+    { id: 4, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
   ];
 
-  // Mapear servicios directamente por statusId (excluyendo PERDIDO y RECHAZADO del Kanban)
+  // Mapear servicios directamente por statusId (excluyendo RECHAZADO del Kanban)
   const mapServiceToColumn = (statusId: number) => {
     switch (statusId) {
       case 1: return 1; // RECIBIDO
-      case 2: return 2; // COTIZADO (legacy)
-      case 4: return 4; // EN PROCESO
-      case 5: return 5; // TERMINADO (legacy)
-      case 6: return null; // PERDIDO - no mostrar en Kanban
-      case 7: return null; // RECHAZADO - NO mostrar en Kanban
-      case 8: return 2; // COTIZADO (nuevo estado)
-      case 9: return 5; // TERMINADO (nuevo estado)
+      case 2: return 2; // COTIZADO
+      case 3: return 3; // EN PROCESO
+      case 4: return 4; // TERMINADO
+      case 5: return null; // RECHAZADO - NO mostrar en Kanban
       default: return 1; // default to RECIBIDO
     }
   };
