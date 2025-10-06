@@ -203,13 +203,27 @@ export default function ServicesKanban({
 
       // REGLA ESPECIAL: Servicios TERMINADOS solo se muestran si fueron completados HOY
       if (service.statusId === 4 && column.id === 4) {
-        return isCompletedToday(service);
+        console.log(`[Kanban] 🔍 Servicio #${service.id} es TERMINADO (statusId: 4)`);
+        console.log(`[Kanban] 📅 completedAt:`, service.completedAt);
+        console.log(`[Kanban] 📊 service completo:`, service);
+        const shouldShow = isCompletedToday(service);
+        console.log(`[Kanban] ✅ shouldShow:`, shouldShow);
+        return shouldShow;
       }
 
       return true;
     });
     return acc;
   }, {} as Record<number, Service[]>);
+
+  // Log para debugging del total de servicios
+  console.log(`[Kanban] 📦 Total servicios recibidos:`, services.length);
+  console.log(`[Kanban] 📋 Servicios por columna:`, {
+    recibido: servicesByColumn[1]?.length || 0,
+    cotizado: servicesByColumn[2]?.length || 0,
+    enProceso: servicesByColumn[3]?.length || 0,
+    terminado: servicesByColumn[4]?.length || 0,
+  });
 
   const handleDragStart = (e: React.DragEvent, service: Service) => {
     setDraggedService(service);
