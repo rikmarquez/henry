@@ -614,6 +614,14 @@ router.put(
 
       // Update service and create status log in a transaction
       const result = await prisma.$transaction(async (tx) => {
+        // Log para debugging
+        console.log(`[Status Change] Service #${id} -> Estado: "${newStatus.name}" (ID: ${newStatusId})`);
+        console.log(`[Status Change] ¿Es Terminado?`, newStatus.name === 'Terminado');
+        console.log(`[Status Change] ¿Es Completado?`, newStatus.name === 'Completado');
+
+        const shouldSetCompletedAt = (newStatus.name === 'Completado' || newStatus.name === 'Terminado');
+        console.log(`[Status Change] shouldSetCompletedAt:`, shouldSetCompletedAt);
+
         // Update service status
         const updatedService = await tx.service.update({
           where: { id: parseInt(id) },
@@ -624,7 +632,7 @@ router.put(
               startedAt: new Date(),
             }),
             // Set completedAt if moving to "Completado" or "Terminado"
-            ...((newStatus.name === 'Completado' || newStatus.name === 'Terminado') && {
+            ...(shouldSetCompletedAt && {
               completedAt: new Date(),
             }),
           },
