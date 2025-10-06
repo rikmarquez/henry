@@ -181,14 +181,19 @@ export default function UsersPage() {
   const handleUpdateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
-    
-    const updateData = {
+
+    const updateData: any = {
       name: formData.name,
       email: formData.email,
       roleId: formData.roleId,
       branchId: formData.branchId,
     };
-    
+
+    // Solo incluir password si se proporcionó uno nuevo
+    if (formData.password && formData.password.trim() !== '') {
+      updateData.password = formData.password;
+    }
+
     updateUserMutation.mutate({ id: selectedUser.id, data: updateData });
   };
 
@@ -528,6 +533,31 @@ export default function UsersPage() {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+1234567890"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Nueva Contraseña (opcional)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-1">
+                    Dejar en blanco para mantener la contraseña actual
+                  </p>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Nueva contraseña..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
