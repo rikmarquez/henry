@@ -81,7 +81,7 @@ interface Service {
 export const useReception = () => {
   const queryClient = useQueryClient();
 
-  // Obtener citas del día
+  // Obtener citas del día (pendientes)
   const {
     data: todayAppointments = [],
     isLoading: isLoadingAppointments,
@@ -96,6 +96,21 @@ export const useReception = () => {
     refetchInterval: 60000, // Auto-refresh cada 60 segundos
   });
 
+  // Obtener servicios recibidos hoy
+  const {
+    data: receivedServices = [],
+    isLoading: isLoadingReceivedServices,
+    error: receivedServicesError,
+    refetch: refetchReceivedServices,
+  } = useQuery<Service[]>({
+    queryKey: ['reception', 'received-today'],
+    queryFn: async () => {
+      const response = await api.get('/reception/received-today');
+      return response.data;
+    },
+    refetchInterval: 60000, // Auto-refresh cada 60 segundos
+  });
+
   // Recibir vehículo
   const receiveVehicleMutation = useMutation({
     mutationFn: async (data: VehicleReceptionInput) => {
@@ -105,6 +120,7 @@ export const useReception = () => {
     onSuccess: (data) => {
       toast.success('Vehículo recibido exitosamente');
       queryClient.invalidateQueries({ queryKey: ['reception', 'today'] });
+      queryClient.invalidateQueries({ queryKey: ['reception', 'received-today'] });
       queryClient.invalidateQueries({ queryKey: ['services'] });
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       return data;
@@ -123,11 +139,17 @@ export const useReception = () => {
   };
 
   return {
-    // Queries
+    // Queries - Citas pendientes
     todayAppointments,
     isLoadingAppointments,
     appointmentsError,
     refetchAppointments,
+
+    // Queries - Servicios recibidos
+    receivedServices,
+    isLoadingReceivedServices,
+    receivedServicesError,
+    refetchReceivedServices,
 
     // Mutations
     receiveVehicle: receiveVehicleMutation.mutate,

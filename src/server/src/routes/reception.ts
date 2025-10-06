@@ -309,6 +309,104 @@ router.post(
 );
 
 /**
+ * GET /api/reception/received-today
+ * Obtener todos los servicios recibidos hoy (statusId = 1)
+ */
+router.get(
+  '/received-today',
+  authenticate,
+  authorize(['reception'], ['read']),
+  async (req, res) => {
+    try {
+      const branchId = req.user?.branchId;
+
+      if (!branchId) {
+        return res.status(401).json({ message: 'Usuario no autenticado' });
+      }
+
+      // Obtener fecha de inicio y fin del día de hoy en zona horaria México (UTC-6)
+      const nowUTC = new Date();
+      const mexicoOffsetHours = -6;
+      const mexicoTime = new Date(nowUTC.getTime() + (mexicoOffsetHours * 60 * 60 * 1000));
+
+      const todayMexico = new Date(mexicoTime.getFullYear(), mexicoTime.getMonth(), mexicoTime.getDate());
+      const today = new Date(todayMexico.getTime() - (mexicoOffsetHours * 60 * 60 * 1000)); // Convertir a UTC
+      const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
+
+      console.log('[RECEPTION] Buscando servicios recibidos para branchId:', branchId);
+      console.log('[RECEPTION] Rango de fechas UTC:', {
+        today: today.toISOString(),
+        tomorrow: tomorrow.toISOString()
+      });
+
+      const services = await prisma.service.findMany({
+        where: {
+          branchId,
+          receivedAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              whatsapp: true,
+            },
+          },
+          vehicle: {
+            select: {
+              id: true,
+              plate: true,
+              brand: true,
+              model: true,
+              year: true,
+              color: true,
+            },
+          },
+          receptionist: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          status: true,
+          appointment: {
+            select: {
+              id: true,
+              scheduledDate: true,
+            },
+          },
+        },
+        orderBy: {
+          receivedAt: 'desc',
+        },
+      });
+
+      console.log('[RECEPTION] Servicios recibidos encontrados:', services.length);
+
+      // Serializar BigInt para JSON
+      const serializedServices = JSON.parse(
+        JSON.stringify(services, (_, value) =>
+          typeof value === 'bigint' ? value.toString() : value
+        )
+      );
+
+      res.json(serializedServices);
+    } catch (error) {
+      console.error('[RECEPTION] Error al obtener servicios recibidos:', error);
+      res.status(500).json({
+        message: 'Error al obtener servicios recibidos',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+);
+
+/**
  * GET /api/reception/service/:id
  * Obtener detalles completos de un servicio incluyendo datos de recepción
  */

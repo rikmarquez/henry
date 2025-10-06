@@ -17,7 +17,14 @@ import {
 } from 'lucide-react';
 
 export const ReceptionPage: React.FC = () => {
-  const { todayAppointments, isLoadingAppointments, refetchAppointments } = useReception();
+  const {
+    todayAppointments,
+    isLoadingAppointments,
+    refetchAppointments,
+    receivedServices,
+    isLoadingReceivedServices,
+    refetchReceivedServices,
+  } = useReception();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showReceptionForm, setShowReceptionForm] = useState(false);
@@ -25,19 +32,13 @@ export const ReceptionPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'pending' | 'received'>('pending');
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
 
-  // Separar citas pendientes vs recibidas
+  // Separar citas pendientes (todas las no canceladas ni recibidas)
   const pendingAppointments = todayAppointments.filter(
     (apt) => apt.status !== 'received' && apt.status !== 'cancelled'
   );
 
-  const receivedAppointments = todayAppointments.filter(
-    (apt) => apt.status === 'received'
-  );
-
-  // Filtrar según tab activo
-  const appointmentsToShow = activeTab === 'pending' ? pendingAppointments : receivedAppointments;
-
-  const filteredAppointments = appointmentsToShow.filter((appointment) => {
+  // Filtrar citas pendientes
+  const filteredPendingAppointments = pendingAppointments.filter((appointment) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
@@ -45,6 +46,18 @@ export const ReceptionPage: React.FC = () => {
       appointment.vehicle.plate.toLowerCase().includes(search) ||
       appointment.vehicle.brand.toLowerCase().includes(search) ||
       appointment.vehicle.model.toLowerCase().includes(search)
+    );
+  });
+
+  // Filtrar servicios recibidos
+  const filteredReceivedServices = receivedServices.filter((service) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      service.client.name.toLowerCase().includes(search) ||
+      service.vehicle.plate.toLowerCase().includes(search) ||
+      service.vehicle.brand.toLowerCase().includes(search) ||
+      service.vehicle.model.toLowerCase().includes(search)
     );
   });
 
@@ -66,6 +79,7 @@ export const ReceptionPage: React.FC = () => {
     setShowReceptionForm(false);
     setSelectedAppointment(null);
     refetchAppointments();
+    refetchReceivedServices();
   };
 
   const handleBackToList = () => {
@@ -76,6 +90,7 @@ export const ReceptionPage: React.FC = () => {
   const handleWalkInComplete = () => {
     setShowWalkInForm(false);
     refetchAppointments();
+    refetchReceivedServices();
   };
 
   const handleCancelWalkIn = () => {
@@ -85,6 +100,12 @@ export const ReceptionPage: React.FC = () => {
   const handleServiceDetailsClose = () => {
     setSelectedServiceId(null);
     refetchAppointments();
+    refetchReceivedServices();
+  };
+
+  const handleRefresh = () => {
+    refetchAppointments();
+    refetchReceivedServices();
   };
 
   // Si se está mostrando el formulario de walk-in
@@ -141,7 +162,7 @@ export const ReceptionPage: React.FC = () => {
             </button>
 
             <button
-              onClick={() => refetchAppointments()}
+              onClick={handleRefresh}
               className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 flex items-center gap-2 h-14"
             >
               <RefreshCw className="h-5 w-5" />
@@ -193,58 +214,47 @@ export const ReceptionPage: React.FC = () => {
           >
             <div className="flex items-center justify-center gap-2">
               <CheckCircle className="h-5 w-5" />
-              <span>Recibidos ({receivedAppointments.length})</span>
+              <span>Recibidos ({receivedServices.length})</span>
             </div>
           </button>
         </div>
       </div>
 
       {/* Loading State */}
-      {isLoadingAppointments && (
+      {(activeTab === 'pending' ? isLoadingAppointments : isLoadingReceivedServices) && (
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-3 text-lg text-gray-600">Cargando citas...</span>
+          <span className="ml-3 text-lg text-gray-600">
+            {activeTab === 'pending' ? 'Cargando citas...' : 'Cargando servicios recibidos...'}
+          </span>
         </div>
       )}
 
-      {/* Lista de Citas */}
-      {!isLoadingAppointments && (
+      {/* Lista de Citas Pendientes */}
+      {!isLoadingAppointments && activeTab === 'pending' && (
         <>
           {/* Contador */}
           <div className="mb-4 flex items-center gap-2">
-            {activeTab === 'pending' ? (
-              <Clock className="h-5 w-5 text-blue-600" />
-            ) : (
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            )}
+            <Clock className="h-5 w-5 text-blue-600" />
             <span className="text-lg font-medium text-gray-700">
-              {filteredAppointments.length} {activeTab === 'pending' ? 'pendiente' : 'recibido'}
-              {filteredAppointments.length !== 1 ? 's' : ''}
+              {filteredPendingAppointments.length} pendiente{filteredPendingAppointments.length !== 1 ? 's' : ''}
             </span>
           </div>
 
           {/* Grid de Citas */}
-          {filteredAppointments.length === 0 ? (
+          {filteredPendingAppointments.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
               <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                {searchTerm
-                  ? 'No se encontraron resultados'
-                  : activeTab === 'pending'
-                  ? 'No hay citas pendientes'
-                  : 'No hay autos recibidos'}
+                {searchTerm ? 'No se encontraron resultados' : 'No hay citas pendientes'}
               </h3>
               <p className="text-gray-500">
-                {searchTerm
-                  ? 'Intenta con otro término de búsqueda'
-                  : activeTab === 'pending'
-                  ? 'Las citas pendientes aparecerán aquí'
-                  : 'Los autos recibidos (con o sin cita) aparecerán aquí'}
+                {searchTerm ? 'Intenta con otro término de búsqueda' : 'Las citas pendientes aparecerán aquí'}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAppointments.map((appointment) => {
+              {filteredPendingAppointments.map((appointment) => {
                 const isReceived = appointment.status === 'received';
 
                 return (
@@ -353,12 +363,127 @@ export const ReceptionPage: React.FC = () => {
         </>
       )}
 
+      {/* Lista de Servicios Recibidos */}
+      {!isLoadingReceivedServices && activeTab === 'received' && (
+        <>
+          {/* Contador */}
+          <div className="mb-4 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span className="text-lg font-medium text-gray-700">
+              {filteredReceivedServices.length} recibido{filteredReceivedServices.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Grid de Servicios */}
+          {filteredReceivedServices.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
+              <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                {searchTerm ? 'No se encontraron resultados' : 'No hay autos recibidos'}
+              </h3>
+              <p className="text-gray-500">
+                {searchTerm ? 'Intenta con otro término de búsqueda' : 'Los autos recibidos (con o sin cita) aparecerán aquí'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredReceivedServices.map((service) => {
+                return (
+                  <div
+                    key={service.id}
+                    className="bg-white rounded-lg shadow-sm border border-green-300 bg-green-50 hover:shadow-lg transition-shadow"
+                  >
+                    {/* Header */}
+                    <div className="p-4 border-b">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Car className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold text-gray-900 truncate">
+                              {service.vehicle.brand} {service.vehicle.model}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {service.vehicle.year || ''} • {service.vehicle.color || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                            <div className="text-xs font-medium opacity-90">ID SERVICIO</div>
+                            <div className="text-2xl font-bold">#{service.id}</div>
+                          </div>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            {service.status.name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 space-y-4">
+                      {/* Cliente */}
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <User className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{service.client.name}</p>
+                          <p className="text-sm text-gray-500">{service.client.phone}</p>
+                        </div>
+                      </div>
+
+                      {/* Placa */}
+                      <div className="flex items-center gap-3">
+                        <div className="px-4 py-2 bg-yellow-100 border-2 border-yellow-400 rounded-lg font-bold text-lg text-gray-900">
+                          {service.vehicle.plate}
+                        </div>
+                      </div>
+
+                      {/* Hora de recepción */}
+                      {service.receivedAt && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <Clock className="h-5 w-5 text-gray-400" />
+                          <span className="font-medium">
+                            Recibido: {new Date(service.receivedAt).toLocaleTimeString('es-MX', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Recepcionista */}
+                      {service.receptionist && (
+                        <div className="p-3 bg-gray-100 rounded-lg">
+                          <p className="text-xs text-gray-500">Recibido por</p>
+                          <p className="text-sm font-medium text-gray-700">{service.receptionist.name}</p>
+                        </div>
+                      )}
+
+                      {/* Botón Ver Detalles */}
+                      <button
+                        onClick={() => setSelectedServiceId(service.id)}
+                        className="w-full py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle className="h-5 w-5" />
+                        Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
       {/* Modal de Detalles del Servicio */}
       {selectedServiceId && (
         <ServiceDetailsModal
           serviceId={selectedServiceId}
           onClose={handleServiceDetailsClose}
-          onUpdate={refetchAppointments}
+          onUpdate={handleRefresh}
         />
       )}
     </div>
