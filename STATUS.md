@@ -35,7 +35,40 @@
 
 ---
 
-## 🎯 Última Sesión: Eliminación de Restricciones de Estados (2025-10-06)
+## 🎯 Última Sesión: Búsqueda Inteligente de Clientes en Oportunidades (2025-10-07)
+
+### ✅ Completado
+
+#### 1. Reemplazo de dropdown de clientes con búsqueda inteligente
+**Problema**: Dropdown cargaba 1000+ clientes, causando mal rendimiento y UX deficiente
+
+**Solución**:
+- ✅ Nuevo componente `ClientSearchSelect` reutilizable
+- ✅ Búsqueda en tiempo real (nombre, teléfono, email, whatsapp)
+- ✅ Dropdown con scroll y filtrado instantáneo
+- ✅ Preview completo de info del cliente en resultados
+- ✅ Botón clear para limpiar selección
+- ✅ Auto-focus y cierre al hacer click fuera
+- ✅ Integrado en formularios crear/editar oportunidades
+
+**Características técnicas**:
+- Búsqueda frontend-only (filtrado local de 1000 registros)
+- Loading states y error handling
+- Diseño consistente con shadcn/ui
+- TypeScript con tipos estrictos
+- Componentización reutilizable
+
+**Archivos modificados**:
+- `src/client/src/components/ClientSearchSelect.tsx` - Nuevo componente (210 líneas)
+- `src/client/src/pages/OpportunitiesPage.tsx` - Líneas 9, 712-720, 875-883
+
+**Commit**: `e9edfad` - feat: reemplazar dropdown de clientes con búsqueda inteligente
+
+**Beneficio**: UX mejorado significativamente - búsqueda instantánea sin lag con miles de registros
+
+---
+
+## 📚 Sesión Anterior: Eliminación de Restricciones de Estados (2025-10-06)
 
 ### ✅ Completado
 
@@ -383,5 +416,5 @@ postgresql://postgres:uFXiUmoRNqxdKctJesvlRiLiOXuWTQac@shortline.proxy.rlwy.net:
 - ✅ Exportación a PDF y Excel
 - ✅ Interfaz adaptativa (desktop + tablet + móvil)
 
-**Última modificación**: 2025-10-05 23:45 UTC-6
+**Última modificación**: 2025-10-07 00:30 UTC-6
 **Modificado por**: Claude Code + Rik Marquez
