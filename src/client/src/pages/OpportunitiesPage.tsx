@@ -254,7 +254,13 @@ export default function OpportunitiesPage() {
 
   const handleCreateOpportunity = async (data: CreateOpportunityForm) => {
     try {
-      const response = await api.post('/opportunities', data);
+      // Limpiar serviceId si es 0 (no seleccionado)
+      const payload = {
+        ...data,
+        serviceId: data.serviceId && data.serviceId > 0 ? data.serviceId : undefined,
+      };
+
+      const response = await api.post('/opportunities', payload);
       if (response.data.success) {
         toast.success('Oportunidad creada exitosamente');
         setIsCreateModalOpen(false);
@@ -271,7 +277,13 @@ export default function OpportunitiesPage() {
     if (!selectedOpportunity) return;
 
     try {
-      const response = await api.put(`/opportunities/${selectedOpportunity.id}`, data);
+      // Limpiar serviceId si es 0 (no seleccionado)
+      const payload = {
+        ...data,
+        serviceId: data.serviceId && data.serviceId > 0 ? data.serviceId : undefined,
+      };
+
+      const response = await api.put(`/opportunities/${selectedOpportunity.id}`, payload);
       if (response.data.success) {
         toast.success('Oportunidad actualizada exitosamente');
         setIsEditModalOpen(false);
