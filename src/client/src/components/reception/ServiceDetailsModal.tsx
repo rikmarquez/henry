@@ -13,10 +13,11 @@ import {
   Fuel,
   CheckCircle,
   AlertCircle,
-  Lightbulb,
-  Circle,
+  Wind,
   Shield,
-  Droplet,
+  Lock,
+  Package,
+  Grip,
   Calendar,
   Save,
 } from 'lucide-react';
@@ -27,10 +28,11 @@ const serviceEditSchema = z.object({
   nivelCombustible: z.enum(['1/4', '1/2', '3/4', 'FULL'], {
     errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
   }),
-  lucesOk: z.boolean(),
-  llantasOk: z.boolean(),
+  aireAcondicionadoOk: z.boolean(),
   cristalesOk: z.boolean(),
-  carroceriaOk: z.boolean(),
+  candadoLlantaOk: z.boolean(),
+  pertenenciasCajuelaOk: z.boolean(),
+  manijasOk: z.boolean(),
   observacionesRecepcion: z.string().optional(),
 });
 
@@ -78,10 +80,11 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
         reset({
           kilometraje: serviceData.kilometraje || 0,
           nivelCombustible: serviceData.nivelCombustible || '1/2',
-          lucesOk: serviceData.lucesOk ?? true,
-          llantasOk: serviceData.llantasOk ?? true,
+          aireAcondicionadoOk: serviceData.aireAcondicionadoOk ?? true,
           cristalesOk: serviceData.cristalesOk ?? true,
-          carroceriaOk: serviceData.carroceriaOk ?? true,
+          candadoLlantaOk: serviceData.candadoLlantaOk ?? true,
+          pertenenciasCajuelaOk: serviceData.pertenenciasCajuelaOk ?? true,
+          manijasOk: serviceData.manijasOk ?? true,
           observacionesRecepcion: serviceData.observacionesRecepcion || '',
         });
       } catch (error) {
@@ -102,10 +105,11 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
       await api.put(`/services/${serviceId}`, {
         kilometraje: data.kilometraje,
         nivelCombustible: data.nivelCombustible,
-        lucesOk: data.lucesOk,
-        llantasOk: data.llantasOk,
+        aireAcondicionadoOk: data.aireAcondicionadoOk,
         cristalesOk: data.cristalesOk,
-        carroceriaOk: data.carroceriaOk,
+        candadoLlantaOk: data.candadoLlantaOk,
+        pertenenciasCajuelaOk: data.pertenenciasCajuelaOk,
+        manijasOk: data.manijasOk,
         observacionesRecepcion: data.observacionesRecepcion,
       });
 
@@ -300,53 +304,28 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
               Inspección Visual
             </h3>
             <div className="space-y-3">
-              {/* Luces */}
+              {/* Aire Acondicionado */}
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 {isEditing ? (
                   <input
                     type="checkbox"
-                    id="lucesOk"
-                    checked={watch('lucesOk')}
-                    onChange={(e) => setValue('lucesOk', e.target.checked)}
+                    id="aireAcondicionadoOk"
+                    checked={watch('aireAcondicionadoOk')}
+                    onChange={(e) => setValue('aireAcondicionadoOk', e.target.checked)}
                     className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
                   <div className="h-5 w-5 flex items-center justify-center">
-                    {service.lucesOk ? (
+                    {service.aireAcondicionadoOk ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
                     ) : (
                       <AlertCircle className="h-5 w-5 text-red-600" />
                     )}
                   </div>
                 )}
-                <label htmlFor="lucesOk" className="flex items-center gap-2 flex-1">
-                  <Lightbulb className="h-5 w-5 text-yellow-600" />
-                  Luces funcionando correctamente
-                </label>
-              </div>
-
-              {/* Llantas */}
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                {isEditing ? (
-                  <input
-                    type="checkbox"
-                    id="llantasOk"
-                    checked={watch('llantasOk')}
-                    onChange={(e) => setValue('llantasOk', e.target.checked)}
-                    className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <div className="h-5 w-5 flex items-center justify-center">
-                    {service.llantasOk ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <AlertCircle className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                )}
-                <label htmlFor="llantasOk" className="flex items-center gap-2 flex-1">
-                  <Circle className="h-5 w-5 text-gray-600" />
-                  Llantas en buen estado
+                <label htmlFor="aireAcondicionadoOk" className="flex items-center gap-2 flex-1">
+                  <Wind className="h-5 w-5 text-blue-500" />
+                  Aire acondicionado funcionando
                 </label>
               </div>
 
@@ -375,28 +354,78 @@ export const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
                 </label>
               </div>
 
-              {/* Carrocería */}
+              {/* Candado Llanta */}
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 {isEditing ? (
                   <input
                     type="checkbox"
-                    id="carroceriaOk"
-                    checked={watch('carroceriaOk')}
-                    onChange={(e) => setValue('carroceriaOk', e.target.checked)}
+                    id="candadoLlantaOk"
+                    checked={watch('candadoLlantaOk')}
+                    onChange={(e) => setValue('candadoLlantaOk', e.target.checked)}
                     className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
                   <div className="h-5 w-5 flex items-center justify-center">
-                    {service.carroceriaOk ? (
+                    {service.candadoLlantaOk ? (
                       <CheckCircle className="h-5 w-5 text-green-600" />
                     ) : (
                       <AlertCircle className="h-5 w-5 text-red-600" />
                     )}
                   </div>
                 )}
-                <label htmlFor="carroceriaOk" className="flex items-center gap-2 flex-1">
-                  <Droplet className="h-5 w-5 text-gray-600" />
-                  Carrocería sin golpes nuevos
+                <label htmlFor="candadoLlantaOk" className="flex items-center gap-2 flex-1">
+                  <Lock className="h-5 w-5 text-gray-700" />
+                  Candado de llanta presente
+                </label>
+              </div>
+
+              {/* Pertenencias Cajuela */}
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                {isEditing ? (
+                  <input
+                    type="checkbox"
+                    id="pertenenciasCajuelaOk"
+                    checked={watch('pertenenciasCajuelaOk')}
+                    onChange={(e) => setValue('pertenenciasCajuelaOk', e.target.checked)}
+                    className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                ) : (
+                  <div className="h-5 w-5 flex items-center justify-center">
+                    {service.pertenenciasCajuelaOk ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                    )}
+                  </div>
+                )}
+                <label htmlFor="pertenenciasCajuelaOk" className="flex items-center gap-2 flex-1">
+                  <Package className="h-5 w-5 text-orange-600" />
+                  Pertenencias en cajuela verificadas
+                </label>
+              </div>
+
+              {/* Manijas */}
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                {isEditing ? (
+                  <input
+                    type="checkbox"
+                    id="manijasOk"
+                    checked={watch('manijasOk')}
+                    onChange={(e) => setValue('manijasOk', e.target.checked)}
+                    className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                ) : (
+                  <div className="h-5 w-5 flex items-center justify-center">
+                    {service.manijasOk ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                    )}
+                  </div>
+                )}
+                <label htmlFor="manijasOk" className="flex items-center gap-2 flex-1">
+                  <Grip className="h-5 w-5 text-gray-600" />
+                  Manijas de puertas funcionando
                 </label>
               </div>
             </div>

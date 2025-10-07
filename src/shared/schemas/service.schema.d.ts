@@ -26,10 +26,11 @@ export declare const vehicleReceptionSchema: z.ZodObject<{
         "3/4": "3/4";
         FULL: "FULL";
     }>;
-    lucesOk: z.ZodDefault<z.ZodBoolean>;
-    llantasOk: z.ZodDefault<z.ZodBoolean>;
+    aireAcondicionadoOk: z.ZodDefault<z.ZodBoolean>;
     cristalesOk: z.ZodDefault<z.ZodBoolean>;
-    carroceriaOk: z.ZodDefault<z.ZodBoolean>;
+    candadoLlantaOk: z.ZodDefault<z.ZodBoolean>;
+    pertenenciasCajuelaOk: z.ZodDefault<z.ZodBoolean>;
+    manijasOk: z.ZodDefault<z.ZodBoolean>;
     observacionesRecepcion: z.ZodOptional<z.ZodString>;
     firmaCliente: z.ZodString;
     fotosRecepcion: z.ZodOptional<z.ZodArray<z.ZodString>>;

@@ -28,10 +28,11 @@ exports.vehicleReceptionSchema = zod_1.z.object({
     nivelCombustible: zod_1.z.enum(['1/4', '1/2', '3/4', 'FULL'], {
         errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
     }),
-    lucesOk: zod_1.z.boolean().default(true),
-    llantasOk: zod_1.z.boolean().default(true),
+    aireAcondicionadoOk: zod_1.z.boolean().default(true),
     cristalesOk: zod_1.z.boolean().default(true),
-    carroceriaOk: zod_1.z.boolean().default(true),
+    candadoLlantaOk: zod_1.z.boolean().default(true),
+    pertenenciasCajuelaOk: zod_1.z.boolean().default(true),
+    manijasOk: zod_1.z.boolean().default(true),
     observacionesRecepcion: zod_1.z.string().optional(),
     firmaCliente: zod_1.z.string().min(1, 'La firma del cliente es requerida'),
     fotosRecepcion: zod_1.z.array(zod_1.z.string()).optional(),

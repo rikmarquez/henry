@@ -27,10 +27,11 @@ export const vehicleReceptionSchema = z.object({
   nivelCombustible: z.enum(['1/4', '1/2', '3/4', 'FULL'], {
     errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
   }),
-  lucesOk: z.boolean().default(true),
-  llantasOk: z.boolean().default(true),
+  aireAcondicionadoOk: z.boolean().default(true),
   cristalesOk: z.boolean().default(true),
-  carroceriaOk: z.boolean().default(true),
+  candadoLlantaOk: z.boolean().default(true),
+  pertenenciasCajuelaOk: z.boolean().default(true),
+  manijasOk: z.boolean().default(true),
   observacionesRecepcion: z.string().optional(),
   firmaCliente: z.string().min(1, 'La firma del cliente es requerida'),
   fotosRecepcion: z.array(z.string()).optional(),

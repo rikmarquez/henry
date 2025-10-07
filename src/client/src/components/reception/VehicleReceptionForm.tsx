@@ -13,10 +13,11 @@ import {
   Fuel,
   CheckCircle,
   AlertCircle,
-  Lightbulb,
-  Circle,
+  Wind,
   Shield,
-  Droplet,
+  Lock,
+  Package,
+  Grip,
 } from 'lucide-react';
 
 // Schema de validación local para el frontend
@@ -28,10 +29,11 @@ const vehicleReceptionSchema = z.object({
   nivelCombustible: z.enum(['1/4', '1/2', '3/4', 'FULL'], {
     errorMap: () => ({ message: 'Selecciona un nivel de combustible válido' })
   }),
-  lucesOk: z.boolean().default(true),
-  llantasOk: z.boolean().default(true),
+  aireAcondicionadoOk: z.boolean().default(true),
   cristalesOk: z.boolean().default(true),
-  carroceriaOk: z.boolean().default(true),
+  candadoLlantaOk: z.boolean().default(true),
+  pertenenciasCajuelaOk: z.boolean().default(true),
+  manijasOk: z.boolean().default(true),
   observacionesRecepcion: z.string().optional(),
   firmaCliente: z.string().optional(), // Validamos manualmente en onSubmit
   fotosRecepcion: z.array(z.string()).optional(),
@@ -77,10 +79,11 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
       appointmentId: appointment.id,
       clientId: appointment.clientId,
       vehicleId: appointment.vehicleId,
-      lucesOk: true,
-      llantasOk: true,
+      aireAcondicionadoOk: true,
       cristalesOk: true,
-      carroceriaOk: true,
+      candadoLlantaOk: true,
+      pertenenciasCajuelaOk: true,
+      manijasOk: true,
     },
   });
 
@@ -423,28 +426,14 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
               <input
                 type="checkbox"
-                id="lucesOk"
-                checked={watch('lucesOk')}
-                onChange={(e) => setValue('lucesOk', e.target.checked)}
+                id="aireAcondicionadoOk"
+                checked={watch('aireAcondicionadoOk')}
+                onChange={(e) => setValue('aireAcondicionadoOk', e.target.checked)}
                 className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <label htmlFor="lucesOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
-                <Lightbulb className="h-5 w-5 text-yellow-600" />
-                Luces funcionando correctamente
-              </label>
-            </div>
-
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-              <input
-                type="checkbox"
-                id="llantasOk"
-                checked={watch('llantasOk')}
-                onChange={(e) => setValue('llantasOk', e.target.checked)}
-                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <label htmlFor="llantasOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
-                <Circle className="h-5 w-5 text-gray-600" />
-                Llantas en buen estado
+              <label htmlFor="aireAcondicionadoOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+                <Wind className="h-5 w-5 text-blue-500" />
+                Aire acondicionado funcionando
               </label>
             </div>
 
@@ -465,14 +454,42 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
               <input
                 type="checkbox"
-                id="carroceriaOk"
-                checked={watch('carroceriaOk')}
-                onChange={(e) => setValue('carroceriaOk', e.target.checked)}
+                id="candadoLlantaOk"
+                checked={watch('candadoLlantaOk')}
+                onChange={(e) => setValue('candadoLlantaOk', e.target.checked)}
                 className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
-              <label htmlFor="carroceriaOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
-                <Droplet className="h-5 w-5 text-gray-600" />
-                Carrocería sin golpes nuevos
+              <label htmlFor="candadoLlantaOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+                <Lock className="h-5 w-5 text-gray-700" />
+                Candado de llanta presente
+              </label>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="pertenenciasCajuelaOk"
+                checked={watch('pertenenciasCajuelaOk')}
+                onChange={(e) => setValue('pertenenciasCajuelaOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="pertenenciasCajuelaOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+                <Package className="h-5 w-5 text-orange-600" />
+                Pertenencias en cajuela verificadas
+              </label>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="manijasOk"
+                checked={watch('manijasOk')}
+                onChange={(e) => setValue('manijasOk', e.target.checked)}
+                className="h-6 w-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <label htmlFor="manijasOk" className="text-lg flex items-center gap-3 cursor-pointer flex-1">
+                <Grip className="h-5 w-5 text-gray-600" />
+                Manijas de puertas funcionando
               </label>
             </div>
           </div>
