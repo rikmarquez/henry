@@ -88,23 +88,31 @@ interface ServicesKanbanProps {
 const statusColors: Record<string, string> = {
   'RECIBIDO': 'bg-blue-100 text-blue-800 border-blue-200',
   'Recibido': 'bg-blue-100 text-blue-800 border-blue-200',
-  'COTIZADO': 'bg-purple-100 text-purple-800 border-purple-200', 
-  'Cotizado': 'bg-purple-100 text-purple-800 border-purple-200',
-  'EN PROCESO': 'bg-orange-100 text-orange-800 border-orange-200',
-  'En Progreso': 'bg-orange-100 text-orange-800 border-orange-200',
+  'COTIZADO': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Cotizado': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'PROCESO': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Proceso': 'bg-purple-100 text-purple-800 border-purple-200',
+  'EN PROCESO': 'bg-purple-100 text-purple-800 border-purple-200',
+  'En Progreso': 'bg-purple-100 text-purple-800 border-purple-200',
   'TERMINADO': 'bg-green-100 text-green-800 border-green-200',
+  'Terminado': 'bg-green-100 text-green-800 border-green-200',
   'Completado': 'bg-green-100 text-green-800 border-green-200',
   'Entregado': 'bg-green-100 text-green-800 border-green-200',
+  'RECHAZADO': 'bg-red-100 text-red-800 border-red-200',
+  'Rechazado': 'bg-red-100 text-red-800 border-red-200',
 };
 
 const columnColors: Record<string, string> = {
   'RECIBIDO': 'border-blue-200 bg-blue-50',
   'Recibido': 'border-blue-200 bg-blue-50',
-  'COTIZADO': 'border-purple-200 bg-purple-50',
-  'Cotizado': 'border-purple-200 bg-purple-50',
-  'EN PROCESO': 'border-orange-200 bg-orange-50',
-  'En Progreso': 'border-orange-200 bg-orange-50',
+  'COTIZADO': 'border-yellow-200 bg-yellow-50',
+  'Cotizado': 'border-yellow-200 bg-yellow-50',
+  'PROCESO': 'border-purple-200 bg-purple-50',
+  'Proceso': 'border-purple-200 bg-purple-50',
+  'EN PROCESO': 'border-purple-200 bg-purple-50',
+  'En Progreso': 'border-purple-200 bg-purple-50',
   'TERMINADO': 'border-green-200 bg-green-50',
+  'Terminado': 'border-green-200 bg-green-50',
   'Completado': 'border-green-200 bg-green-50',
   'Entregado': 'border-green-200 bg-green-50',
 };
@@ -115,11 +123,16 @@ const getStatusIcon = (statusName: string) => {
     case 'Recibido': return <Clock className="h-4 w-4" />;
     case 'COTIZADO':
     case 'Cotizado': return <FileText className="h-4 w-4" />;
+    case 'PROCESO':
+    case 'Proceso':
     case 'EN PROCESO':
     case 'En Progreso': return <Play className="h-4 w-4" />;
+    case 'RECHAZADO':
+    case 'Rechazado':
     case 'PERDIDO':
     case 'Perdido': return <XCircle className="h-4 w-4" />;
     case 'TERMINADO':
+    case 'Terminado':
     case 'Completado':
     case 'Entregado': return <CheckCircle className="h-4 w-4" />;
     default: return <AlertCircle className="h-4 w-4" />;
@@ -154,10 +167,10 @@ export default function ServicesKanban({
 
   // Define las 4 columnas del flujo activo de trabajo (sin RECHAZADO)
   const simplifiedColumns = [
-    { id: 1, name: 'RECIBIDO', color: 'bg-blue-50', orderIndex: 1 },
-    { id: 2, name: 'COTIZADO', color: 'bg-yellow-50', orderIndex: 2 },
-    { id: 3, name: 'EN PROCESO', color: 'bg-purple-50', orderIndex: 3 },
-    { id: 4, name: 'TERMINADO', color: 'bg-green-50', orderIndex: 4 }
+    { id: 1, name: 'Recibido', color: 'bg-blue-50', orderIndex: 1 },
+    { id: 2, name: 'Cotizado', color: 'bg-yellow-50', orderIndex: 2 },
+    { id: 3, name: 'Proceso', color: 'bg-purple-50', orderIndex: 3 },
+    { id: 4, name: 'Terminado', color: 'bg-green-50', orderIndex: 4 }
   ];
 
   // Mapear servicios directamente por statusId (excluyendo RECHAZADO del Kanban)
