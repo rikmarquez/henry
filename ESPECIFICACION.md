@@ -115,24 +115,31 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 ### 3.5 Módulo de Servicios/Trabajos ✅
 **Funcionalidades**:
 - ✅ CRUD completo de servicios
-- ✅ Sistema de estados con workflow: Recibido → Cotizado → En Proceso → Terminado
+- ✅ Sistema de estados con workflow: Recibido → Cotizado → Proceso → Terminado
 - ✅ Estado adicional: Rechazado (para cotizaciones no aprobadas)
-- ✅ Vista Kanban con drag & drop entre estados
+- ✅ **Movimiento libre entre estados** - Sin restricciones de transición (forward/backward)
+- ✅ Vista Kanban con drag & drop entre estados (excluye Rechazado)
+- ✅ Vista lista con dropdown de todos los estados disponibles
 - ✅ Sistema de pricing completo: labor_price, parts_price, parts_cost, total_amount, truput
 - ✅ Mecánico asignado con cálculo automático de comisiones
 - ✅ Problema, diagnóstico, cotización detallada
 - ✅ Timestamps automáticos (started_at, completed_at)
-- ✅ Logs de auditoría de cambios de estado
 - ✅ Segregación por sucursal (branchId)
 - ✅ Integración con citas y recepción
-- ✅ Campos de recepción: kilometraje, combustible, checklist, firma, fotos
+- ✅ Campos de recepción: kilometraje, combustible, checklist actualizado, firma, fotos
 
-**Estados de Trabajo**:
-1. **Recibido** (#EF4444) - Vehículo recibido en taller
-2. **Cotizado** (#F59E0B) - Cotización generada
-3. **En Proceso** (#8B5CF6) - Trabajo en ejecución
-4. **Terminado** (#10B981) - Trabajo completado (genera ingresos)
-5. **Rechazado** (#DC2626) - Cotización rechazada (NO genera ingresos)
+**Estados de Trabajo** (5 estados exactos):
+1. **Recibido** (#EF4444 azul) - Vehículo recibido en taller
+2. **Cotizado** (#F59E0B amarillo) - Cotización generada
+3. **Proceso** (#8B5CF6 morado) - Trabajo en ejecución
+4. **Terminado** (#10B981 verde) - Trabajo completado (genera ingresos)
+5. **Rechazado** (#DC2626 rojo) - Cotización rechazada (NO genera ingresos)
+
+**IMPORTANTE**:
+- NO hay restricciones de transición entre estados
+- Dropdown muestra TODOS los estados ordenados por orderIndex
+- Usuario puede mover servicios hacia adelante o hacia atrás libremente
+- Tabla status_logs eliminada - sin logs de auditoría de estados
 
 ---
 
@@ -324,11 +331,11 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - Índices en campos críticos de BD
 
 ### Estados y Workflow ✅
-- Validación de transiciones de estado secuencial
-- Logs automáticos con StatusLog model
+- **Movimiento libre entre estados** - Sin restricciones de transición
 - Timestamps automáticos (started_at, completed_at)
-- Vista Kanban con drag & drop entre estados
-- Dropdown inteligente muestra solo transiciones válidas
+- Vista Kanban con drag & drop entre estados (excluye Rechazado)
+- Dropdown muestra TODOS los estados disponibles
+- Sin logs de auditoría de estados (tabla status_logs removida)
 
 ---
 

@@ -42,13 +42,10 @@ erDiagram
     MECHANICS ||--o{ SERVICES : works_on
 
     WORK_STATUSES ||--o{ SERVICES : current_status
-    WORK_STATUSES ||--o{ STATUS_LOGS : old_status
-    WORK_STATUSES ||--o{ STATUS_LOGS : new_status
 
     APPOINTMENTS ||--o{ SERVICES : generates
     OPPORTUNITIES ||--o{ APPOINTMENTS : creates
     SERVICES ||--o{ OPPORTUNITIES : generates
-    SERVICES ||--o{ STATUS_LOGS : tracked_by
 
     BRANCHES {
         int id PK
@@ -195,16 +192,6 @@ erDiagram
         timestamp updated_at
     }
 
-    STATUS_LOGS {
-        int id PK
-        int service_id FK
-        int old_status_id FK
-        int new_status_id FK
-        int changed_by FK
-        text notes
-        timestamp created_at
-    }
-
     SETTINGS {
         int id PK
         int branch_id FK
@@ -318,13 +305,15 @@ CREATE TABLE work_statuses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Estados implementados
-INSERT INTO work_statuses (name, order_index, color) VALUES
-('Recibido', 1, '#EF4444'),
-('Cotizado', 2, '#F59E0B'),
-('Rechazado', 3, '#DC2626'),
-('En Proceso', 4, '#8B5CF6'),
-('Terminado', 5, '#10B981');
+-- Estados implementados (5 exactos - sin restricciones de transición)
+INSERT INTO work_statuses (id, name, order_index, color) VALUES
+(1, 'Recibido', 1, '#EF4444'),
+(2, 'Cotizado', 2, '#F59E0B'),
+(3, 'Proceso', 3, '#8B5CF6'),
+(4, 'Terminado', 4, '#10B981'),
+(5, 'Rechazado', 5, '#DC2626');
+
+-- IMPORTANTE: Sin restricciones de transición - Movimiento libre entre estados
 ```
 
 ### Tabla: appointments (POR SUCURSAL)
@@ -412,17 +401,11 @@ CREATE TABLE opportunities (
 );
 ```
 
-### Tabla: status_logs (Auditoría)
+### Tabla: status_logs (ELIMINADA 2025-10-06)
 ```sql
-CREATE TABLE status_logs (
-    id SERIAL PRIMARY KEY,
-    service_id INTEGER REFERENCES services(id) NOT NULL,
-    old_status_id INTEGER REFERENCES work_statuses(id),
-    new_status_id INTEGER REFERENCES work_statuses(id) NOT NULL,
-    changed_by INTEGER REFERENCES users(id) NOT NULL,
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- NOTA: Esta tabla fue eliminada para permitir movimiento libre entre estados
+-- DROP TABLE IF EXISTS status_logs CASCADE; (aplicado en migración 20251006184548)
+-- Sin logs de auditoría de cambios de estado
 ```
 
 ### Tabla: settings (POR SUCURSAL)
@@ -588,14 +571,14 @@ GET    /api/workstatus/:id                # Obtener estado específico
 POST   /api/workstatus                    # Crear estado personalizado
 PUT    /api/workstatus/:id                # Actualizar estado
 DELETE /api/workstatus/:id                # Eliminar estado
+
+NOTA: Sin restricciones de transición - Movimiento libre entre todos los estados
 ```
 
-### Logs de Auditoría ✅
+### Logs de Auditoría ❌ (ELIMINADOS 2025-10-06)
 ```
-GET    /api/statuslogs                    # Listar todos los logs con paginación
-GET    /api/statuslogs/:id                # Obtener log específico
-GET    /api/statuslogs/service/:serviceId # Logs de un servicio específico
-GET    /api/statuslogs/user/:userId       # Logs de cambios por usuario
+-- Endpoints removidos - tabla status_logs eliminada
+-- Sin logs de auditoría de cambios de estado
 ```
 
 ### Utilidades ✅

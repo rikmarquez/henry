@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { api } from '../services/api';
 import PermissionGate from '../components/PermissionGate';
 import { WhatsAppFollowUpButton } from '../components/WhatsAppButton';
+import ClientSearchSelect from '../components/ClientSearchSelect';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -708,20 +709,14 @@ export default function OpportunitiesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Cliente *
                   </label>
-                  <select
-                    {...createForm.register('clientId', { valueAsNumber: true })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value={0}>Seleccionar cliente...</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} - {client.phone}
-                      </option>
-                    ))}
-                  </select>
-                  {createForm.formState.errors.clientId && (
-                    <p className="text-red-500 text-sm mt-1">{createForm.formState.errors.clientId.message}</p>
-                  )}
+                  <ClientSearchSelect
+                    selectedClientId={selectedClientId}
+                    onClientSelect={(clientId) => createForm.setValue('clientId', clientId)}
+                    clients={clients}
+                    isLoading={loading}
+                    error={createForm.formState.errors.clientId?.message}
+                    placeholder="Buscar cliente..."
+                  />
                 </div>
 
                 <div>
@@ -877,20 +872,14 @@ export default function OpportunitiesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Cliente *
                   </label>
-                  <select
-                    {...editForm.register('clientId', { valueAsNumber: true })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value={0}>Seleccionar cliente...</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} - {client.phone}
-                      </option>
-                    ))}
-                  </select>
-                  {editForm.formState.errors.clientId && (
-                    <p className="text-red-500 text-sm mt-1">{editForm.formState.errors.clientId.message}</p>
-                  )}
+                  <ClientSearchSelect
+                    selectedClientId={editSelectedClientId}
+                    onClientSelect={(clientId) => editForm.setValue('clientId', clientId)}
+                    clients={clients}
+                    isLoading={loading}
+                    error={editForm.formState.errors.clientId?.message}
+                    placeholder="Buscar cliente..."
+                  />
                 </div>
 
                 <div>

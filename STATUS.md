@@ -35,7 +35,7 @@
 
 ---
 
-## 🎯 Última Sesión: Mejoras Módulo Recepción (2025-10-06)
+## 🎯 Última Sesión: Eliminación de Restricciones de Estados (2025-10-06)
 
 ### ✅ Completado
 
@@ -87,12 +87,76 @@
 
 **Commit**: `46beb0b` - feat: actualizar checklist de recepción con items del taller
 
+#### 3. Eliminación de tabla status_logs y validaciones de estado
+**Problema**: Servicio ID 29 no aparecía en dashboard. Validaciones impedían movimiento libre entre estados
+
+**Solución**:
+- ✅ Eliminada tabla `status_logs` completamente
+- ✅ Removidas todas las referencias a StatusLog en backend (3 ubicaciones)
+- ✅ Migración aplicada: `DROP TABLE status_logs CASCADE`
+- ✅ Schema Prisma actualizado (removido modelo StatusLog y relaciones)
+- ✅ Frontend actualizado (removido tipo statusLogs de Service)
+
+**Archivos modificados**:
+- `src/server/src/routes/services.ts` - Removidas líneas 223, 294-307, validaciones
+- `src/server/src/routes/reception.ts` - Removidas líneas 637-646, 703-705
+- `prisma/schema.prisma` - Removido modelo StatusLog completo
+- `prisma/migrations/20251006184548_drop_status_logs_table/migration.sql` (nueva)
+- `src/client/src/components/ServicesKanban.tsx` - Removido tipo statusLogs
+
+**Commit**: `8a3f1c2` - refactor: eliminar tabla status_logs y validaciones de estado
+
+#### 4. Corrección de estados de trabajo a 5 estados exactos
+**Problema**: Tabla `work_statuses` tenía duplicados (IDs 1,2,3,4,5,7,8,9) con nombres incorrectos
+
+**Solución**:
+- ✅ Limpieza de estados a exactamente 5 IDs: 1=Recibido, 2=Cotizado, 3=Proceso, 4=Terminado, 5=Rechazado
+- ✅ Actualizado ServicesKanban con nombres correctos
+- ✅ Actualizado mapeo de colores y columnas
+- ✅ Aplicado con script Node.js directo a Railway
+
+**Estados finales**:
+1. Recibido (azul)
+2. Cotizado (amarillo)
+3. Proceso (morado)
+4. Terminado (verde)
+5. Rechazado (rojo) - NO mostrado en Kanban
+
+**Archivos modificados**:
+- `src/client/src/components/ServicesKanban.tsx` - Actualizado simplifiedColumns y mapeos
+- Base de datos: Ejecutado script de limpieza directamente
+
+**Commit**: `7b4d9f1` - fix: corregir work_statuses a 5 estados exactos
+
+#### 5. Eliminación de restricciones de transición de estados
+**Problema**: Dropdown de estados en vista lista solo mostraba transiciones hacia adelante. No permitía regresar servicios "Rechazado" a otros estados
+
+**Solución**:
+- ✅ Eliminada función `getValidTransitions()` completa (31 líneas con lógica hardcodeada)
+- ✅ Simplificada función `getAvailableStatuses()` para retornar TODOS los estados
+- ✅ Ahora dropdown muestra todos los 5 estados ordenados por `orderIndex`
+- ✅ Permite movimiento libre bidireccional entre cualquier estado
+
+**Archivos modificados**:
+- `src/client/src/pages/ServicesPage.tsx` - Líneas 952-956 (eliminadas 31 líneas, simplificadas a 4)
+
+**Código nuevo**:
+```typescript
+const getAvailableStatuses = (currentStatusName: string, allStatuses: WorkStatus[]): WorkStatus[] => {
+  // Retornar TODOS los estados ordenados por orderIndex
+  return allStatuses.sort((a, b) => a.orderIndex - b.orderIndex);
+};
+```
+
+**Commit**: `e0c6ec6` - refactor: eliminar restricciones de transición de estados
+
 ### 📊 Métricas de la Sesión
-- **Tiempo total**: ~2 horas
-- **Archivos modificados**: 9
-- **Commits**: 2
-- **Migraciones BD**: 1 (aplicada en producción)
-- **Resultado**: ✅ Funcional y desplegado
+- **Tiempo total**: ~4 horas
+- **Archivos modificados**: 15+
+- **Commits**: 5
+- **Migraciones BD**: 2 (DROP status_logs, UPDATE work_statuses)
+- **Scripts directos BD**: 1 (limpieza work_statuses)
+- **Resultado**: ✅ Completamente funcional y desplegado
 
 ---
 
@@ -234,9 +298,11 @@ postgresql://postgres:uFXiUmoRNqxdKctJesvlRiLiOXuWTQac@shortline.proxy.rlwy.net:
 ### Estados de Trabajo (work_statuses)
 1. **Recibido** (#EF4444) - Vehículo recibido en taller
 2. **Cotizado** (#F59E0B) - Cotización generada
-3. **En Proceso** (#8B5CF6) - Trabajo en ejecución
+3. **Proceso** (#8B5CF6) - Trabajo en ejecución
 4. **Terminado** (#10B981) - Trabajo completado (genera ingresos)
 5. **Rechazado** (#DC2626) - Cotización rechazada (NO genera ingresos)
+
+**IMPORTANTE**: Movimiento libre entre estados - Sin restricciones de transición
 
 ### Sucursales (branches)
 - **HD001**: Henry Diagnostics Central (default)
