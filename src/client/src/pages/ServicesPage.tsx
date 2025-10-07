@@ -949,38 +949,10 @@ export default function ServicesPage() {
     }).format(amount);
   };
 
-  // Función para obtener transiciones válidas según el estado actual
-  const getValidTransitions = (currentStatusName: string): string[] => {
-    const transitionRules: { [key: string]: string[] } = {
-      // Flujo simplificado (5 estados)
-      'Recibido': ['Cotizado'],
-      'Cotizado': ['En Proceso', 'Rechazado'],
-      'En Proceso': ['Terminado'],
-      'Terminado': [], // Estado final - GENERA INGRESOS
-      'Rechazado': [], // Estado final - NO genera ingresos
-
-      // Estados legacy (por compatibilidad temporal)
-      'En Diagnóstico': ['Cotizado'],
-      'Esperando Aprobación': ['En Proceso', 'Rechazado'],
-      'Completado': ['Terminado'],
-      'Entregado': ['Terminado'],
-      'Autorizado': ['En Proceso', 'Rechazado'],
-      'Diagnosticando': ['Cotizado'],
-    };
-
-    return transitionRules[currentStatusName] || [];
-  };
-
-  // Función para filtrar estados disponibles en dropdown
+  // Función para obtener TODOS los estados disponibles (sin restricciones)
   const getAvailableStatuses = (currentStatusName: string, allStatuses: WorkStatus[]): WorkStatus[] => {
-    const validTransitions = getValidTransitions(currentStatusName);
-
-    // Siempre incluir el estado actual
-    const availableStatuses = allStatuses.filter(status =>
-      status.name === currentStatusName || validTransitions.includes(status.name)
-    );
-
-    return availableStatuses;
+    // Retornar TODOS los estados ordenados por orderIndex
+    return allStatuses.sort((a, b) => a.orderIndex - b.orderIndex);
   };
 
   const formatDate = (dateString: string) => {
