@@ -65,7 +65,6 @@ interface Service {
   };
   _count: {
     opportunities: number;
-    statusLogs: number;
   };
 }
 

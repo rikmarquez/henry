@@ -5,7 +5,7 @@
 - **Estado**: ✅ SISTEMA 100% FUNCIONAL EN PRODUCCIÓN
 - **Stack**: React + TypeScript + Node.js + PostgreSQL + Prisma
 - **Deployment**: Railway (Frontend + Backend monolítico)
-- **Última actualización**: 2025-10-05
+- **Última actualización**: 2025-10-06
 
 ---
 
@@ -35,35 +35,64 @@
 
 ---
 
-## 🎯 Última Sesión: Fix Permisos Dashboard (2025-10-05)
+## 🎯 Última Sesión: Mejoras Módulo Recepción (2025-10-06)
 
 ### ✅ Completado
-**Problema**: Rol `RECEPCIONISTA_TALLER` no podía acceder al dashboard (error 403)
 
-**Causa**: Faltaba permiso `reports: ['read']` en definición del rol
+#### 1. Tab "Recibidos" ahora muestra servicios recibidos (no solo citas)
+**Problema**: Tab "Recibidos" mostraba solo citas con status "received", excluyendo walk-ins sin cita
 
 **Solución**:
-- ✅ Agregado `reports: ['read']` en `prisma/seed.ts`
-- ✅ Ejecutado seed localmente
-- ✅ Commit y push a Railway
-- ✅ Pendiente: Ejecutar seed en Railway + logout/login del usuario
+- ✅ Nuevo endpoint `GET /api/reception/received-today` - Servicios recibidos hoy (cualquier status)
+- ✅ Hook `useReception` actualizado con query `receivedServices`
+- ✅ ReceptionPage separado: Tab Pendientes (citas) / Tab Recibidos (servicios)
+- ✅ Cards de servicios muestran: ID, status actual, hora recepción, recepcionista
 
 **Archivos modificados**:
-- `prisma/seed.ts` - Líneas 94 y 105
+- `src/server/src/routes/reception.ts` - Líneas 311-407
+- `src/client/src/hooks/useReception.ts` - Líneas 99-112, 147-151
+- `src/client/src/pages/ReceptionPage.tsx` - Líneas 20-27, 366-479
 
-**Commit**: `825c609` - fix: agregar permiso reports.read a rol RECEPCIONISTA_TALLER
+**Commit**: `53b845c` - feat: mostrar servicios recibidos hoy en tab Recibidos
 
-### 📋 Permisos Actualizados - RECEPCIONISTA_TALLER
-```json
-{
-  "clients": ["create", "read"],
-  "vehicles": ["create", "read", "update"],
-  "appointments": ["read"],
-  "services": ["create", "read", "update"],
-  "reception": ["create", "read"],
-  "reports": ["read"]
-}
-```
+#### 2. Actualización de checklist de recepción según operación real del taller
+**Solicitado por usuario**: Cambiar items de inspección visual
+
+**Checklist anterior**:
+- Luces, Llantas, Cristales, Carrocería
+
+**Checklist nuevo**:
+- ✅ Aire acondicionado funcionando
+- ✅ Cristales completos sin daños
+- ✅ Candado de llanta presente
+- ✅ Pertenencias en cajuela verificadas
+- ✅ Manijas de puertas funcionando
+
+**Solución**:
+- ✅ Migración BD: RENAME COLUMN + ADD COLUMN `manijas_ok` (aplicada en Railway)
+- ✅ Schema Prisma actualizado con nuevos campos
+- ✅ Schema Zod `vehicleReceptionSchema` actualizado
+- ✅ Endpoint `/api/reception/receive-vehicle` con nuevos campos
+- ✅ VehicleReceptionForm con 5 checkboxes nuevos + iconos apropiados
+- ✅ ServiceDetailsModal con vista/edición de nuevos campos
+- ✅ WalkInReceptionForm heredado automáticamente
+
+**Archivos modificados**:
+- `prisma/schema.prisma` - Líneas 181-185
+- `prisma/migrations/20251006175757_update_reception_checklist_fields/migration.sql` (nueva)
+- `src/shared/schemas/service.schema.ts` - Líneas 30-34
+- `src/server/src/routes/reception.ts` - Líneas 39-43, 115-119
+- `src/client/src/components/reception/VehicleReceptionForm.tsx` - Líneas 7-20, 31-35, 81-86, 426-495
+- `src/client/src/components/reception/ServiceDetailsModal.tsx` - Líneas 7-23, 31-36, 83-87, 108-113, 307-431
+
+**Commit**: `46beb0b` - feat: actualizar checklist de recepción con items del taller
+
+### 📊 Métricas de la Sesión
+- **Tiempo total**: ~2 horas
+- **Archivos modificados**: 9
+- **Commits**: 2
+- **Migraciones BD**: 1 (aplicada en producción)
+- **Resultado**: ✅ Funcional y desplegado
 
 ---
 

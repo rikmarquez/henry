@@ -165,12 +165,17 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 ---
 
 ### 3.8 Módulo de Recepción de Vehículos ✅
-**Estado**: Sistema completo implementado (2025-10-04 + 2025-10-05)
+**Estado**: Sistema completo implementado (2025-10-04 + 2025-10-05 + 2025-10-06)
 
 **Funcionalidades con Cita**:
 - ✅ Listado de citas del día (zona horaria México UTC-6)
 - ✅ Inspección digital completa
-- ✅ Checklist visual: luces, llantas, cristales, carrocería
+- ✅ Checklist visual operativo del taller:
+  - Aire acondicionado funcionando
+  - Cristales completos sin daños
+  - Candado de llanta presente
+  - Pertenencias en cajuela verificadas
+  - Manijas de puertas funcionando
 - ✅ Captura de kilometraje y nivel de combustible
 - ✅ Firma digital del cliente (canvas)
 - ✅ Observaciones especiales
@@ -194,6 +199,12 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
   2. Merge mismo cliente (modal confirmación)
   3. Bloqueo cliente diferente (alerta error)
 - ✅ Endpoint merge para fusionar vehículos
+
+**Tabs de Visualización**:
+- ✅ **Tab Pendientes**: Citas del día sin recibir (status ≠ received/cancelled)
+- ✅ **Tab Recibidos**: Servicios recibidos hoy (con o sin cita, cualquier status)
+- ✅ Cards muestran: ID servicio, status actual, hora recepción, recepcionista
+- ✅ Búsqueda funciona en ambos tabs
 
 **Permisos**:
 - Roles: ADMIN, ENCARGADO, RECEPCIONISTA_TALLER
@@ -425,7 +436,7 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - ✅ **Móvil**: Interfaz adaptativa para citas
 - ✅ **Exportación**: PDF y Excel integrados
 
-**Última actualización**: 2025-10-05
+**Última actualización**: 2025-10-06
 **Credenciales**: rik@rikmarquez.com / Acceso979971
 **Deployment**: https://henry-production.up.railway.app
 

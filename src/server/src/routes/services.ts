@@ -220,7 +220,6 @@ router.get(
             _count: {
               select: {
                 opportunities: true,
-                statusLogs: true,
               },
             },
           },
@@ -291,20 +290,6 @@ router.get(
                 select: { id: true, name: true },
               },
             },
-          },
-          statusLogs: {
-            include: {
-              oldStatus: {
-                select: { id: true, name: true, color: true },
-              },
-              newStatus: {
-                select: { id: true, name: true, color: true },
-              },
-              changedByUser: {
-                select: { id: true, name: true },
-              },
-            },
-            orderBy: { createdAt: 'desc' },
           },
         },
       });
@@ -649,17 +634,6 @@ router.put(
           },
         });
 
-        // Create status log
-        await tx.statusLog.create({
-          data: {
-            serviceId: parseInt(id),
-            oldStatusId: existingService.statusId,
-            newStatusId,
-            notes,
-            changedBy: userId,
-          },
-        });
-
         // Auto-complete appointment if service is terminated
         if (newStatus.name === 'Terminado') {
           await autoCompleteAppointmentIfAllServicesTerminated(parseInt(id), tx);
@@ -723,13 +697,8 @@ router.delete(
         });
       }
 
-      // Delete service and related logs
+      // Delete service and related data
       await prisma.$transaction(async (tx) => {
-        // Delete status logs
-        await tx.statusLog.deleteMany({
-          where: { serviceId: parseInt(id) },
-        });
-
         // Delete opportunities
         await tx.opportunity.deleteMany({
           where: { serviceId: parseInt(id) },

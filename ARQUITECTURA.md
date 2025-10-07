@@ -374,10 +374,11 @@ CREATE TABLE services (
     received_at TIMESTAMP,
     kilometraje INTEGER,
     nivel_combustible VARCHAR(10),
-    luces_ok BOOLEAN DEFAULT true,
-    llantas_ok BOOLEAN DEFAULT true,
+    aire_acondicionado_ok BOOLEAN DEFAULT true,
     cristales_ok BOOLEAN DEFAULT true,
-    carroceria_ok BOOLEAN DEFAULT true,
+    candado_llanta_ok BOOLEAN DEFAULT true,
+    pertenencias_cajuela_ok BOOLEAN DEFAULT true,
+    manijas_ok BOOLEAN DEFAULT true,
     observaciones_recepcion TEXT,
     firma_cliente TEXT,
     fotos_recepcion JSON,
@@ -530,7 +531,8 @@ GET    /api/services/client/:clientId     # Historial servicios de un cliente
 ```
 POST   /api/reception/receive-vehicle     # Recibir vehículo con inspección completa
 POST   /api/reception/merge-vehicle       # Fusionar vehículo temporal con existente
-GET    /api/reception/today               # Citas del día para recepción
+GET    /api/reception/today               # Citas del día (pendientes de recibir)
+GET    /api/reception/received-today      # Servicios recibidos hoy (con o sin cita)
 GET    /api/reception/service/:id         # Detalles completos de servicio recibido
 ```
 
@@ -885,6 +887,6 @@ henry/
 
 ---
 
-**Última actualización**: 2025-10-05
+**Última actualización**: 2025-10-06
 **Mantenido por**: Claude Code + Rik Marquez
 **Propósito**: Referencia técnica completa para desarrollo y debugging
