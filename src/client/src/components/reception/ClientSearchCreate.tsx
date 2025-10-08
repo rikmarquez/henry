@@ -80,9 +80,12 @@ export const ClientSearchCreate: React.FC<ClientSearchCreateProps> = ({
     try {
       setIsCreating(true);
 
-      // Copiar whatsapp a phone si es necesario
+      // Transformar campos de texto a mayúsculas y copiar whatsapp a phone
       const dataToSend = {
         ...formData,
+        name: formData.name.toUpperCase(),
+        email: formData.email?.toUpperCase(),
+        address: formData.address?.toUpperCase(),
         phone: formData.whatsapp, // Backend requiere phone
       };
 

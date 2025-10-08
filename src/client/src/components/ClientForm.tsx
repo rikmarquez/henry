@@ -82,11 +82,11 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
   const createClientMutation = useMutation({
     mutationFn: async (data: ClientFormData) => {
       const payload = {
-        name: data.name,
+        name: data.name.toUpperCase(),
         whatsapp: data.whatsapp || data.phone,
         phone: data.phone || data.whatsapp,
-        email: data.email || null,
-        address: data.address || null,
+        email: data.email?.toUpperCase() || null,
+        address: data.address?.toUpperCase() || null,
       };
       const response = await api.post('/clients', payload);
       return response.data;
@@ -108,11 +108,11 @@ export default function ClientForm({ client, isOpen, onClose, onSuccess }: Clien
       if (!client) throw new Error('Cliente no encontrado');
       // Solo enviar los campos específicos que necesitamos
       const payload = {
-        name: data.name,
+        name: data.name.toUpperCase(),
         whatsapp: data.whatsapp || data.phone,
         phone: data.phone || data.whatsapp,
-        email: data.email || null,
-        address: data.address || null,
+        email: data.email?.toUpperCase() || null,
+        address: data.address?.toUpperCase() || null,
       };
       const response = await api.put(`/clients/${client.id}`, payload);
       return response.data;

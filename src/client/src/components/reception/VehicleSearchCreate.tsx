@@ -92,7 +92,19 @@ export const VehicleSearchCreate: React.FC<VehicleSearchCreateProps> = ({
 
     try {
       setIsCreating(true);
-      const { data } = await api.post('/vehicles', formData);
+
+      // Transformar campos de texto a mayúsculas
+      const dataToSend = {
+        ...formData,
+        plate: formData.plate.toUpperCase(),
+        brand: formData.brand.toUpperCase(),
+        model: formData.model.toUpperCase(),
+        color: formData.color?.toUpperCase(),
+        engineNumber: formData.engineNumber?.toUpperCase(),
+        chassisNumber: formData.chassisNumber?.toUpperCase(),
+      };
+
+      const { data } = await api.post('/vehicles', dataToSend);
       console.log('[VehicleSearchCreate] Response completa:', data);
 
       // La respuesta tiene estructura: { success, data: { vehicle: {...} } }

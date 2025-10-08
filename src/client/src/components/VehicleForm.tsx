@@ -138,9 +138,14 @@ export default function VehicleForm({
     mutationFn: async (data: VehicleFormData) => {
       const payload = {
         ...data,
-        color: data.color || null,
+        plate: data.plate.toUpperCase(),
+        brand: data.brand.toUpperCase(),
+        model: data.model.toUpperCase(),
+        color: data.color?.toUpperCase() || null,
         fuelType: data.fuelType || null,
         transmission: data.transmission || null,
+        engineNumber: data.engineNumber?.toUpperCase(),
+        chassisNumber: data.chassisNumber?.toUpperCase(),
       };
       const response = await api.post('/vehicles', payload);
       return response.data;
@@ -163,9 +168,14 @@ export default function VehicleForm({
       if (!vehicle) throw new Error('Vehículo no encontrado');
       const payload = {
         ...data,
-        color: data.color || null,
+        plate: data.plate.toUpperCase(),
+        brand: data.brand.toUpperCase(),
+        model: data.model.toUpperCase(),
+        color: data.color?.toUpperCase() || null,
         fuelType: data.fuelType || null,
         transmission: data.transmission || null,
+        engineNumber: data.engineNumber?.toUpperCase(),
+        chassisNumber: data.chassisNumber?.toUpperCase(),
       };
       const response = await api.put(`/vehicles/${vehicle.id}`, payload);
       return response.data;

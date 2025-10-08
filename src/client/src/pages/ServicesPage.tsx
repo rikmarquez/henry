@@ -821,13 +821,28 @@ export default function ServicesPage() {
         newStatusId,
         notes: `Estado cambiado desde la interfaz web`,
       });
-      
+
       if (response.data.success) {
         toast.success('Estado actualizado exitosamente');
         loadServices();
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error al actualizar estado');
+    }
+  };
+
+  const handleMechanicChange = async (serviceId: number, newMechanicId: number | null) => {
+    try {
+      const response = await api.put(`/services/${serviceId}`, {
+        mechanicId: newMechanicId || null,
+      });
+
+      if (response.data.success) {
+        toast.success('Mecánico actualizado exitosamente');
+        loadServices();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al actualizar mecánico');
     }
   };
 
@@ -862,13 +877,8 @@ export default function ServicesPage() {
           statusId: service.statusId, // ← CRITICAL: Preserve current status
           problemDescription: service.problemDescription || '',
           diagnosis: service.diagnosis || '',
-          quotationDetails: service.quotationDetails || '',
-          laborPrice: service.laborPrice || 0,
-          partsPrice: service.partsPrice || 0,
-          // partsCost: service.partsCost || 0, // HIDDEN FIELD
-          totalAmount: service.totalAmount || 0,
-          // truput: service.truput || 0, // HIDDEN FIELD
-          mechanicCommission: service.mechanicCommission || 0,
+          // Fields below are hidden and will be captured in future phases
+          // quotationDetails, laborPrice, partsPrice, totalAmount, mechanicCommission
         });
 
         setShowEditModal(true);
@@ -904,10 +914,22 @@ export default function ServicesPage() {
 
   const handleUpdateService = async (data: CreateServiceData) => {
     if (!selectedService) return;
-    
+
     try {
-      const response = await api.put(`/services/${selectedService.id}`, data);
-      
+      // Set default values for fields that are not captured in the form
+      const payload = {
+        ...data,
+        quotationDetails: selectedService.quotationDetails || '',
+        laborPrice: selectedService.laborPrice || 0,
+        partsPrice: selectedService.partsPrice || 0,
+        partsCost: selectedService.partsCost || 0,
+        totalAmount: selectedService.totalAmount || 0,
+        truput: selectedService.truput || 0,
+        mechanicCommission: selectedService.mechanicCommission || 0,
+      };
+
+      const response = await api.put(`/services/${selectedService.id}`, payload);
+
       if (response.data.success) {
         toast.success('Servicio actualizado exitosamente');
         setShowEditModal(false);
@@ -1196,147 +1218,148 @@ export default function ServicesPage() {
             isLoading={loading}
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID Servicio
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cliente / Vehículo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Mecánico
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Monto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {ensureArray<Service>(services).map((service) => (
-                  <tr key={service.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        <div className="bg-blue-600 text-white px-4 py-2 rounded-lg inline-block">
-                          <div className="text-[10px] font-bold uppercase tracking-wider opacity-90">ID</div>
-                          <div className="text-2xl font-black">#{service.id}</div>
-                        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {ensureArray<Service>(services).map((service) => (
+              <div
+                key={service.id}
+                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border border-gray-200 overflow-hidden"
+              >
+                {/* Header con ID */}
+                <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider opacity-90">Servicio</div>
+                    <div className="text-2xl font-black">#{service.id}</div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => handleViewService(service.id)}
+                      className="text-white hover:bg-blue-700 p-1.5 rounded transition-colors"
+                      title="Ver detalles"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleEditService(service.id)}
+                      className="text-white hover:bg-blue-700 p-1.5 rounded transition-colors"
+                      title="Editar"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteService(service.id, service.client.name)}
+                      className="text-white hover:bg-red-700 p-1.5 rounded transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Contenido */}
+                <div className="p-4 space-y-3">
+                  {/* Cliente y Vehículo */}
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="font-semibold text-gray-900 text-sm truncate">
+                        {service.client.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Car className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="text-xs text-gray-600 truncate">
+                        {service.vehicle.plate} - {service.vehicle.brand} {service.vehicle.model}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Estado - Dropdown Inline */}
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1">
+                      Estado
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-shrink-0">
+                        {getStatusIcon(service.status.name)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-900">
-                            {service.client.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Car className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">
-                            {service.vehicle.plate} - {service.vehicle.brand} {service.vehicle.model}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-shrink-0">
-                          {getStatusIcon(service.status.name)}
-                        </div>
-                        <select
-                          value={service.statusId}
-                          onChange={(e) => handleStatusChange(service.id, parseInt(e.target.value))}
-                          className={`text-xs px-3 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500 min-w-0 flex-1 ${
-                            statusColors[service.status.name] || 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {getAvailableStatuses(service.status.name, ensureArray<WorkStatus>(workStatuses)).map((status) => (
-                            <option key={status.id} value={status.id}>
-                              {status.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {service.mechanic ? (
-                        <div className="flex items-center space-x-2">
-                          <Wrench className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-900">
-                            {service.mechanic.name}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">Sin asignar</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-900">
+                      <select
+                        value={service.statusId}
+                        onChange={(e) => handleStatusChange(service.id, parseInt(e.target.value))}
+                        className={`text-xs px-3 py-1.5 rounded-md border-0 focus:ring-2 focus:ring-blue-500 flex-1 font-medium ${
+                          statusColors[service.status.name] || 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {getAvailableStatuses(service.status.name, ensureArray<WorkStatus>(workStatuses)).map((status) => (
+                          <option key={status.id} value={status.id}>
+                            {status.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Mecánico - Dropdown Inline */}
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1">
+                      Mecánico
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <Wrench className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <select
+                        value={service.mechanicId || ''}
+                        onChange={(e) => handleMechanicChange(service.id, e.target.value ? parseInt(e.target.value) : null)}
+                        className="text-xs px-3 py-1.5 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-1"
+                      >
+                        <option value="">Sin asignar</option>
+                        {ensureArray<Mechanic>(mechanics).map((mechanic) => (
+                          <option key={mechanic.id} value={mechanic.id}>
+                            {mechanic.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Monto y Fecha */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-0.5">Monto</div>
+                      <div className="flex items-center space-x-1">
+                        <DollarSign className="h-3 w-3 text-gray-400" />
+                        <span className="text-sm font-bold text-gray-900">
                           {formatCurrency(service.totalAmount)}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-500">
-                          {formatDate(service.createdAt)}
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-0.5">Fecha</div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="h-3 w-3 text-gray-400" />
+                        <span className="text-xs text-gray-600">
+                          {new Date(service.createdAt).toLocaleDateString('es-MX', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => handleViewService(service.id)}
-                          className="text-blue-600 hover:text-blue-800"
-                          title="Ver detalles"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEditService(service.id)}
-                          className="text-gray-600 hover:text-gray-800"
-                          title="Editar"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        {/* Show create opportunity button only for completed/finished services */}
-                        {(service.status.name === 'Terminado' || service.status.name === 'Completado' || service.status.name === 'Entregado') && (
-                          <button
-                            onClick={() => handleCreateOpportunity(service)}
-                            className="text-green-600 hover:text-green-800"
-                            title="Crear Oportunidad"
-                          >
-                            <Target className="h-4 w-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleDeleteService(service.id, service.client.name)}
-                          className="text-red-600 hover:text-red-800"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer - Botón Crear Oportunidad */}
+                {(service.status.name === 'Terminado' || service.status.name === 'Completado' || service.status.name === 'Entregado') && (
+                  <div className="px-4 pb-4">
+                    <button
+                      onClick={() => handleCreateOpportunity(service)}
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                      <Target className="h-5 w-5" />
+                      <span>Crear Oportunidad</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
@@ -2071,120 +2094,11 @@ export default function ServicesPage() {
                 />
               </div>
 
-              {/* Quotation Details */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Detalles de Cotización
-                </label>
-                <textarea
-                  {...createForm.register('quotationDetails', {
-                    value: selectedService.quotationDetails || ''
-                  })}
-                  rows={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Parts Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Precio Refacciones
-                  </label>
-                  <input
-                    {...createForm.register('partsPrice', { 
-                      valueAsNumber: true,
-                      value: selectedService.partsPrice || 0
-                    })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Labor Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Precio Mano de Obra
-                  </label>
-                  <input
-                    {...createForm.register('laborPrice', { 
-                      valueAsNumber: true,
-                      value: selectedService.laborPrice || 0
-                    })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Parts Cost - HIDDEN PER REQUEST
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Costo Refacciones
-                  </label>
-                  <input
-                    {...createForm.register('partsCost', {
-                      valueAsNumber: true,
-                      value: selectedService.partsCost || 0
-                    })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                */}
-
-                {/* Total Amount (Read-only) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Total Cotizado <span className="text-gray-500 text-xs">(Calculado automáticamente)</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={selectedService.totalAmount || 0}
-                    readOnly
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
-                  />
-                </div>
-
-                {/* Truput (Read-only) - HIDDEN PER REQUEST
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Truput (Ganancia) <span className="text-gray-500 text-xs">(Calculado automáticamente)</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={selectedService.truput || 0}
-                    readOnly
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
-                  />
-                </div>
-                */}
-
-                {/* Mechanic Commission */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Comisión Mecánico <span className="text-gray-500 text-xs">(calculada automáticamente)</span>
-                  </label>
-                  <input
-                    {...createForm.register('mechanicCommission', { 
-                      valueAsNumber: true,
-                      value: selectedService.mechanicCommission
-                    })}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    readOnly
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-700 cursor-not-allowed"
-                  />
-                </div>
-              </div>
+              {/* Quotation Details - HIDDEN - Will be captured in future phases */}
+              {/* Labor Price - HIDDEN - Will be captured in future phases */}
+              {/* Parts Price - HIDDEN - Will be captured in future phases */}
+              {/* Total Amount - HIDDEN - Will be calculated automatically in future phases */}
+              {/* Mechanic Commission - HIDDEN - Will be calculated automatically in future phases */}
 
               {/* Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">

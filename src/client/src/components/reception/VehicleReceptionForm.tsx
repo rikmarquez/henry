@@ -103,15 +103,29 @@ export const VehicleReceptionForm: React.FC<VehicleReceptionFormProps> = ({
     try {
       console.log('[VehicleReceptionForm] Datos del formulario:', data);
 
-      // Filtrar solo campos que tengan valor en vehicleUpdates
+      // Filtrar solo campos que tengan valor en vehicleUpdates y transformar a mayúsculas
       const vehicleUpdates = data.vehicleUpdates
         ? Object.fromEntries(
-            Object.entries(data.vehicleUpdates).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+            Object.entries(data.vehicleUpdates)
+              .filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+              .map(([key, value]) => {
+                // Transformar campos de texto a mayúsculas
+                if (typeof value === 'string' && ['plate', 'brand', 'model', 'color'].includes(key)) {
+                  return [key, value.toUpperCase()];
+                }
+                return [key, value];
+              })
           )
+        : undefined;
+
+      // Transformar observaciones a mayúsculas si existe
+      const observacionesRecepcion = data.observacionesRecepcion
+        ? data.observacionesRecepcion.toUpperCase()
         : undefined;
 
       const payload = {
         ...data,
+        observacionesRecepcion,
         firmaCliente: signature,
         vehicleUpdates: vehicleUpdates && Object.keys(vehicleUpdates).length > 0 ? vehicleUpdates : undefined,
       };
