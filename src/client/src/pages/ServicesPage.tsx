@@ -924,14 +924,14 @@ export default function ServicesPage() {
         statusId: data.statusId,
         problemDescription: data.problemDescription,
         diagnosis: data.diagnosis || '',
-        // Preserve hidden financial fields from original service
+        // Preserve hidden financial fields from original service (parse to numbers)
         quotationDetails: selectedService.quotationDetails || '',
-        laborPrice: selectedService.laborPrice || 0,
-        partsPrice: selectedService.partsPrice || 0,
-        partsCost: selectedService.partsCost || 0,
-        totalAmount: selectedService.totalAmount || 0,
-        truput: selectedService.truput || 0,
-        mechanicCommission: selectedService.mechanicCommission || 0,
+        laborPrice: Number(selectedService.laborPrice) || 0,
+        partsPrice: Number(selectedService.partsPrice) || 0,
+        partsCost: Number(selectedService.partsCost) || 0,
+        totalAmount: Number(selectedService.totalAmount) || 0,
+        truput: Number(selectedService.truput) || 0,
+        mechanicCommission: Number(selectedService.mechanicCommission) || 0,
       };
 
       console.log('[handleUpdateService] Payload completo:', payload);
