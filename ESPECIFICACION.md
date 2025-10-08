@@ -119,7 +119,9 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - ✅ Estado adicional: Rechazado (para cotizaciones no aprobadas)
 - ✅ **Movimiento libre entre estados** - Sin restricciones de transición (forward/backward)
 - ✅ Vista Kanban con drag & drop entre estados (excluye Rechazado)
-- ✅ Vista lista con dropdown de todos los estados disponibles
+- ✅ **Vista Mosaico con tarjetas** - Grid responsivo 1-4 columnas
+- ✅ **Edición inline sin modal** - Cambio de estado y mecánico directo en tarjeta
+- ✅ **Botón prominente "Crear Oportunidad"** - Solo servicios terminados
 - ✅ Sistema de pricing completo: labor_price, parts_price, parts_cost, total_amount, truput
 - ✅ Mecánico asignado con cálculo automático de comisiones
 - ✅ Problema, diagnóstico, cotización detallada
@@ -127,6 +129,20 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - ✅ Segregación por sucursal (branchId)
 - ✅ Integración con citas y recepción
 - ✅ Campos de recepción: kilometraje, combustible, checklist actualizado, firma, fotos
+
+**Vista Mosaico (Lista)**:
+- Grid responsivo: 1 columna (móvil) → 2 (tablet) → 3 (desktop) → 4 (XL)
+- Tarjetas con shadow y hover effects
+- Header azul con ID prominente + acciones rápidas (Ver, Editar, Eliminar)
+- Dropdown inline para estado (con iconos y colores)
+- Dropdown inline para mecánico
+- Botón verde prominente "Crear Oportunidad" (solo terminados)
+- Monto y fecha visibles en footer de tarjeta
+
+**Formulario Edición Simplificado**:
+- Campos editables: Cliente, Vehículo, Mecánico, Estado, Problema, Diagnóstico
+- Campos ocultos (preservados automáticamente): quotationDetails, laborPrice, partsPrice, totalAmount, mechanicCommission
+- Campos financieros se llenarán en fases futuras del desarrollo
 
 **Estados de Trabajo** (5 estados exactos):
 1. **Recibido** (#EF4444 azul) - Vehículo recibido en taller
@@ -140,6 +156,7 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - Dropdown muestra TODOS los estados ordenados por orderIndex
 - Usuario puede mover servicios hacia adelante o hacia atrás libremente
 - Tabla status_logs eliminada - sin logs de auditoría de estados
+- Edición de estado y mecánico directa desde vista mosaico
 
 ---
 
@@ -336,6 +353,29 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - Vista Kanban con drag & drop entre estados (excluye Rechazado)
 - Dropdown muestra TODOS los estados disponibles
 - Sin logs de auditoría de estados (tabla status_logs removida)
+
+### Transformación de Datos ✅
+**⚠️ REGLA OBLIGATORIA**: Todos los formularios transforman campos de texto a mayúsculas antes de enviar al backend
+
+**Campos afectados**:
+- **Clientes**: `name`, `email`, `address`
+- **Vehículos**: `plate`, `brand`, `model`, `color`, `engineNumber`, `chassisNumber`
+- **Observaciones**: Campos de texto libre relacionados a recepción
+
+**Razón**: Soluciona problema de autocapitalize en tablets y garantiza consistencia en BD
+
+**Patrón estándar**:
+```typescript
+const payload = {
+  ...formData,
+  fieldName: formData.fieldName.toUpperCase(),
+  optionalField: formData.optionalField?.toUpperCase() || null,
+};
+```
+
+**Formularios implementados**:
+- VehicleReceptionForm, ClientSearchCreate, VehicleSearchCreate
+- ClientForm (crear/editar), VehicleForm (crear/editar)
 
 ---
 

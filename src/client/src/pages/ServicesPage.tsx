@@ -1347,17 +1347,15 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Footer - Botón Crear Oportunidad */}
-                {(service.status.name === 'Terminado' || service.status.name === 'Completado' || service.status.name === 'Entregado') && (
-                  <div className="px-4 pb-4">
-                    <button
-                      onClick={() => handleCreateOpportunity(service)}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-200"
-                    >
-                      <Target className="h-5 w-5" />
-                      <span>Crear Oportunidad</span>
-                    </button>
-                  </div>
-                )}
+                <div className="px-4 pb-4">
+                  <button
+                    onClick={() => handleCreateOpportunity(service)}
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <Target className="h-5 w-5" />
+                    <span>Crear Oportunidad</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

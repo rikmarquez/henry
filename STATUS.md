@@ -5,7 +5,7 @@
 - **Estado**: ✅ SISTEMA 100% FUNCIONAL EN PRODUCCIÓN
 - **Stack**: React + TypeScript + Node.js + PostgreSQL + Prisma
 - **Deployment**: Railway (Frontend + Backend monolítico)
-- **Última actualización**: 2025-10-06
+- **Última actualización**: 2025-10-07
 
 ---
 
@@ -35,11 +35,114 @@
 
 ---
 
-## 🎯 Última Sesión: Búsqueda Inteligente de Clientes en Oportunidades (2025-10-07)
+## 🎯 Última Sesión: Vista Mosaico Servicios + Transformación Mayúsculas (2025-10-07)
 
 ### ✅ Completado
 
-#### 1. Reemplazo de dropdown de clientes con búsqueda inteligente
+#### 1. Vista Mosaico con Tarjetas en Módulo de Servicios
+**Problema**: Vista lista (tabla) requería múltiples clics para editar servicios. Campos financieros en formulario edición no necesarios.
+
+**Solución - Vista Mosaico**:
+- ✅ Grid responsivo: 1 columna (móvil) → 2 (tablet) → 3 (desktop) → 4 (XL)
+- ✅ Tarjetas elegantes con shadow y hover effects
+- ✅ Header azul con ID prominente + acciones rápidas (Ver, Editar, Eliminar)
+- ✅ **Edición inline sin modal**: Dropdown de estado y mecánico directamente en tarjeta
+- ✅ **Botón prominente verde**: "Crear Oportunidad" (solo servicios terminados)
+- ✅ Nueva función `handleMechanicChange` para actualizar mecánico inline
+
+**Solución - Formulario Edición Simplificado**:
+- ✅ Removidos campos: `quotationDetails`, `laborPrice`, `partsPrice`, `totalAmount`, `mechanicCommission`
+- ✅ Valores preservados automáticamente en `handleUpdateService`
+- ✅ Solo campos editables: Cliente, Vehículo, Mecánico, Estado, Problema, Diagnóstico
+
+**Archivos modificados**:
+- `src/client/src/pages/ServicesPage.tsx` - Líneas 834-847 (nueva función), 1220-1364 (vista mosaico), 2074-2078 (form simplificado), 905-933 (preserve values)
+
+**Commit**: `2bac669` - feat: transformación mayúsculas y vista mosaico servicios
+
+**Beneficio**: UX drásticamente mejorada - edición rápida sin modales, vista atractiva tipo Pinterest
+
+---
+
+#### 2. Transformación Automática a Mayúsculas en Todos los Formularios
+**Problema**: Tablets con autocapitalize generan datos inconsistentes (primer carácter mayúscula, resto minúsculas)
+
+**Solución Global**:
+- ✅ **Todos los formularios** transforman datos a mayúsculas antes de enviar al backend
+- ✅ Transformación transparente (usuario escribe normal, conversión automática)
+- ✅ Consistencia garantizada en base de datos
+
+**Formularios Modificados**:
+
+**Módulo Recepción (Tablet)**:
+1. `VehicleReceptionForm` (líneas 106-131)
+   - Campos: `plate`, `brand`, `model`, `color`, `observacionesRecepcion`
+
+2. `ClientSearchCreate` (líneas 83-90)
+   - Campos: `name`, `email`, `address`
+
+3. `VehicleSearchCreate` (líneas 96-107)
+   - Campos: `plate`, `brand`, `model`, `color`, `engineNumber`, `chassisNumber`
+
+**Módulos CRUD Principales**:
+4. `ClientForm` (líneas 84-89, 110-115)
+   - Crear/Editar: `name`, `email`, `address`
+
+5. `VehicleForm` (líneas 139-149, 169-179)
+   - Crear/Editar: `plate`, `brand`, `model`, `color`, `engineNumber`, `chassisNumber`
+
+**Patrón Implementado**:
+```typescript
+// Antes de enviar al backend
+const dataToSend = {
+  ...formData,
+  name: formData.name.toUpperCase(),
+  email: formData.email?.toUpperCase(),
+  address: formData.address?.toUpperCase(),
+};
+```
+
+**Archivos modificados**:
+- `src/client/src/components/reception/VehicleReceptionForm.tsx`
+- `src/client/src/components/reception/ClientSearchCreate.tsx`
+- `src/client/src/components/reception/VehicleSearchCreate.tsx`
+- `src/client/src/components/ClientForm.tsx`
+- `src/client/src/components/VehicleForm.tsx`
+
+**Commit**: `2bac669` - feat: transformación mayúsculas y vista mosaico servicios
+
+**Beneficio**: Datos 100% consistentes en BD - elimina duplicados por capitalización
+
+---
+
+### 📋 REGLA IMPORTANTE PARA FUTUROS FORMULARIOS
+
+**⚠️ OBLIGATORIO**: Todos los formularios nuevos de clientes/vehículos/recepción deben transformar campos de texto a mayúsculas antes de enviar al backend.
+
+**Campos afectados**:
+- **Clientes**: `name`, `email`, `address`
+- **Vehículos**: `plate`, `brand`, `model`, `color`, `engineNumber`, `chassisNumber`
+- **Observaciones/Notas**: Cualquier campo de texto libre relacionado a recepción
+
+**Implementación estándar**:
+```typescript
+const payload = {
+  ...formData,
+  // Transformar strings a mayúsculas
+  fieldName: formData.fieldName.toUpperCase(),
+  optionalField: formData.optionalField?.toUpperCase() || null,
+};
+```
+
+**Razón**: Soluciona problema de autocapitalize en tablets y garantiza consistencia en base de datos.
+
+---
+
+## 📚 Sesión Anterior: Búsqueda Inteligente de Clientes en Oportunidades (2025-10-07)
+
+### ✅ Completado
+
+#### Reemplazo de dropdown de clientes con búsqueda inteligente
 **Problema**: Dropdown cargaba 1000+ clientes, causando mal rendimiento y UX deficiente
 
 **Solución**:
@@ -51,20 +154,11 @@
 - ✅ Auto-focus y cierre al hacer click fuera
 - ✅ Integrado en formularios crear/editar oportunidades
 
-**Características técnicas**:
-- Búsqueda frontend-only (filtrado local de 1000 registros)
-- Loading states y error handling
-- Diseño consistente con shadcn/ui
-- TypeScript con tipos estrictos
-- Componentización reutilizable
-
 **Archivos modificados**:
 - `src/client/src/components/ClientSearchSelect.tsx` - Nuevo componente (210 líneas)
 - `src/client/src/pages/OpportunitiesPage.tsx` - Líneas 9, 712-720, 875-883
 
 **Commit**: `e9edfad` - feat: reemplazar dropdown de clientes con búsqueda inteligente
-
-**Beneficio**: UX mejorado significativamente - búsqueda instantánea sin lag con miles de registros
 
 ---
 
@@ -416,5 +510,5 @@ postgresql://postgres:uFXiUmoRNqxdKctJesvlRiLiOXuWTQac@shortline.proxy.rlwy.net:
 - ✅ Exportación a PDF y Excel
 - ✅ Interfaz adaptativa (desktop + tablet + móvil)
 
-**Última modificación**: 2025-10-07 00:30 UTC-6
+**Última modificación**: 2025-10-07 18:30 UTC-6
 **Modificado por**: Claude Code + Rik Marquez

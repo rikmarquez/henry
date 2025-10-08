@@ -349,6 +349,56 @@ fix: corregir ruta de import de api en useReception
 
 ---
 
+### 5. Transformación de Datos a Mayúsculas
+**⚠️ REGLA OBLIGATORIA PARA TODOS LOS FORMULARIOS**
+
+**Problema identificado**:
+- Tablets con autocapitalize generan datos inconsistentes
+- Primer carácter mayúscula, resto minúsculas
+- Duplicados en BD por capitalización diferente
+- Búsquedas y matching de datos problemáticos
+
+**Solución implementada**:
+- Transformación automática a mayúsculas antes de enviar al backend
+- Usuario escribe normal, conversión transparente
+- Consistencia garantizada en base de datos
+
+**Campos que SIEMPRE deben transformarse**:
+- **Clientes**: `name`, `email`, `address`
+- **Vehículos**: `plate`, `brand`, `model`, `color`, `engineNumber`, `chassisNumber`
+- **Observaciones**: Cualquier campo de texto libre relacionado a recepción
+
+**Patrón estándar a seguir**:
+```typescript
+// En mutationFn o onSubmit, antes del POST/PUT
+const payload = {
+  ...formData,
+  // Campos obligatorios
+  fieldName: formData.fieldName.toUpperCase(),
+  // Campos opcionales
+  optionalField: formData.optionalField?.toUpperCase() || null,
+};
+
+await api.post('/endpoint', payload);
+```
+
+**Formularios ya implementados** (usar como referencia):
+1. `VehicleReceptionForm` - Líneas 106-131
+2. `ClientSearchCreate` - Líneas 83-90
+3. `VehicleSearchCreate` - Líneas 96-107
+4. `ClientForm` - Líneas 84-89, 110-115
+5. `VehicleForm` - Líneas 139-149, 169-179
+
+**Beneficios**:
+- Elimina duplicados por capitalización
+- Mejora búsquedas y filtros
+- Datos consistentes en reportes
+- Soluciona problema específico de tablets
+
+**Commit de referencia**: `2bac669`
+
+---
+
 ## 📈 MÉTRICAS DE SESIONES RELEVANTES
 
 ### Sesión MEJORA RECEPCIÓN 2 (2025-10-05)
@@ -397,6 +447,6 @@ fix: corregir ruta de import de api en useReception
 
 ---
 
-**Última actualización**: 2025-10-05
+**Última actualización**: 2025-10-07
 **Mantenido por**: Claude Code + Rik Marquez
 **Propósito**: Evitar repetir errores y acelerar debugging futuro
