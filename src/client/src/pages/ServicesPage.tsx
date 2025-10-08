@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
@@ -218,6 +218,36 @@ export default function ServicesPage() {
 
   // Helper function to ensure arrays are valid
   const ensureArray = <T,>(data: any): T[] => Array.isArray(data) ? data : [];
+
+  // Helper function to check if service was completed today
+  const isCompletedToday = (service: Service): boolean => {
+    if (!service.completedAt) {
+      return false;
+    }
+
+    const completedDate = new Date(service.completedAt);
+    const today = new Date();
+
+    return (
+      completedDate.getDate() === today.getDate() &&
+      completedDate.getMonth() === today.getMonth() &&
+      completedDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Filter services for list view: show all non-finished services + finished services from today only
+  const filteredServicesForList = useMemo(() => {
+    return ensureArray<Service>(services).filter(service => {
+      // Si el servicio NO está terminado (statusId !== 4), mostrarlo
+      if (service.statusId !== 4) {
+        return true;
+      }
+
+      // Si el servicio está terminado (statusId === 4), solo mostrarlo si fue completado hoy
+      return isCompletedToday(service);
+    });
+  }, [services]);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -1228,9 +1258,14 @@ export default function ServicesPage() {
             onCreateOpportunity={handleCreateOpportunity}
             isLoading={loading}
           />
+        ) : filteredServicesForList.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            <Wrench className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No hay servicios activos ni terminados hoy</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {ensureArray<Service>(services).map((service) => (
+            {filteredServicesForList.map((service) => (
               <div
                 key={service.id}
                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 border border-gray-200 overflow-hidden"
