@@ -1257,18 +1257,27 @@ export default function ServicesPage() {
 
                 {/* Contenido */}
                 <div className="p-4 space-y-3">
-                  {/* Cliente y Vehículo */}
+                  {/* Vehículo y Cliente - Orden invertido */}
                   <div>
+                    {/* 1. Vehículo (Marca y Modelo) - Principal */}
                     <div className="flex items-center space-x-2 mb-1">
-                      <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="font-semibold text-gray-900 text-sm truncate">
-                        {service.client.name}
+                      <Car className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <span className="font-bold text-gray-900 text-base truncate">
+                        {service.vehicle.brand} {service.vehicle.model}
                       </span>
                     </div>
+                    {/* 2. Placa - Secundario */}
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="w-4 h-4 flex-shrink-0" /> {/* Spacer para alinear */}
+                      <span className="text-sm text-gray-700 font-medium truncate">
+                        {service.vehicle.plate}
+                      </span>
+                    </div>
+                    {/* 3. Cliente - Terciario */}
                     <div className="flex items-center space-x-2">
-                      <Car className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                       <span className="text-xs text-gray-600 truncate">
-                        {service.vehicle.plate} - {service.vehicle.brand} {service.vehicle.model}
+                        {service.client.name}
                       </span>
                     </div>
                   </div>
