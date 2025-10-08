@@ -916,9 +916,15 @@ export default function ServicesPage() {
     if (!selectedService) return;
 
     try {
-      // Set default values for fields that are not captured in the form
+      // Construct complete payload with all required fields
       const payload = {
-        ...data,
+        clientId: data.clientId,
+        vehicleId: data.vehicleId,
+        mechanicId: data.mechanicId || null,
+        statusId: data.statusId,
+        problemDescription: data.problemDescription,
+        diagnosis: data.diagnosis || '',
+        // Preserve hidden financial fields from original service
         quotationDetails: selectedService.quotationDetails || '',
         laborPrice: selectedService.laborPrice || 0,
         partsPrice: selectedService.partsPrice || 0,
@@ -927,6 +933,8 @@ export default function ServicesPage() {
         truput: selectedService.truput || 0,
         mechanicCommission: selectedService.mechanicCommission || 0,
       };
+
+      console.log('[handleUpdateService] Payload completo:', payload);
 
       const response = await api.put(`/services/${selectedService.id}`, payload);
 
@@ -938,6 +946,9 @@ export default function ServicesPage() {
         loadServices();
       }
     } catch (error: any) {
+      console.error('[handleUpdateService] Error completo:', error);
+      console.error('[handleUpdateService] Error response:', error?.response);
+      console.error('[handleUpdateService] Error data:', error?.response?.data);
       toast.error(error.response?.data?.message || 'Error al actualizar servicio');
     }
   };
