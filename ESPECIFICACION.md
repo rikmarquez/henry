@@ -185,6 +185,11 @@ Este documento describe **funcionalidades y módulos del sistema**. Para detalle
 - ✅ Segregación por sucursal (branchId)
 - ✅ Modal de detalles con vista completa
 - ✅ WhatsApp integrado para seguimiento
+- ✅ **Creación Rápida Cliente/Vehículo** - Flujo de 2 pasos para oportunidades telefónicas
+  - Búsqueda/creación inline de cliente (nombre + WhatsApp mínimo)
+  - Búsqueda/creación inline de vehículo (marca + modelo → TEMP-plate)
+  - Pre-selección automática en formulario
+  - Reutilización de componentes de Recepción Walk-In
 
 ---
 
@@ -483,7 +488,7 @@ const payload = {
 - ✅ **Móvil**: Interfaz adaptativa para citas
 - ✅ **Exportación**: PDF y Excel integrados
 
-**Última actualización**: 2025-10-06
+**Última actualización**: 2025-10-08
 **Credenciales**: rik@rikmarquez.com / Acceso979971
 **Deployment**: https://henry-production.up.railway.app
 

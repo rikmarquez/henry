@@ -7,6 +7,8 @@ import { api } from '../services/api';
 import PermissionGate from '../components/PermissionGate';
 import { WhatsAppFollowUpButton } from '../components/WhatsAppButton';
 import ClientSearchSelect from '../components/ClientSearchSelect';
+import { ClientSearchCreate } from '../components/reception/ClientSearchCreate';
+import { VehicleSearchCreate } from '../components/reception/VehicleSearchCreate';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -152,6 +154,11 @@ export default function OpportunitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [convertingId, setConvertingId] = useState<number | null>(null);
+
+  // Estado para flujo de creación rápida (cliente + vehículo)
+  const [quickCreateStep, setQuickCreateStep] = useState<'closed' | 'client' | 'vehicle'>('closed');
+  const [tempClient, setTempClient] = useState<Client | null>(null);
+  const [tempVehicle, setTempVehicle] = useState<Vehicle | null>(null);
 
   // Form hooks
   const createForm = useForm<CreateOpportunityForm>({
@@ -409,6 +416,48 @@ export default function OpportunitiesPage() {
   const openDetailModal = (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
     setIsDetailModalOpen(true);
+  };
+
+  // Handlers para flujo de creación rápida
+  const handleQuickCreateStart = () => {
+    setQuickCreateStep('client');
+    setTempClient(null);
+    setTempVehicle(null);
+  };
+
+  const handleClientCreated = (client: Client) => {
+    console.log('[OpportunitiesPage] Cliente creado/seleccionado:', client);
+    setTempClient(client);
+    setQuickCreateStep('vehicle');
+  };
+
+  const handleVehicleCreated = (vehicle: Vehicle) => {
+    console.log('[OpportunitiesPage] Vehículo creado/seleccionado:', vehicle);
+    setTempVehicle(vehicle);
+
+    // Pre-seleccionar cliente y vehículo en el formulario
+    if (tempClient) {
+      createForm.setValue('clientId', tempClient.id);
+      createForm.setValue('vehicleId', vehicle.id);
+
+      // Filtrar vehículos del cliente seleccionado
+      const clientVehicles = vehicles.filter(v => v.clientId === tempClient.id);
+      setFilteredVehicles(clientVehicles);
+
+      // Recargar datos para actualizar selects
+      loadClients();
+      loadVehicles();
+    }
+
+    // Cerrar modal de quick create
+    setQuickCreateStep('closed');
+    toast.success('Cliente y vehículo listos. Completa los datos de la oportunidad.');
+  };
+
+  const handleQuickCreateCancel = () => {
+    setQuickCreateStep('closed');
+    setTempClient(null);
+    setTempVehicle(null);
   };
 
   // Get opportunities due for follow-up (within next 7 days)
@@ -710,11 +759,43 @@ export default function OpportunitiesPage() {
         )}
       </div>
 
+      {/* Quick Create Modal - Flujo de 2 pasos */}
+      {quickCreateStep !== 'closed' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {quickCreateStep === 'client' && (
+              <ClientSearchCreate
+                onClientSelected={handleClientCreated}
+                onCancel={handleQuickCreateCancel}
+              />
+            )}
+            {quickCreateStep === 'vehicle' && tempClient && (
+              <VehicleSearchCreate
+                clientId={tempClient.id}
+                clientName={tempClient.name}
+                onVehicleSelected={handleVehicleCreated}
+                onBack={() => setQuickCreateStep('client')}
+                onCancel={handleQuickCreateCancel}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Create Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Nueva Oportunidad</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Nueva Oportunidad</h2>
+              <button
+                onClick={handleQuickCreateStart}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Cliente/Auto Rápido
+              </button>
+            </div>
             <form onSubmit={createForm.handleSubmit(handleCreateOpportunity)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

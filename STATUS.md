@@ -5,7 +5,7 @@
 - **Estado**: ✅ SISTEMA 100% FUNCIONAL EN PRODUCCIÓN
 - **Stack**: React + TypeScript + Node.js + PostgreSQL + Prisma
 - **Deployment**: Railway (Frontend + Backend monolítico)
-- **Última actualización**: 2025-10-07
+- **Última actualización**: 2025-10-08
 
 ---
 
@@ -35,7 +35,42 @@
 
 ---
 
-## 🎯 Última Sesión: Vista Mosaico Servicios + Transformación Mayúsculas (2025-10-07)
+## 🎯 Última Sesión: Creación Rápida Cliente/Vehículo en Oportunidades (2025-10-08)
+
+### ✅ Completado
+
+#### Creación Rápida de Cliente y Vehículo en Módulo de Oportunidades
+**Contexto**: El 98% de las oportunidades se crean desde autos ya trabajados, pero el 2% provienen de llamadas telefónicas donde el cliente no tiene la placa del vehículo a mano.
+
+**Problema**: No existía forma rápida de capturar oportunidades telefónicas sin tener que salir del módulo de oportunidades para crear cliente y vehículo.
+
+**Solución - Flujo de Creación Rápida**:
+- ✅ **Botón verde** "Cliente/Auto Rápido" en modal de crear oportunidad
+- ✅ **Flujo de 2 pasos** reutilizando componentes de recepción:
+  1. Paso 1: Buscar/crear cliente (nombre + whatsapp mínimo)
+  2. Paso 2: Buscar/crear vehículo (marca + modelo → genera TEMP-plate automática)
+- ✅ **Pre-selección automática** de cliente y vehículo en formulario al finalizar
+- ✅ **Reutilización completa** de `ClientSearchCreate` y `VehicleSearchCreate`
+- ✅ **Consistencia** con patrón existente en Citas y Recepción Walk-In
+- ✅ **Transformación a mayúsculas** automática (hereda de componentes)
+
+**Flujo de Usuario**:
+1. Click "Nueva Oportunidad"
+2. Click botón verde "Cliente/Auto Rápido"
+3. Buscar/crear cliente con datos mínimos (nombre + WhatsApp)
+4. Buscar/crear vehículo con marca + modelo (placa TEMP-xxxxx si no la sabe)
+5. Cliente y vehículo pre-seleccionados automáticamente
+6. Completar tipo, descripción y fecha de seguimiento
+7. Crear oportunidad
+
+**Archivos modificados**:
+- `src/client/src/pages/OpportunitiesPage.tsx` - Líneas 10-11 (imports), 158-161 (estado), 421-461 (handlers), 762-798 (UI)
+
+**Beneficio**: Captura rápida de oportunidades telefónicas sin salir del módulo, con datos mínimos suficientes para seguimiento posterior.
+
+---
+
+## 📚 Sesión Anterior: Vista Mosaico Servicios + Transformación Mayúsculas (2025-10-07)
 
 ### ✅ Completado
 
@@ -510,5 +545,5 @@ postgresql://postgres:uFXiUmoRNqxdKctJesvlRiLiOXuWTQac@shortline.proxy.rlwy.net:
 - ✅ Exportación a PDF y Excel
 - ✅ Interfaz adaptativa (desktop + tablet + móvil)
 
-**Última modificación**: 2025-10-07 18:30 UTC-6
+**Última modificación**: 2025-10-08 15:50 UTC-6
 **Modificado por**: Claude Code + Rik Marquez
