@@ -7,8 +7,6 @@ import { api } from '../services/api';
 import PermissionGate from '../components/PermissionGate';
 import { WhatsAppFollowUpButton } from '../components/WhatsAppButton';
 import ClientSearchSelect from '../components/ClientSearchSelect';
-import { ClientSearchCreate } from '../components/reception/ClientSearchCreate';
-import { VehicleSearchCreate } from '../components/reception/VehicleSearchCreate';
 import toast from 'react-hot-toast';
 import {
   Plus,
@@ -156,9 +154,8 @@ export default function OpportunitiesPage() {
   const [convertingId, setConvertingId] = useState<number | null>(null);
 
   // Estado para flujo de creación rápida (cliente + vehículo)
-  const [quickCreateStep, setQuickCreateStep] = useState<'closed' | 'client' | 'vehicle'>('closed');
-  const [tempClient, setTempClient] = useState<Client | null>(null);
-  const [tempVehicle, setTempVehicle] = useState<Vehicle | null>(null);
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
+  const [isCreatingQuick, setIsCreatingQuick] = useState(false);
 
   // Form hooks
   const createForm = useForm<CreateOpportunityForm>({
@@ -418,46 +415,64 @@ export default function OpportunitiesPage() {
     setIsDetailModalOpen(true);
   };
 
-  // Handlers para flujo de creación rápida
-  const handleQuickCreateStart = () => {
-    setQuickCreateStep('client');
-    setTempClient(null);
-    setTempVehicle(null);
-  };
+  // Handler para creación rápida de cliente y vehículo
+  const handleQuickCreate = async (formData: { clientName: string; whatsapp: string; brand: string; model: string }) => {
+    try {
+      setIsCreatingQuick(true);
 
-  const handleClientCreated = (client: Client) => {
-    console.log('[OpportunitiesPage] Cliente creado/seleccionado:', client);
-    setTempClient(client);
-    setQuickCreateStep('vehicle');
-  };
+      // 1. Crear cliente
+      const clientPayload = {
+        name: formData.clientName.toUpperCase(),
+        phone: formData.whatsapp,
+        whatsapp: formData.whatsapp,
+      };
 
-  const handleVehicleCreated = (vehicle: Vehicle) => {
-    console.log('[OpportunitiesPage] Vehículo creado/seleccionado:', vehicle);
-    setTempVehicle(vehicle);
+      const clientResponse = await api.post('/clients', clientPayload);
+      const newClient = clientResponse.data.data?.client || clientResponse.data.client || clientResponse.data.data || clientResponse.data;
 
-    // Pre-seleccionar cliente y vehículo en el formulario
-    if (tempClient) {
-      createForm.setValue('clientId', tempClient.id);
-      createForm.setValue('vehicleId', vehicle.id);
+      if (!newClient?.id) {
+        throw new Error('No se pudo crear el cliente');
+      }
 
-      // Filtrar vehículos del cliente seleccionado
-      const clientVehicles = vehicles.filter(v => v.clientId === tempClient.id);
-      setFilteredVehicles(clientVehicles);
+      // 2. Generar placa temporal única
+      const tempPlate = `TEMP-${Date.now().toString().slice(-8)}`;
 
-      // Recargar datos para actualizar selects
-      loadClients();
-      loadVehicles();
+      // 3. Crear vehículo con placa temporal
+      const vehiclePayload = {
+        plate: tempPlate,
+        brand: formData.brand.toUpperCase(),
+        model: formData.model.toUpperCase(),
+        clientId: newClient.id,
+      };
+
+      const vehicleResponse = await api.post('/vehicles', vehiclePayload);
+      const newVehicle = vehicleResponse.data.data?.vehicle || vehicleResponse.data.vehicle || vehicleResponse.data.data || vehicleResponse.data;
+
+      if (!newVehicle?.id) {
+        throw new Error('No se pudo crear el vehículo');
+      }
+
+      // 4. Pre-seleccionar en formulario
+      createForm.setValue('clientId', newClient.id);
+      createForm.setValue('vehicleId', newVehicle.id);
+
+      // 5. Recargar datos
+      await Promise.all([loadClients(), loadVehicles()]);
+
+      // 6. Filtrar vehículos del cliente
+      const clientVehicles = vehicles.filter(v => v.clientId === newClient.id);
+      setFilteredVehicles([...clientVehicles, newVehicle]);
+
+      // 7. Cerrar modal y notificar
+      setIsQuickCreateOpen(false);
+      toast.success(`Cliente ${newClient.name} y vehículo ${newVehicle.brand} ${newVehicle.model} creados exitosamente`);
+
+    } catch (error: any) {
+      console.error('[OpportunitiesPage] Error en creación rápida:', error);
+      toast.error(error.response?.data?.message || 'Error al crear cliente y vehículo');
+    } finally {
+      setIsCreatingQuick(false);
     }
-
-    // Cerrar modal de quick create
-    setQuickCreateStep('closed');
-    toast.success('Cliente y vehículo listos. Completa los datos de la oportunidad.');
-  };
-
-  const handleQuickCreateCancel = () => {
-    setQuickCreateStep('closed');
-    setTempClient(null);
-    setTempVehicle(null);
   };
 
   // Get opportunities due for follow-up (within next 7 days)
@@ -759,25 +774,121 @@ export default function OpportunitiesPage() {
         )}
       </div>
 
-      {/* Quick Create Modal - Flujo de 2 pasos */}
-      {quickCreateStep !== 'closed' && (
+      {/* Quick Create Modal - Formulario Simple */}
+      {isQuickCreateOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {quickCreateStep === 'client' && (
-              <ClientSearchCreate
-                onClientSelected={handleClientCreated}
-                onCancel={handleQuickCreateCancel}
-              />
-            )}
-            {quickCreateStep === 'vehicle' && tempClient && (
-              <VehicleSearchCreate
-                clientId={tempClient.id}
-                clientName={tempClient.name}
-                onVehicleSelected={handleVehicleCreated}
-                onBack={() => setQuickCreateStep('client')}
-                onCancel={handleQuickCreateCancel}
-              />
-            )}
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Plus className="w-6 h-6 text-green-600" />
+              Crear Cliente y Auto Rápido
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Completa los datos mínimos. Se creará automáticamente el cliente y vehículo con placa temporal.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleQuickCreate({
+                  clientName: formData.get('clientName') as string,
+                  whatsapp: formData.get('whatsapp') as string,
+                  brand: formData.get('brand') as string,
+                  model: formData.get('model') as string,
+                });
+              }}
+              className="space-y-4"
+            >
+              {/* Nombre Cliente */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre Cliente <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="clientName"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ej: Juan Pérez"
+                  disabled={isCreatingQuick}
+                />
+              </div>
+
+              {/* WhatsApp */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  WhatsApp <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="whatsapp"
+                  required
+                  pattern="[0-9]{10,15}"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ej: 3331234567"
+                  disabled={isCreatingQuick}
+                />
+              </div>
+
+              {/* Marca Auto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Marca Auto <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="brand"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ej: Toyota"
+                  disabled={isCreatingQuick}
+                />
+              </div>
+
+              {/* Modelo Auto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Modelo Auto <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="model"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Ej: Corolla"
+                  disabled={isCreatingQuick}
+                />
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsQuickCreateOpen(false)}
+                  disabled={isCreatingQuick}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingQuick}
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isCreatingQuick ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Crear
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -789,7 +900,8 @@ export default function OpportunitiesPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Nueva Oportunidad</h2>
               <button
-                onClick={handleQuickCreateStart}
+                type="button"
+                onClick={() => setIsQuickCreateOpen(true)}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
